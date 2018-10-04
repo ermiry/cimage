@@ -11,8 +11,11 @@ all: cimage #run #clean
 cimage: $(SOURCES)
 	$(CC) $(SOURCES) $(CFLAGS) -o ./bin/cimage
 
+# run:
+# 	./bin/cimage
+
 run:
-	./bin/cimage
+	@./bin/cimage ${argv}
 
 clean:
-	rm ./bin/cimage      
+	rm ./bin/cimage     
