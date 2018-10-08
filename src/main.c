@@ -2,23 +2,57 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CIMAGE_VERSION      "0.1"
+#include "cimage.h"
 
-#define EXIT_SUCCESS        0
-#define EXIT_FAILURE        1
+/*** LOG ***/
 
-// TODO: add more types here...
-typedef enum LogMsgType {
+char *getMsgType (LogMsgType type) {
 
-    ERROR = 1,
-    WARNING,
+    char temp[10];
 
-} LogMsgType;
+    switch (type) {
+        case ERROR: strcpy (temp, "[ERROR]"); break;
+        case WARNING: strcpy (temp, "[WARNING]"); break;
+        case SUCCESS: strcpy (temp, "[SUCCESS]"); break;
+        case DEBUG: strcpy (temp, "[DEBUG]"); break;
+        case TEST: strcpy (temp, "[TEST]"); break;
 
-// TODO: maybe add some colors?
-void logMsg (LogMsgType type, char *msg) {
+        default: break;
+    }
 
+    char *retval = (char *) calloc (strlen (temp) + 1, sizeof (temp));
+    strcpy (retval, temp);
 
+    return retval;
+
+}
+
+void logMsg (FILE *__restrict __stream, LogMsgType firstType, LogMsgType secondType,
+    const char *msg) {
+
+    char *first = getMsgType (firstType);
+    char *second = NULL;
+
+    char *message = NULL;
+
+    if (secondType != 0) {
+        second = getMsgType (secondType);
+        message = createString ("%s%s: %s\n", first, second, msg);
+    }
+
+    else message = createString ("%s: %s\n", first, msg);
+
+    // log messages with color
+    switch (firstType) {
+        case ERROR: fprintf (__stream, COLOR_RED "%s" COLOR_RESET, message); break;
+        case WARNING: fprintf (__stream, COLOR_YELLOW "%s" COLOR_RESET, message); break;
+        case SUCCESS: fprintf (__stream, COLOR_GREEN "%s" COLOR_RESET, message); break;
+
+        default: fprintf (__stream, "%s", message); break;
+    }
+
+    if (!first) free (first);
+    if (!second) free (second);
 
 }
 
@@ -39,12 +73,13 @@ void printUsage (void) {
            "  -v    version     Display current version.\n");
 }
 
+// TODO: maybe if no arg is provided we can launch the cimage cmd line app?
 // TODO: hanlde more than one argument each time
 // TODO: handle when we need an extra argument
 int main (int argc, char **argv) {
 
     if (argc <= 1) {
-        fprintf (stderr, "\n[ERROR]: No option provided! Use -h for help.\n");
+        logMsg (stderr, ERROR, NO_TYPE, "No option provided! Use -h for help.");
         exit (EXIT_FAILURE);
     }
 
