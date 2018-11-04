@@ -9,7 +9,7 @@ SOURCES = $(SRCDIR)*.c
 all: UIexec  #run #clean
 
 UIexec: $(SOURCES)
-	$(CC) $(SOURCES) $(CFLAGS) -o ./UIexec
+	$(CC) -g $(SOURCES) $(CFLAGS) -o ./UIexec
 
 run:
 	./UIexec
