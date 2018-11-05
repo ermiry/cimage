@@ -164,3 +164,21 @@ void SDL_RandomColor(SDL_Renderer *renderTarget, Color color){
     SDL_SetRenderDrawColor(renderTarget,color.r,color.g,color.b,color.a);
 }
 
+void SDL_Print(SDL_Renderer **renderTarget,SDL_Texture *texture, int xPos, int yPos, int hTex, int wTex){
+    SDL_Rect DestR;
+    DestR.x = xPos;
+    DestR.y = yPos;
+    DestR.h = hTex;
+    DestR.w = wTex;
+    SDL_RenderCopy(*renderTarget,texture,NULL,&DestR);
+}
+
+void SDL_RenderColor(SDL_Renderer **renderTarget, Color color){
+    SDL_SetRenderDrawColor(*renderTarget,color.r,color.g,color.b,color.a);
+}
+
+void SDL_RenderDrawLine_Gross(SDL_Renderer **renderTarget, int x1, int x2, int y1, int y2, int thickness){
+    for(int i=0; i<thickness; i++){
+        SDL_RenderDrawLine(*renderTarget,x1,y1+i,x2,y2+i);
+    }
+}

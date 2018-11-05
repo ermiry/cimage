@@ -5,7 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 #include <math.h>
-
+#include <SDL2/SDL_ttf.h>
 #include "SDLlib.h"
 #define dim 100
 #define pressedkey key.keysym.sym
@@ -95,15 +95,62 @@ uint32_t ChargingScreen(){
     }
 }
 
+uint32_t SDL_menu(SDL_Renderer **renderTarget, TTF_Font *Sans, SDL_Color Black,Color color){
+    SDL_Rect menu;
+    SDL_Rect display;
+    SDL_Surface *text; 
+    Color rectColor,blackColor;
+    rectColor.r=rectColor.g=rectColor.b=100;
+    blackColor.r=blackColor.g=blackColor.b=0;
+    rectColor.a=blackColor.a=200;
+    SDL_Texture *texture;
+    char messages[5][100]={"Archivo","Edicion","Insertar","Herramientas","Ayuda"};
+    for(int i=0; i<5; i++){
+        text = TTF_RenderText_Solid(Sans,messages[i],Black);
+        texture = SDL_CreateTextureFromSurface(*renderTarget,text);
+        
+        menu.h = 55;
+        menu.w = 70;
+        menu.x = i*70;
+        menu.y = 0;
+        display.h=menu.h-10;
+        display.w = menu.w -10;
+        display.x = i*70+5;
+        display.y = 8;
+        SDL_RenderColor(renderTarget,rectColor);
+        SDL_RenderDrawRect(*renderTarget,&menu);
+        SDL_RenderColor(renderTarget,blackColor);
+        SDL_RenderCopy(*renderTarget,texture,NULL, &display);
+    }
+    SDL_RenderColor(renderTarget,color);
+    return 1;
+}
+
 void User(){
+    SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
     SDL_Window *window = NULL;
     SDL_Renderer *renderTarget = NULL;
     SDL_Event event;
+    SDL_Surface *surface = NULL;
     SDL_Texture *texture[100];
-    Color color;
-    color.a = 255;
+    Color color,colorLine;
+    TTF_Font *Sans = TTF_OpenFont(ResourcePath"/Fonts/OpenSans-Light.ttf",12);
+    TTF_Font *Roboto = TTF_OpenFont(ResourcePath"/Fonts/Roboto-Regular.ttf",150);
+    SDL_Color White = {255,255,255};
+    SDL_Color Black = {0,0,0};
+    SDL_Surface *surfaceMessage = TTF_RenderText_Solid(Sans,"Put your text here",Black);
+    if(!surfaceMessage){
+        printf("Error creating a surface message %s", SDL_GetError());
+    }
+    color.a = colorLine.a = 255;
     bool exit=false;
     if(SDL_STARTER_FIXED(&window,&renderTarget,"CIMAGE",1280,720)==0){
+        SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderTarget,surfaceMessage);
+        if(!textTexture){
+            printf("Error creating a texture message, %s", SDL_GetError());
+        }
+        SDL_SetWindowResizable(window,true);
         texture[0]=LoadTexture(ResourcePath"/CIMAGE10.png",renderTarget);
         while(!exit){
             while(SDL_PollEvent(&event)!=0){
@@ -112,20 +159,28 @@ void User(){
                 }
             }
             color.r=color.g=color.b=230;
+            colorLine.r = colorLine.g = colorLine.b = 120; 
             SDL_RenderClear(renderTarget);
-            SDL_RenderCopy(renderTarget,texture[0],NULL,NULL);
-            SDL_SetRenderDrawColor(renderTarget,color.r,color.g,color.b,color.a);
+            SDL_RenderColor(&renderTarget,color);
+            SDL_Print(&renderTarget,texture[0],1280-138,0,128,128);
+            //SDL_Print(&renderTarget,textTexture,0,10,25,115);
+            SDL_RenderColor(&renderTarget,colorLine);
+            SDL_RenderDrawLine_Gross(&renderTarget,0,1280,120,120,2);
+            SDL_menu(&renderTarget,Roboto,Black,color);
+            
+            SDL_RenderColor(&renderTarget,color);
             SDL_RenderPresent(renderTarget);
         }
         SDL_DestroyWindow(window);
         SDL_DestroyRenderer(renderTarget);
         SDL_Quit();
+        
     }
 }
 
 int main(void){
     uint32_t cont=0;
-    cont  = ChargingScreen();
+    //cont  = ChargingScreen();
     if(cont==-1){
         fprintf(stdout,"Exit program\n");
     }else{
@@ -133,3 +188,4 @@ int main(void){
     }
     return 0;
 } 
+
