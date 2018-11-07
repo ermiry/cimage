@@ -13,7 +13,7 @@ void bplus_node_init (BplusNode *node, bool leaf) {
         node->parent = NULL;
         node->leaf = leaf;
 
-        node->lenght = 0;
+        node->length = 0;
     }
 
 }
@@ -64,21 +64,34 @@ void bplus_node_destroy (BplusTree *tree, BplusNode *node) {
 
 }
 
-// TODO: 
 void bplus_node_move_and_resize_data (BplusTree const *tree, BplusNode *node, 
     const size_t index_to, const size_t index_from) {
+
+    if (node && index_from <= node->length) {
+        int64_t const resize_length = index_to - index_from;
+
+        if (resize_length == 0) return;
+
+        int64_t const move_length = node->length - index_from;
+        if (move_length > 0)
+            memmove (node->items + index_to, node->items + index_from, move_length * sizeof (BplusItem));
+
+        if (resize_length > 0) node->length += resize_length;
+
+        else if (resize_length < 0) node->length -= -resize_length;
+    }
 
 }
 
 void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index, 
-    const size_t lenght, BplusItem const * const items) {
+    const size_t length, BplusItem const * const items) {
 
-    if (node && (index <= node->lenght) && (node->lenght + lenght <= BPLUS_ORDER)) {
-        bplus_node_move_and_resize_data (tree, node, index + lenght, index);
-        memcpy (node->items + index, items, lenght * sizeof (BplusItem));
+    if (node && (index <= node->length) && (node->length + length <= BPLUS_ORDER)) {
+        bplus_node_move_and_resize_data (tree, node, index + length, index);
+        memcpy (node->items + index, items, length * sizeof (BplusItem));
 
         if (node->leaf == false) 
-            for (size_t i = index; i < index + lenght; ++i) 
+            for (size_t i = index; i < index + length; ++i) 
                 bplus_node_at (node, i)->parent = node;
         
     }
@@ -152,11 +165,129 @@ void bplus_leaf_destroy (BplusTree *tree, BplusLeaf *leaf) {
 
 #pragma endregion
 
+#pragma region BPLUS SEARCH
+
+static size_t bplus_node_get_key_index (BplusTree const *tree, BplusNode const *node, 
+    const BplusKey key) {
+
+    if (tree && node) {}
+
+}
+
+#pragma endregion
+
+// TODO:
+#pragma region BPLUS REBALANCE
+
+
+#pragma endregion
+
+#pragma region BPLUS INSERT
+
+#define bplus_key_at(node, index)      (((BplusNode *) (node))->items[(index)].key)
+#define bplus_value_at(node, index)    (((BplusNode *) (node))->items[(index)].value)
+
+void bplus_leaf_insert_at (BplusTree const *tree, BplusNode *node, const size_t index, 
+    const BplusKey key, const BplusData value) {
+
+    if (node && index <= node->length) {
+        bplus_node_move_and_resize_data (tree, node, index + 1, index);
+        bplus_key_at (node, index) = key;
+        bplus_value_at (node, index) = value;
+    }
+    
+}
+
+void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index,
+    const size_t length, BplusItem const * const items) {
+
+    if (node && (index <= node->length) && (node->length + length <= BPLUS_ORDER)) {
+        bplus_node_move_and_resize_data (tree, node, index + length, index);
+        memcpy (node->items + index, items, length * sizeof (BplusItem));
+
+        if (node->leaf == false)  
+            for (size_t i = index; i < index + length; i++)
+                bplus_node_at (node, i)->parent = node;
+    }
+
+}
+
+void bplus_tree_insert (BplusTree const *tree, const BplusKey key, const BplusData value) {
+
+    BplusPath path;
+    bplus_tree_get_path_to_key (tree, key, &path);
+
+    size_t index = path.index[0];
+    BplusNode *node = (BplusNode *) path.leaf;
+
+    if ((index < node->length) && bplus_key_lte (tree, bplus_key_at (node, index), key))
+        index++;
+
+    bplus_leaf_insert_at (tree, node, index, key, value);
+    if (index == 0) bplus_rebalance_propagate (tree, &path);
+    if (bplus_node_overfilled (node)) bplus_rebalance_overfilled (tree, &path);
+
+}
+
+#pragma endregion
+
+#pragma region BPLUS REMOVE
+
+void bplus_node_remove_at (BplusTree const *tree, BplusNode *node, const size_t index, 
+    const size_t length) {
+
+    if (node && (index < node->length) && (index + length <= node->length)) 
+        bplus_node_move_and_resize_data (tree, node, index, index + length);
+
+}
+
+BplusData bplus_tree_remove_first (BplusTree const *tree) {
+
+    BplusPath path = { .leaf = (BplusNode *) tree->first };
+    BplusNode *node = (BplusNode *) path.leaf;
+    const size_t index = path.index[0];
+
+    BplusData value = bplus_value_at (node, 0);
+    bplus_node_remove_at (tree, node, index, 1);
+
+    if (index == 0) bplus_rebalance_propagate (tree, &path);
+
+    if (bplus_node_underfilled (node)) bplus_rebalance_underfilled (tree, &path);
+
+    return value;
+
+}
+
+BplusData bplus_tree_remove (BplusTree const *tree, const BplusKey key) {
+
+    BplusPath path;
+    bplus_tree_get_path_to_key (tree, key, &path);
+
+    const size_t index = path.index[0];
+    BplusNode *node = (BplusNode *) path.leaf;
+
+    if (bplus_key_eq (tree, bplus_key_at (node, index), key)) {
+        BplusData value = bplus_value_at (node, index);
+        bplus_node_remove_at (tree, node, index, 1);
+
+        if (index == 0) bplus_rebalance_propagate (tree, &path);
+        
+        if (bplus_node_underfilled (node)) bplus_rebalance_underfilled (tree, &path);
+
+        return value;
+    }
+
+    else return NULL;
+
+}
+
+#pragma endregion
+
 #pragma region BPLUS TREE
 
 // TODO: more stats
 // inits a new bplus tree
-BplusTree *bplus_new (void) {
+BplusTree *bplus_tree_new (void) {
 
     BplusTree *tree = (BplusTree *) malloc (sizeof (BplusTree));
 
