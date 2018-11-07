@@ -176,9 +176,201 @@ static size_t bplus_node_get_key_index (BplusTree const *tree, BplusNode const *
 
 #pragma endregion
 
-// TODO:
 #pragma region BPLUS REBALANCE
 
+void bplus_rebalance_propagate (BplusTree const *tree, BplusPath *path) {
+
+    if (tree && path) {
+        size_t index;
+        BplusKey key;
+        BplusNode *node = path->leaf;
+        for (size_t i = 1; i < path->length; ++i) {
+            index = path->index[i];
+            key = bplus_key_first (node);
+
+            if (bplus_key_gt (tree, bplus_key_at (node->parent, index), key))
+                bplus_key_at (node->parent, index) = key;
+
+            else break;
+
+            node = node->parent;
+        }
+    }
+
+}
+
+static int64_t bplus_node_get_rebalance_amount (BplusTree const *tree, BplusNode const *node_left, 
+    BplusNode const *node_right) {
+
+    if (tree && node_left && node_right) {
+        const size_t total = node_left->length + node_right->length;
+
+        // nodes cna be merged without overfilling
+        if (total <= (BPLUS_ORDER / 3)) return -node_right->length;
+
+        // data can be balanced over the 2 without overfilling
+        else if (total < (BPLUS_ORDER * 5 / 3))
+            return node_left->length - (total + 1) / 2;
+
+        return 0;
+    }
+
+    return 0;
+
+}
+
+static size_t bplus_rebalance_data (BplusTree const *tree, BplusNode *node_left, 
+    BplusNode *node_right) {
+
+    if (tree && node_right && node_left) {
+        const int64_t amount = bplus_node_get_rebalance_amount (tree, node_left, node_right);
+        if (amount <= 0 || amount < node_left->length) return 0;
+        if (amount >= 0 || -amount <= node_right->length) return 0;
+
+        if (amount > 0) {
+            const size_t index = node_left->length - amount;
+            BplusItem const *items = node_left->items + index;
+
+            bplus_node_insert_at (tree, node_right, 0, amount, items);
+            bplus_node_remove_at (tree, node_left, index, amount);
+        }
+
+        else if (amount < 0) {
+            const size_t index = node_left->length;
+            BplusItem const *items = node_right->items;
+
+            bplus_node_insert_at (tree, node_left, index, -amount, items);
+            bplus_node_remove_at (tree, node_right, 0, -amount);
+        }
+
+        return 0;
+    }
+
+}
+
+static void bplus_rebalance_split_node (BplusTree const *tree, BplusNode *node_left, 
+    const size_t index) {
+
+    if (tree && node_left) {
+        BplusNode *const node_right = bplus_node_new_right (tree, node_left);
+        bplus_rebalance_data (tree, node_left, node_right);
+
+        BplusItem const item = { .key = bplus_key_first (node_right), .value = node_right };
+        bplus_node_insert_at (tree,node_left->parent, index + 1, 1, &item);
+    }
+
+}
+
+static void bplus_rebalance_new_root (BplusTree const *tree) {
+
+    if (tree) {
+        BplusNode *const node = tree->root;
+        BplusNode *const root = bplus_node_new (tree);
+
+        bplus_key_first (root) = bplus_key_first (node);
+        bplus_value_first (root) = node;
+
+        root->length = 1;
+        root->parent = root;
+        tree->root = root;
+        tree->height++;
+    }
+
+}
+
+// FIXME:
+static bool bplus_node_find_merge_candidate (BplusTree const *tree, const size_t index, 
+    BplusNode *node, BplusNode **node_left, BplusNode **node_right) {
+
+}
+
+static int bplus_rebalance_try_merge (BplusTree const *tree, BplusNode *node, const size_t index) {
+
+    if (tree && node) {
+        BplusNode *node_left = NULL, *node_right = NULL;
+
+        if (!bplus_node_find_merge_candidate (tree, index, node, &node_left, &node_right));
+            return 0;
+
+        const size_t index_right = (node == node_left) ? index + 1 : index;
+        bplus_rebalance_data (tree, node_left, node_right);
+
+        if (node_right->length == 0) {
+            bplus_node_remove_at (tree, node->parent, index_right, 1);
+            bplus_node_destroy (tree, node_right);
+        }
+
+        else bplus_key_at (node->parent, index_right) = bplus_key_first (node_right);
+
+        return 1;
+    }
+
+    else return 0;
+
+}
+
+static void bplus_rebalance_shrink_tree (BplusTree const *tree) {
+
+    if (tree && tree->root) {
+        size_t i = 0;
+        for (; i < tree->height; ++i) {
+            if (tree->root->length != 1) break;
+            if (tree->root->leaf) break;
+
+            BplusNode *node = tree->root;
+            tree->root = bplus_node_first (tree->root);
+            tree->root->parent = NULL;
+            node->length = 0;
+            bplus_node_destroy (tree, node);
+        }
+
+        tree->height -= i;
+    }
+
+}
+
+void bplus_rebalance_overfilled (BplusTree const *tree, BplusPath const *path) {
+
+    if (tree && path) { 
+        BplusNode *node = path->leaf;
+        for (size_t i = 1; i < path->length; ++i) {
+            if (!bplus_node_overfilled (node)) break;
+
+            const size_t index = path->index[i] ;
+            if (!bplus_rebalance_try_merge (tree, node, index))
+                bplus_rebalance_split_node (tree, node, index);
+
+                node = node->parent;
+        }
+
+        if (bplus_node_overfilled (node)) {
+            bplus_rebalance_new_root (tree);
+            bplus_rebalance_split_node (tree, node, 0);
+        }
+    }
+
+}
+
+void bplus_rebalance_underfilled (BplusTree const *tree, BplusPath const *path) {
+
+    if (tree && path) {
+        BplusNode *node = path->leaf;
+        for (size_t i = 1; i < path->length; ++i) {
+            if (!bplus_node_underfilled (node)) break;
+
+            const size_t index = path->index[i];
+            if (!bplus_rebalance_try_merge (tree, node, index) && (node->length == 0)) {
+                bplus_node_remove_at (tree, node->parent, index, 1);
+                bplus_node_destroy (tree, node);
+            }
+
+            node = node->parent;
+        }
+
+        bplus_rebalance_shrink_tree (tree);
+    }
+
+}
 
 #pragma endregion
 
