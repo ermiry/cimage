@@ -2,6 +2,13 @@
 #include <SDL2/SDL_image.h>
 #include <time.h>
 
+#define  click SDL_MOUSEBUTTONDOWN
+#define  leftClick SDL_BUTTON_LEFT
+#define rightClick SDL_BUTTON_RIGHT 
+#define mousePos SDL_MOUSEMOTION
+#define mouseX event.button.x
+#define mouseY event.button.y
+
 typedef struct{
     int r,h,k,nX,nY,oX,oY;
     float step;
@@ -28,7 +35,7 @@ typedef struct{
 
 #define pressedkey key.keysym.sym
 
-
+SDL_Window *UniversalWindow;
 
 int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]){
     /**
@@ -36,14 +43,22 @@ int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]){
     */
     *window = SDL_CreateWindow(title,center,center,HEIGHT,WIDTH,SDL_WINDOW_SHOWN);
     *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
-
+    UniversalWindow = window;
     if(!*window){
         fprintf(stderr,"[ERR]ERROR CREATING WINDOW\n");
         return -1;
     }else{
         return 0;
     }
+}
 
+
+
+void clean(SDL_Window **window, SDL_Renderer **renderer){
+    SDL_DestroyWindow(*window);
+    
+    SDL_DestroyRenderer(*renderer);
+    SDL_Quit();
 }
 
 int SDL_STARTER_FIXED(SDL_Window **window,SDL_Renderer **renderer, char title[100],int h,int w){
@@ -94,25 +109,30 @@ SDL_Rect createRectFixed(int x,int y, int w,int h){
     return rect;
 }
 
-SDL_Surface *OptimizedSurface(char filepath[100],SDL_Surface *windowSurface){
+SDL_Surface *OptimizedSurface(char filepath[100]){
     SDL_Surface *optimizedSurface = NULL;
     SDL_Surface *surface = NULL;
     IMG_Loader(&surface,filepath);  
     if(!surface){
         printf("ERROR");
     }else{
-        optimizedSurface = SDL_ConvertSurface(surface,windowSurface->format,0);
+        optimizedSurface = SDL_ConvertSurface(surface,SDL_GetWindowSurface(UniversalWindow)->format,0);
+        if(!optimizedSurface){
+            printf("%s",SDL_GetError());
+        }
     }
     SDL_FreeSurface(surface);
     return optimizedSurface;
 }
 
 SDL_Texture *LoadTexture(char filePath[100],SDL_Renderer *renderTarget){
+    SDL_Window *window = Call_for_Window();
     SDL_Texture *texture = NULL;
     SDL_Surface *surface = NULL;
-    IMG_Loader(&surface,filePath);
+    //IMG_Loader(&surface,filePath);
+    surface = OptimizedSurface(filePath);
     if(!surface){
-        printf("ERROR");
+        printf("ERROR\n");
     }
     texture = SDL_CreateTextureFromSurface(renderTarget,surface);
     if(!texture){
@@ -165,7 +185,11 @@ void SDL_RandomColor(SDL_Renderer *renderTarget, Color color){
 }
 
 void SDL_Print(SDL_Renderer **renderTarget,SDL_Texture *texture, int xPos, int yPos, int hTex, int wTex){
-    SDL_Rect DestR;
+    SDL_Rect DestR,camera;
+    camera.x=0;
+    camera.y = 35;
+    camera.h = 650;
+    camera.w = 1200;
     DestR.x = xPos;
     DestR.y = yPos;
     DestR.h = hTex;
@@ -180,5 +204,15 @@ void SDL_RenderColor(SDL_Renderer **renderTarget, Color color){
 void SDL_RenderDrawLine_Gross(SDL_Renderer **renderTarget, int x1, int x2, int y1, int y2, int thickness){
     for(int i=0; i<thickness; i++){
         SDL_RenderDrawLine(*renderTarget,x1,y1+i,x2,y2+i);
+    }
+}
+
+
+void SDL_fullScreenToggle(SDL_Window *window, bool *FullScreen){
+    *FullScreen = !*FullScreen;
+    if(*FullScreen){
+        SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN_DESKTOP);
+    }else{
+        SDL_SetWindowFullscreen(window,0);
     }
 }

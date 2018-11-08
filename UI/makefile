@@ -13,6 +13,6 @@ UIexec: $(SOURCES)
 
 run:
 	./UIexec
-
 clean:
 	rm ./UIexec
+	clear
