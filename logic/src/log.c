@@ -15,6 +15,8 @@ char *getMsgType (LogMsgType type) {
         case DEBUG: strcpy (temp, "[DEBUG]"); break;
         case TEST: strcpy (temp, "[TEST]"); break;
 
+        case IMAGE: strcpy (temp, "[IMAGE]"); break;
+
         default: break;
     }
 

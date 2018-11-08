@@ -21,6 +21,8 @@ typedef enum LogMsgType {
     DEBUG,
     TEST,
 
+    IMAGE,
+
 } LogMsgType;
 
 void logMsg (FILE *__restrict __stream, LogMsgType firstType, LogMsgType secondType,

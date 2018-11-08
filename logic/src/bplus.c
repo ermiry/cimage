@@ -1,5 +1,6 @@
 #include "bplus.h"
 
+#include <stdio.h>
 #include <string.h>     // for memcpy
 
 #pragma region BPLUS NODE

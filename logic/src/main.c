@@ -6,6 +6,9 @@
 #include "cimage.h"
 
 #include "log.h"
+#include "utils/myUtils.h"
+
+#pragma region OTHER
 
 // TODO: load this from a file
 void printUsage (void) {
@@ -24,19 +27,73 @@ void printUsage (void) {
            "  -v    version     Display current version.\n");
 }
 
+#pragma endregion
+
+#pragma region JPEG
+
+// parse the marker stream until SOS or EOI is seen
+int jpeg_readSections (FILE *file, ReadMode readmode) {
+
+
+
+}
+
+int jpeg_readFile (const char *filename, ReadMode readmode) {
+
+    FILE *file = fopen (filename, "rb");
+    if (!file) {
+        logMsg (stderr, ERROR, IMAGE, createString ("Failed to open: %s", filename));
+        return 1;
+    }
+
+    // scan the jpeg headers
+    if (!jpeg_readSections (file, readmode)) {
+        logMsg (stdout, DEBUG, IMAGE, "Done getting jpeg sections.");
+        fclose (file);
+        return 0;
+    }
+
+    else {
+        logMsg (stdout, WARNING, IMAGE, createString ("Not jpeg: %s", filename));
+        fclose (file);
+        return 1;
+    } 
+
+}
+
+#pragma endregion
+
 #pragma region IMAGES
 
 // do selected operations to one file a time
 void cimage_processFile (const char *filename) {
 
-    /* bool modified = false;
+    bool modified = false;
 
     ReadMode readmode = READ_METADATA;
 
     // TODO: reset jpg file
 
-    ImageData *data = (ImageData *data) malloc (sizeof (ImageData)); */
+    // start with an empty image data
+    ImageData *imgData = (ImageData *) malloc (sizeof (ImageData)); 
+    imgData->flashUsed = -1;
+    imgData->meteringMode = -1;
+    imgData->whitebalance = -1;
     
+    // TODO: store file date/time using fstat
+    // thisis the creation day of the file in the current machine
+
+    strncpy (imgData->filename, filename, 256);
+
+    // no command option selected, so just read te img info
+    if (jpeg_readFile (filename, readmode)) {
+        // TODO: we got the exif header info
+        // we can now display it
+    }
+    
+    else {
+        // TODO: discard data and return
+    }
 
 }
 
