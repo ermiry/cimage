@@ -471,6 +471,54 @@ BplusIterator *bplus_iterator_for_key_range (BplusTree const *tree, const BplusK
 
 #pragma endregion
 
+#pragma region BPLUS FOREACH
+
+void bplus_foreach_item_in_node (BplusTree *tree, BplusNode *node, BplusforeachItemFunc *foreach, 
+    void *arg) {
+
+    if (tree && node) {
+        if (!node->leaf)
+            for (size_t i = 0; i < node->length; i++)
+                bplus_foreach_item_in_node (tree, bplus_no_at (node, i), foreach, arg);
+
+        else
+            for (size_t i = 0; i < node->length; i++)
+                foreach (tree, node->items + i, arg);
+    }
+    
+}
+
+void bplus_foreach_item_in_tree (BplusTree *tree, BplusforeachItemFunc *foreach, 
+    void *arg) {
+
+    if (tree && node)
+        bplus_foreach_item_in_node (tree, tree->root, foreach, arg);
+
+}
+
+void bplus_foreach_node_in_node (BplusTree *tree, BplusNode *node, BplusforeachNodeFunc *foreach,
+    void *arg) {
+
+    if (tree && node) {
+        if (!node->leaf)
+            for (size_t i = 0; i < node->length; i++)
+                bplus_foreach_node_in_node (tree, bplus_node_at (node, i), foreach, arg);
+
+        foreach (tree, node, arg);
+    }
+
+}
+
+void bplus_foreach_node_in_tree (BplusTree *tree, BplusforeachNodeFunc *foreach, 
+    void *arg) {
+
+    if (tree && node)
+        bplus_foreach_node_in_node (tree, tree->root, foreach, arg);
+
+}
+
+#pragma endregion
+
 #pragma region BPLUS REBALANCE
 
 void bplus_rebalance_propagate (BplusTree const *tree, BplusPath *path) {
@@ -792,6 +840,100 @@ BplusTree *bplus_tree_new (void) {
     size_t overflow_count; */
 
     return tree;
+
+}
+
+void bplus_foreach_node_destroy (BplusTree *tree, BplusNode *node, void *arg) {
+
+    if (tree && node)
+        bplus_node_destroy (tree, node);
+
+}
+
+// TODO: add mor debugging information
+void bplus_tree_destroy (BplusTree *tree) {
+
+    if (tree) {
+        bplus_foreach_node_in_tree (tree, &bplus_foreach_node_destroy, NULL);
+
+        free (tree);
+
+        #ifdef BPLUS_DEBUG
+            fprintf (stdout, "Tree was successfully destroyed!\n");
+        #endif
+    }
+
+}
+
+// TODO:
+void bplus_tree_destroy_each (BplusTree *tree, BplusforeachItemFunc *foreach, 
+    void *arg) {
+
+}
+
+BplusData bplus_tree_get_node_data (BplusTree const *tree, const BplusKey key) {
+
+    if (tree) {
+        BplusPath path;
+        bplus_tree_get_path_to_key (tree, key, &path);
+
+        const size_t index = path.index[0];
+        BplusNode const *node = path.leaf;
+        BplusData value = NULL;
+
+        if ((index < node->length) && bplus_key_eq (tree, bplus_key_at (node, index), key))
+            value = bplus_value_at (node, index);
+
+        return value;
+    }
+
+    return NULL;
+
+}
+
+BplusData bplus_tree_get_first_data (BplusTree const *tree) {
+
+    if (tree) {
+        if (tree->first->node.length == 0) return NULL;
+        else return tree->first->node.items[0].value;
+    }
+
+    return NULL;
+
+}
+
+BplusData bplus_tree_get_nth_data (BplusTree const *tree, const size_t pos) {
+
+    if (tree && pos > 0) {
+        BplusLeaf *leaf = tree->first;
+        if (leaf->node.length == 0) return NULL;
+
+        while (leaf != NULL && pos >= leaf->node.length) {
+            pos -= leaf->node.length;
+            leaf = leaf->right;
+        }
+
+        if (leaf) return leaf->node.items[position].value;
+
+        return NULL;
+    }
+
+    return NULL;
+
+}
+
+#pragma endregion
+
+#pragma region DEBUG
+
+void bplus_tree_print_stats (BplusTree const *tree) {
+
+    if (tree) {
+        fprintf (stout, "\n--> Bplus tree stats <--\n");
+        fprintf (stout, "Height: %lu\n", tree->height);
+        fprintf (stout, "Node count: %lu\n", tree->node_count);
+        fprintf (stout, "Leaf count: %lu\n", tree->leaf_count);
+    }
 
 }
 
