@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cimage.h"
 
@@ -22,6 +23,26 @@ void printUsage (void) {
            "  -h    help        This text.\n"
            "  -v    version     Display current version.\n");
 }
+
+#pragma region IMAGES
+
+// do selected operations to one file a time
+void cimage_processFile (const char *filename) {
+
+    bool modified = false;
+
+    ReadMode readmode = READ_METADATA;
+
+    // TODO: reset jpg file
+
+    ImageData *data = (ImageData *data) malloc (sizeof (ImageData));
+    
+
+}
+
+#pragma endregion
+
+#pragma region THREAD
 
 // TODO: maybe if no arg is provided we can launch the cimage cmd line app?
 // TODO: hanlde more than one argument each time
@@ -60,3 +81,5 @@ int main (int argc, char **argv) {
     return EXIT_SUCCESS;
 
 }
+
+#pragma endregion
