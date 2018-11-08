@@ -167,10 +167,117 @@ void bplus_leaf_destroy (BplusTree *tree, BplusLeaf *leaf) {
 
 #pragma region BPLUS SEARCH
 
-static size_t bplus_node_get_key_index (BplusTree const *tree, BplusNode const *node, 
+#define bplus_node_get_key_index_op(operator, tree, node, key)              \
+    do {                                                                    \
+        size_t index = 1;                                                   \
+        while (index < (node)->length) {                                    \
+            if (operator ((tree), bplus_key_at (node, index), (key)))       \
+                break;                                                      \
+            ++index;                                                        \
+        }                                                                   \
+                                                                            \
+        return --index;                                                     \
+    }                                                                       \
+    while (0)
+
+#define bplus_tree_get_path_to_key_op(operator, tree, key, path)                   \
+    do {                                                                           \
+        if (__builtin_expect (((tree)->root->length == 0), 0)) {                   \
+            (path)->length   = 1;                                                  \
+            (path)->index[0] = 0;                                                  \
+            (path)->leaf     = tree->root;                                         \
+            return;                                                                \
+        }                                                                          \
+                                                                                   \
+        BplusNode const *node   = (tree)->root;                                    \
+        size_t const     length = (tree)->height;                                  \
+        for (size_t i = length; i > 0; --i) {                                      \
+            for (int i = 0; i < BPLUS_ORDER * sizeof (*(node)->items) / 64; ++i)   \
+                __builtin_prefetch (node->items + i * 64 / sizeof(*node->items));  \
+                                                                                   \
+            size_t const index = operator_m ((tree), node, (key));                 \
+            (path)->index[i - 1] = index;                                          \
+                                                                                   \
+            if (i == 1)                                                            \
+                break;                                                             \
+                                                                                   \
+            node = bplus_node_at (node, index);                                    \
+        }                                                                          \
+                                                                                   \
+        (path)->length = length;                                                   \
+        (path)->leaf   = (BplusNode*) node;                                        \
+    }                                                                              \
+    while (0)
+
+size_t bplus_node_get_key_index (BplusTree const *tree, BplusNode const *node, 
     const BplusKey key) {
 
-    if (tree && node) {}
+    if (tree && node) bplus_node_get_key_index_op (bplus_key_gt, tree, node, key);
+    else return 0;
+
+}
+
+size_t bplus_node_get_key_index_before (BplusTree const *tree, BplusNode const *node,
+    const BplusKey key) {
+
+    if (tree && node) bplus_node_get_key_index_op (bplus_key_gte, tree, node, key);
+    else return 0;
+
+}
+
+// TODO: check the original function --> assert condition
+void bplus_tree_get_path_to_key (BplusTree const *tree, const BplusKey key, BplusPath *path) {
+
+    if (tree) 
+        if (tree->height < sizeof (path->index) / sizeof (*(path)->index))
+            bplus_tree_get_path_to_key_op (bplus_node_get_key_index, tree, key, path);
+
+}
+
+// TODO: check the original function --> assert condition
+void bplus_tree_get_path_to_key_before (BplusTree const *tree, const BplusKey key,
+    BplusPath *path) {
+
+    if (tree) 
+        if (tree->height < sizeof (path->index) / sizeof (*(path)->index))
+            bplus_tree_get_path_to_key_op (bplus_node_get_key_index_before, tree, key, path);
+
+}
+
+// TODO: check the original function --> assert condition
+void bplus_tree_get_paths_to_key_range (BplusTree const *tree, BplusKey key_from, BplusKey key_to,
+    BplusPath *path_from, BplusPath *path_to) {
+
+    if (tree) {
+        // TODO: assert conditions
+
+        if (bplus_key_gt (tree, key_from, key_to)) {
+            BplusKey temp = key_to;
+            key_to = key_from;
+            key_from = temp;
+        }
+
+        bplus_tree_get_path_to_key (tree, key_to, path_to);
+        if (!bplus_key_gt (tree, bplus_key_at (path_to->leaf, path_to->index[0]), key_to))
+            path_to->index[0]++;
+
+        bplus_tree_get_path_to_key_before (tree, key_from, path_from);
+        if (!bplus_key_gt (tree, bplus_key_at (path_to->leaf, path_from->index[0]), key_from))
+            path_from->index[0]++;
+
+        BplusLeaf const * const leaf = &path_from->leaf;
+        if (path_from->index[0] == leaf->node.leaf) {
+            if (!leaf->right) {
+                path_from->leaf = path_to->leaf;
+                path_from->index[0] = path_to->index[0];
+            }
+
+            else {
+                path_from->leaf = (BplusNode *) leaf->right;
+                path_from->index[0] = 0;
+            }
+        }
+    }
 
 }
 
@@ -245,7 +352,7 @@ bool bplus_iterator_next (BplusIterator *iterator) {
 
         if (next == iterator->item_to) return false;
 
-        if (next - leaf->nodes.items < leaf->node.length) ++iterator->item;
+        if (next - leaf->node.items < leaf->node.length) ++iterator->item;
         else {
             if (!leaf->right) return false;
 
@@ -269,7 +376,7 @@ bool bplus_iterator_previous (BplusIterator *iterator) {
         if (item == iterator->item_from) return false;
 
         if (item - leaf->node.items == 0) {
-            if (!leaf->leaft) return false;
+            if (!leaf->left) return false;
 
             iterator->leaf = leaf->left;
             iterator->item = leaf->left->node.items + leaf->left->node.length;
@@ -353,7 +460,7 @@ BplusIterator *bplus_iterator_for_key_range (BplusTree const *tree, const BplusK
         bplus_tree_get_paths_to_key_range (tree, key_from, key_to, &path_from, &path_to);
 
         return bplus_iterator_new_full (tree,
-            (BplusLeaf *) path_from.leaf, path_From.leaf->items + path_from.index[0],
+            (BplusLeaf *) path_from.leaf, path_from.leaf->items + path_from.index[0],
             (BplusLeaf *) path_to.leaf, path_to.leaf->items + path_to.index[0]);
     }
 
@@ -449,7 +556,7 @@ static void bplus_rebalance_split_node (BplusTree const *tree, BplusNode *node_l
 
 }
 
-static void bplus_rebalance_new_root (BplusTree const *tree) {
+static void bplus_rebalance_new_root (BplusTree *tree) {
 
     if (tree) {
         BplusNode *const node = tree->root;
@@ -497,7 +604,7 @@ static int bplus_rebalance_try_merge (BplusTree const *tree, BplusNode *node, co
 
 }
 
-static void bplus_rebalance_shrink_tree (BplusTree const *tree) {
+static void bplus_rebalance_shrink_tree (BplusTree *tree) {
 
     if (tree && tree->root) {
         size_t i = 0;

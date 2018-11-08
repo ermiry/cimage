@@ -19,6 +19,21 @@ typedef struct BplusItem {
 
 } BplusItem;
 
+#define bplus_key_gt(bplus_tree, k1, k2)    ((k1) > (k2))
+#define bplus_key_lt(bplus_tree, k1, k2)    ((k1) < (k2))
+#define bplus_key_gte(bplus_tree, k1, k2)   ((k1) >= (k2))
+#define bplus_key_lte(bplus_tree, k1, k2)   ((k1) <= (k2))
+#define bplus_key_eq(bplus_tree, k1, k2)    ((k1) == (k2))
+#define bplus_key_neq(bplus_tree, k1, k2)   ((k1) != (k2))
+
+#define bplus_key_at(node, index)     (((BplusNode*) node)->items[(index)].key)
+#define bplus_key_first(node)         bplus_key_at(node, 0)
+#define bplus_key_last(node)          bplus_key_at(node, (node)->length - 1)
+
+#define bplus_value_at(node, index)   (((BplusNode*) node)->items[(index)].value)
+#define bplus_value_first(node)       bplus_value_at(node, 0)
+#define bplus_value_last(node)        bplus_value_at(node, (node)->length - 1)
+
 typedef struct BplusNode {
 
     size_t length;
@@ -28,6 +43,10 @@ typedef struct BplusNode {
     BplusNode *parent;
 
 } BplusNode;
+
+#define bplus_node_at(node, index)      ((BplusNode*) bplus_value_at(node, index))
+#define bplus_node_first(node)          ((BplusNode*) bplus_value_first(node))
+#define bplus_node_last(node)           ((BplusNode*) bplus_value_last(node))
 
 typedef struct BplusLeaf {
 
