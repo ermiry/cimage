@@ -31,10 +31,20 @@ void printUsage (void) {
 
 #pragma region JPEG
 
+// process a COM marker
+void jpeg_process_COM (const uchar *data, int length) {}
+
+// process a SOFn marker -> used for image dimensions
+void jpeg_process_SOFn (const uchar *data, int marker) {
+
+}
+
+void jpeg_checkAllocatedSections (void) {
+
+}
+
 // parse the marker stream until SOS or EOI is seen
 int jpeg_readSections (FILE *file, ReadMode readmode) {
-
-
 
 }
 
@@ -90,7 +100,7 @@ void cimage_processFile (const char *filename) {
         // TODO: we got the exif header info
         // we can now display it
     }
-    
+
     else {
         // TODO: discard data and return
     }
