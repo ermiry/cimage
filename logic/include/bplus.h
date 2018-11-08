@@ -38,6 +38,26 @@ typedef struct BplusLeaf {
 
 } BplusLeaf;
 
+typedef struct BplusPath {
+
+    size_t length;
+    size_t index[16];   // TODO: where do we get the correct value for this?
+    BplusNode *leaf;
+
+} BplusPath;
+
+typedef struct BplusIterator {
+
+    BplusItem *item;
+    BplusLeaf *leaf;
+
+    BplusLeaf *leaf_from;
+    BplusItem *item_from;
+    BplusLeaf *leaf_to;
+    BplusItem *item_to;
+
+} BplusIterator;
+
 typedef struct BplusTree {
 
     BplusNode *root;
@@ -57,14 +77,6 @@ typedef struct BplusTree {
 
 } BplusTree;
 
-// TODO: where do we want to use this?
-typedef struct BplusPath {
-
-    size_t length;
-    size_t index[16];   // TODO: where do we get the correct value for this?
-    BplusNode *leaf;
-
-} BplusPath;
 
 // TODO:
 // 06/11/2018 -- 22:36 - target functions

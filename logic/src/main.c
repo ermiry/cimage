@@ -29,13 +29,13 @@ void printUsage (void) {
 // do selected operations to one file a time
 void cimage_processFile (const char *filename) {
 
-    bool modified = false;
+    /* bool modified = false;
 
     ReadMode readmode = READ_METADATA;
 
     // TODO: reset jpg file
 
-    ImageData *data = (ImageData *data) malloc (sizeof (ImageData));
+    ImageData *data = (ImageData *data) malloc (sizeof (ImageData)); */
     
 
 }
