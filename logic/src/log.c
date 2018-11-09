@@ -4,6 +4,8 @@
 
 #include "log.h"
 
+#include "utils/myUtils.h"
+
 char *getMsgType (LogMsgType type) {
 
     char temp[10];

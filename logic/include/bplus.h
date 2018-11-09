@@ -12,6 +12,8 @@
 typedef uint64_t BplusKey;
 typedef void*   BplusData;
 
+struct BplusTree;
+
 typedef struct BplusItem {
 
     BplusKey key;
@@ -19,7 +21,7 @@ typedef struct BplusItem {
 
 } BplusItem;
 
-typedef void (BplusForeachItemFunc) (BplusTree const *tree,
+typedef void (BplusForeachItemFunc) (struct BplusTree *tree,
     BplusItem *item, void *arg);
 
 #define bplus_key_gt(bplus_tree, k1, k2)    ((k1) > (k2))
@@ -43,11 +45,11 @@ typedef struct BplusNode {
     BplusItem items[BPLUS_ORDER];
 
     bool leaf;
-    BplusNode *parent;
+    struct BplusNode *parent;
 
 } BplusNode;
 
-typedef void (BplusForeachNodeFunc) (BplusTree *tree, BplusNode *node, void *arg);
+typedef void (BplusForeachNodeFunc) (struct BplusTree *tree, BplusNode *node, void *arg);
 
 #define bplus_node_at(node, index)      ((BplusNode*) bplus_value_at(node, index))
 #define bplus_node_first(node)          ((BplusNode*) bplus_value_first(node))
@@ -105,14 +107,14 @@ extern BplusTree *bplus_tree_new (void);
 extern void bplus_tree_destroy (BplusTree *);
 // extern void bplus_tree_destroy_each (BplusTree *, BplusForEach *foreach, void *argument);
 
-extern void bplus_tree_insert (BplusTree const *tree, const BplusKey key, const BplusData value);
-extern BplusData bplus_tree_remove (BplusTree const *tree, const BplusKey key);
-extern BplusData bplus_tree_remove_first (BplusTree const *tree);
-extern void bplus_tree_remove_value (BplusTree const *tree, const BplusKey key, const BplusData value);
+extern void bplus_tree_insert (BplusTree *tree, const BplusKey key, const BplusData value);
+extern BplusData bplus_tree_remove (BplusTree *tree, const BplusKey key);
+extern BplusData bplus_tree_remove_first (BplusTree *tree);
+extern void bplus_tree_remove_value (BplusTree *tree, const BplusKey key, const BplusData value);
 
-extern BplusData bplus_tree_get_node_data (BplusTree const *tree, const BplusKey key);
-extern BplusData bplus_tree_get_first_data (BplusTree const *tree);
-extern BplusData bplus_tree_get_nth_data (BplusTree const *tree, const size_t pos);
+extern BplusData bplus_tree_get_node_data (BplusTree *tree, const BplusKey key);
+extern BplusData bplus_tree_get_first_data (BplusTree *tree);
+extern BplusData bplus_tree_get_nth_data (BplusTree *tree, const size_t pos);
 
 extern void bplus_tree_print_stats (BplusTree const *tree);
 

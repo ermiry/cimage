@@ -5,8 +5,11 @@
 
 #pragma region BPLUS NODE
 
-#define bplus_value_at(node, index) (((BplusNode *) node)->items[(index)].value)
-#define bplus_node_at(node, index) ((BplusNode *) bplus_value_at (node, index))
+// #define bplus_value_at(node, index) (((BplusNode *) node)->items[(index)].value)
+// #define bplus_node_at(node, index) ((BplusNode *) bplus_value_at (node, index))
+
+void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index,
+    const size_t length, BplusItem const * const items);
 
 void bplus_node_init (BplusNode *node, bool leaf) {
 
@@ -34,6 +37,8 @@ BplusNode *bplus_node_new (BplusTree *tree) {
 
 }
 
+BplusLeaf *bplus_leaf_new_right (BplusTree *tree, BplusLeaf *leaf_left);
+
 BplusNode *bplus_node_new_right (BplusTree *tree, BplusNode *node_left) {
 
     if (tree && node_left) {
@@ -51,6 +56,8 @@ BplusNode *bplus_node_new_right (BplusTree *tree, BplusNode *node_left) {
     else return NULL;
 
 }
+
+void bplus_leaf_destroy (BplusTree *tree, BplusLeaf *leaf);
 
 // FIXME: free the node
 void bplus_node_destroy (BplusTree *tree, BplusNode *node) {
@@ -84,18 +91,18 @@ void bplus_node_move_and_resize_data (BplusTree const *tree, BplusNode *node,
 
 }
 
-void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index, 
+void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index,
     const size_t length, BplusItem const * const items) {
 
     if (node && (index <= node->length) && (node->length + length <= BPLUS_ORDER)) {
         bplus_node_move_and_resize_data (tree, node, index + length, index);
         memcpy (node->items + index, items, length * sizeof (BplusItem));
 
-        if (node->leaf == false) 
-            for (size_t i = index; i < index + length; ++i) 
+        if (node->leaf == false)  
+            for (size_t i = index; i < index + length; i++)
                 bplus_node_at (node, i)->parent = node;
-        
     }
+
 }
 
 #pragma endregion
@@ -196,7 +203,7 @@ void bplus_leaf_destroy (BplusTree *tree, BplusLeaf *leaf) {
             for (int i = 0; i < BPLUS_ORDER * sizeof (*(node)->items) / 64; ++i)   \
                 __builtin_prefetch (node->items + i * 64 / sizeof(*node->items));  \
                                                                                    \
-            size_t const index = operator_m ((tree), node, (key));                 \
+            size_t const index = operator ((tree), node, (key));                 \
             (path)->index[i - 1] = index;                                          \
                                                                                    \
             if (i == 1)                                                            \
@@ -266,7 +273,7 @@ void bplus_tree_get_paths_to_key_range (BplusTree const *tree, BplusKey key_from
         if (!bplus_key_gt (tree, bplus_key_at (path_to->leaf, path_from->index[0]), key_from))
             path_from->index[0]++;
 
-        BplusLeaf const * const leaf = &path_from->leaf;
+        BplusLeaf *leaf = &path_from->leaf;
         if (path_from->index[0] == leaf->node.leaf) {
             if (!leaf->right) {
                 path_from->leaf = path_to->leaf;
@@ -286,8 +293,8 @@ void bplus_tree_get_paths_to_key_range (BplusTree const *tree, BplusKey key_from
 
 #pragma region BPLUS ITERATOR
 
-BplusIterator *bplus_iterator_new_full (BplusTree const *tree, BplusLeaf const *leaf_from, 
-    BplusItem const *item_from, BplusLeaf const *leaf_to, BplusItem const *item_to) {
+BplusIterator *bplus_iterator_new_full (BplusTree *tree, BplusLeaf *leaf_from, 
+    BplusItem *item_from, BplusLeaf *leaf_to, BplusItem *item_to) {
 
     BplusIterator *iterator = (BplusIterator *) malloc (sizeof (BplusIterator));
 
@@ -307,23 +314,23 @@ BplusIterator *bplus_iterator_new_full (BplusTree const *tree, BplusLeaf const *
 
 }
 
-BplusIterator *bplus_iterator_new_to_last (BplusTree const *tree, BplusLeaf const* leaf_from, 
-    BplusItem const *item_from) {
+BplusIterator *bplus_iterator_new_to_last (BplusTree *tree, BplusLeaf *leaf_from, 
+    BplusItem *item_from) {
 
     return bplus_iterator_new_full (tree, leaf_from, item_from, tree->last, 
         tree->last->node.items + tree->last->node.length);
 
 }
 
-BplusIterator *bplus_iterator_new_from_first (BplusTree const *tree, BplusLeaf const *leaf_to,
-    BplusItem const *item_to) {
+BplusIterator *bplus_iterator_new_from_first (BplusTree *tree, BplusLeaf *leaf_to,
+    BplusItem *item_to) {
 
     return bplus_iterator_new_full (tree, tree->first, tree->first->node.items, 
         leaf_to, item_to);
 
 }
 
-BplusIterator *bplus_iterator_new (BplusTree const *tree) {
+BplusIterator *bplus_iterator_new (BplusTree *tree) {
 
     return bplus_iterator_new_to_last (tree, tree->first, tree->first->node.items);
 
@@ -403,14 +410,14 @@ BplusItem const *bplus_iterator_get_item (BplusIterator const *iterator) {
 
 }
 
-BplusIterator *bplus_tree_first (BplusTree const *tree) {
+BplusIterator *bplus_tree_first (BplusTree *tree) {
 
     if (tree) return bplus_iterator_new (tree);
     else return NULL;
 
 }
 
-BplusIterator *bplus_iterator_from_key (BplusTree const *tree, const BplusKey key) {
+BplusIterator *bplus_iterator_from_key (BplusTree *tree, const BplusKey key) {
 
     if (tree) {
         BplusPath path_from, path_to;
@@ -424,7 +431,7 @@ BplusIterator *bplus_iterator_from_key (BplusTree const *tree, const BplusKey ke
 
 }
 
-BplusIterator *bplus_iterator_to_key (BplusTree const *tree, const BplusKey key) {
+BplusIterator *bplus_iterator_to_key (BplusTree *tree, const BplusKey key) {
 
     if (tree) {
         BplusPath path_from, path_to;
@@ -438,7 +445,7 @@ BplusIterator *bplus_iterator_to_key (BplusTree const *tree, const BplusKey key)
 
 }
 
-BplusIterator *bplus_iterator_for_key (BplusTree const *tree, const BplusKey key) {
+BplusIterator *bplus_iterator_for_key (BplusTree *tree, const BplusKey key) {
 
     if (tree) {
         BplusPath path_from, path_to;
@@ -453,7 +460,7 @@ BplusIterator *bplus_iterator_for_key (BplusTree const *tree, const BplusKey key
 
 }
 
-BplusIterator *bplus_iterator_for_key_range (BplusTree const *tree, const BplusKey key_from,
+BplusIterator *bplus_iterator_for_key_range (BplusTree *tree, const BplusKey key_from,
     const BplusKey key_to) {
 
     if (tree) {
@@ -474,13 +481,13 @@ BplusIterator *bplus_iterator_for_key_range (BplusTree const *tree, const BplusK
 
 #pragma region BPLUS FOREACH
 
-void bplus_foreach_item_in_node (BplusTree *tree, BplusNode *node, BplusforeachItemFunc *foreach, 
-    void *arg) {
+void bplus_foreach_item_in_node (BplusTree *tree, BplusNode *node, 
+    BplusForeachItemFunc *foreach, void *arg) {
 
     if (tree && node) {
         if (!node->leaf)
             for (size_t i = 0; i < node->length; i++)
-                bplus_foreach_item_in_node (tree, bplus_no_at (node, i), foreach, arg);
+                bplus_foreach_item_in_node (tree, bplus_node_at (node, i), foreach, arg);
 
         else
             for (size_t i = 0; i < node->length; i++)
@@ -489,15 +496,15 @@ void bplus_foreach_item_in_node (BplusTree *tree, BplusNode *node, BplusforeachI
     
 }
 
-void bplus_foreach_item_in_tree (BplusTree *tree, BplusforeachItemFunc *foreach, 
+void bplus_foreach_item_in_tree (BplusTree *tree, BplusForeachItemFunc *foreach, 
     void *arg) {
 
-    if (tree && node)
+    if (tree)
         bplus_foreach_item_in_node (tree, tree->root, foreach, arg);
 
 }
 
-void bplus_foreach_node_in_node (BplusTree *tree, BplusNode *node, BplusforeachNodeFunc *foreach,
+void bplus_foreach_node_in_node (BplusTree *tree, BplusNode *node, BplusForeachNodeFunc *foreach,
     void *arg) {
 
     if (tree && node) {
@@ -510,10 +517,10 @@ void bplus_foreach_node_in_node (BplusTree *tree, BplusNode *node, BplusforeachN
 
 }
 
-void bplus_foreach_node_in_tree (BplusTree *tree, BplusforeachNodeFunc *foreach, 
+void bplus_foreach_node_in_tree (BplusTree *tree, BplusForeachNodeFunc *foreach, 
     void *arg) {
 
-    if (tree && node)
+    if (tree)
         bplus_foreach_node_in_node (tree, tree->root, foreach, arg);
 
 }
@@ -521,6 +528,9 @@ void bplus_foreach_node_in_tree (BplusTree *tree, BplusforeachNodeFunc *foreach,
 #pragma endregion
 
 #pragma region BPLUS REBALANCE
+
+void bplus_node_remove_at (BplusTree const *tree, BplusNode *node, const size_t index, 
+    const size_t length);
 
 void bplus_rebalance_propagate (BplusTree const *tree, BplusPath *path) {
 
@@ -592,7 +602,7 @@ static size_t bplus_rebalance_data (BplusTree const *tree, BplusNode *node_left,
 
 }
 
-static void bplus_rebalance_split_node (BplusTree const *tree, BplusNode *node_left, 
+static void bplus_rebalance_split_node (BplusTree *tree, BplusNode *node_left, 
     const size_t index) {
 
     if (tree && node_left) {
@@ -628,7 +638,7 @@ static bool bplus_node_find_merge_candidate (BplusTree const *tree, const size_t
 
 }
 
-static int bplus_rebalance_try_merge (BplusTree const *tree, BplusNode *node, const size_t index) {
+static int bplus_rebalance_try_merge (BplusTree *tree, BplusNode *node, const size_t index) {
 
     if (tree && node) {
         BplusNode *node_left = NULL, *node_right = NULL;
@@ -673,7 +683,7 @@ static void bplus_rebalance_shrink_tree (BplusTree *tree) {
 
 }
 
-void bplus_rebalance_overfilled (BplusTree const *tree, BplusPath const *path) {
+void bplus_rebalance_overfilled (BplusTree *tree, BplusPath const *path) {
 
     if (tree && path) { 
         BplusNode *node = path->leaf;
@@ -695,7 +705,7 @@ void bplus_rebalance_overfilled (BplusTree const *tree, BplusPath const *path) {
 
 }
 
-void bplus_rebalance_underfilled (BplusTree const *tree, BplusPath const *path) {
+void bplus_rebalance_underfilled (BplusTree *tree, BplusPath const *path) {
 
     if (tree && path) {
         BplusNode *node = path->leaf;
@@ -734,7 +744,7 @@ void bplus_leaf_insert_at (BplusTree const *tree, BplusNode *node, const size_t 
     
 }
 
-void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index,
+/* void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t index,
     const size_t length, BplusItem const * const items) {
 
     if (node && (index <= node->length) && (node->length + length <= BPLUS_ORDER)) {
@@ -746,9 +756,9 @@ void bplus_node_insert_at (BplusTree const *tree, BplusNode *node, const size_t 
                 bplus_node_at (node, i)->parent = node;
     }
 
-}
+}*/
 
-void bplus_tree_insert (BplusTree const *tree, const BplusKey key, const BplusData value) {
+void bplus_tree_insert (BplusTree *tree, const BplusKey key, const BplusData value) {
 
     BplusPath path;
     bplus_tree_get_path_to_key (tree, key, &path);
@@ -777,7 +787,7 @@ void bplus_node_remove_at (BplusTree const *tree, BplusNode *node, const size_t 
 
 }
 
-BplusData bplus_tree_remove_first (BplusTree const *tree) {
+BplusData bplus_tree_remove_first (BplusTree *tree) {
 
     BplusPath path = { .leaf = (BplusNode *) tree->first };
     BplusNode *node = (BplusNode *) path.leaf;
@@ -794,7 +804,7 @@ BplusData bplus_tree_remove_first (BplusTree const *tree) {
 
 }
 
-BplusData bplus_tree_remove (BplusTree const *tree, const BplusKey key) {
+BplusData bplus_tree_remove (BplusTree *tree, const BplusKey key) {
 
     BplusPath path;
     bplus_tree_get_path_to_key (tree, key, &path);
@@ -867,12 +877,12 @@ void bplus_tree_destroy (BplusTree *tree) {
 }
 
 // TODO:
-void bplus_tree_destroy_each (BplusTree *tree, BplusforeachItemFunc *foreach, 
+void bplus_tree_destroy_each (BplusTree *tree, BplusForeachItemFunc *foreach, 
     void *arg) {
 
 }
 
-BplusData bplus_tree_get_node_data (BplusTree const *tree, const BplusKey key) {
+BplusData bplus_tree_get_node_data (BplusTree *tree, const BplusKey key) {
 
     if (tree) {
         BplusPath path;
@@ -892,7 +902,7 @@ BplusData bplus_tree_get_node_data (BplusTree const *tree, const BplusKey key) {
 
 }
 
-BplusData bplus_tree_get_first_data (BplusTree const *tree) {
+BplusData bplus_tree_get_first_data (BplusTree *tree) {
 
     if (tree) {
         if (tree->first->node.length == 0) return NULL;
@@ -903,7 +913,7 @@ BplusData bplus_tree_get_first_data (BplusTree const *tree) {
 
 }
 
-BplusData bplus_tree_get_nth_data (BplusTree const *tree, const size_t pos) {
+BplusData bplus_tree_get_nth_data (BplusTree *tree, size_t pos) {
 
     if (tree && pos > 0) {
         BplusLeaf *leaf = tree->first;
@@ -914,7 +924,7 @@ BplusData bplus_tree_get_nth_data (BplusTree const *tree, const size_t pos) {
             leaf = leaf->right;
         }
 
-        if (leaf) return leaf->node.items[position].value;
+        if (leaf) return leaf->node.items[pos].value;
 
         return NULL;
     }
@@ -930,10 +940,10 @@ BplusData bplus_tree_get_nth_data (BplusTree const *tree, const size_t pos) {
 void bplus_tree_print_stats (BplusTree const *tree) {
 
     if (tree) {
-        fprintf (stout, "\n--> Bplus tree stats <--\n");
-        fprintf (stout, "Height: %lu\n", tree->height);
-        fprintf (stout, "Node count: %lu\n", tree->node_count);
-        fprintf (stout, "Leaf count: %lu\n", tree->leaf_count);
+        fprintf (stdout, "\n--> Bplus tree stats <--\n");
+        fprintf (stdout, "Height: %lu\n", tree->height);
+        fprintf (stdout, "Node count: %lu\n", tree->node_count);
+        fprintf (stdout, "Leaf count: %lu\n", tree->leaf_count);
     }
 
 }
