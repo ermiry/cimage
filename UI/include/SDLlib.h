@@ -9,6 +9,7 @@
 #define mouseX event.button.x
 #define mouseY event.button.y
 
+
 typedef struct{
     int r,h,k,nX,nY,oX,oY;
     float step;
@@ -35,15 +36,14 @@ typedef struct{
 
 #define pressedkey key.keysym.sym
 
-SDL_Window *UniversalWindow;
+SDL_Window *UniversalWindow=NULL;
 
 int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]){
     /**
      * Initialize SDL, creates a window and asign a window surface
     */
     *window = SDL_CreateWindow(title,center,center,HEIGHT,WIDTH,SDL_WINDOW_SHOWN);
-    *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
-    UniversalWindow = window;
+    *renderer = SDL_CreateRenderer(*window,-1,0);
     if(!*window){
         fprintf(stderr,"[ERR]ERROR CREATING WINDOW\n");
         return -1;
@@ -51,8 +51,6 @@ int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]){
         return 0;
     }
 }
-
-
 
 void clean(SDL_Window **window, SDL_Renderer **renderer){
     SDL_DestroyWindow(*window);
@@ -62,8 +60,21 @@ void clean(SDL_Window **window, SDL_Renderer **renderer){
 }
 
 int SDL_STARTER_FIXED(SDL_Window **window,SDL_Renderer **renderer, char title[100],int h,int w){
+    SDL_RendererInfo info;
+    char titulo[256] = {0};
+    int r_has_texture_support = 0;
     *window = SDL_CreateWindow(title,center,center,h,w,SDL_WINDOW_SHOWN);
-    *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
+    SDL_GetWindowSize(*window,&w,&h);
+    *renderer = SDL_CreateRenderer(*window,-1,0);
+    SDL_GetRendererInfo(*renderer,&info);
+    r_has_texture_support = info.flags & SDL_RENDERER_TARGETTEXTURE;
+    SDL_Log("Renderer %s started.",info.name);
+    SDL_strlcat(titulo,info.name,sizeof(titulo));
+    if(!r_has_texture_support){
+        SDL_Log("Renderer has no target texture support");
+        return -1;
+    }
+    UniversalWindow = *window;
      if(!*window){
         fprintf(stderr,"[ERR]ERROR CREATING WINDOW\n");
         return -1;
@@ -126,11 +137,10 @@ SDL_Surface *OptimizedSurface(char filepath[100]){
 }
 
 SDL_Texture *LoadTexture(char filePath[100],SDL_Renderer *renderTarget){
-    SDL_Window *window = Call_for_Window();
     SDL_Texture *texture = NULL;
     SDL_Surface *surface = NULL;
-    //IMG_Loader(&surface,filePath);
-    surface = OptimizedSurface(filePath);
+    IMG_Loader(&surface,filePath);
+    
     if(!surface){
         printf("ERROR\n");
     }

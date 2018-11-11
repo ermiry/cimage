@@ -3,12 +3,14 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_audio.h>
 #include <stdbool.h>
 #include <math.h>
 #include <unistd.h>
 #include "detect-plataform.h"
 //#include "system.h"
 #include "list.h"
+//FIXME: Im not stable, you should use bitmap font
 #include <SDL2/SDL_ttf.h>
 #include "SDLlib.h"
 
@@ -42,13 +44,14 @@ typedef struct{
 #ifdef LINUX
     void cleanScreen();
 #elif PLATAFORM_WINDOWS
-    void clS();
+    void cls();
 #endif
 
 
+
 uint32_t ChargingScreen(){
-   
-    SDL_Init(SDL_INIT_EVERYTHING);
+    printf("Entre");
+    SDL_Init(SDL_INIT_VIDEO);
     bool exit = false, forced = false;;
     int xAux,yAux,cont=0,cont2=0,ff=1,MaxCont=0,aux,MAX = 8;
     Tiempo Time;
@@ -58,17 +61,19 @@ uint32_t ChargingScreen(){
     SDL_Window *window = NULL;//principal window
     SDL_Event event;//the event checker
     SDL_Renderer *renderTarget;
-    SDL_Texture *texture[2];
+    SDL_Texture *logo = NULL;
+    SDL_Texture *background = NULL;
     //WE will use renderer for better results
     if(SDL_STARTER(&window,&renderTarget,"cimage")==0){
-        texture[0] = LoadTexture(ResourcePath"/CIMAGE33.png",renderTarget);
-        texture[1] = LoadTexture(ResourcePath"/background.jpg",renderTarget);
+        printf("Image created");
+        logo = LoadTexture(ResourcePath"/CIMAGE33.png",renderTarget);
+        background = LoadTexture(ResourcePath"/background.jpg",renderTarget);
         Time.frameTime = Time.deltaTime = 0;
         Time.currentTime = Time.prevTime = 0;
         //game cycle
         while(!exit){
             SDL_TIME(&Time.prevTime,&Time.currentTime,&Time.deltaTime);
-            while(SDL_PollEvent(&event)!=0){//EVENTS
+                while(SDL_PollEvent(&event)!=0){//EVENTS
                 if(event.type == SDL_QUIT){// || (event.type == SDL_KEYDOWN && event.pressedkey==SDLK_ESCAPE)){
                     exit=true;
                     forced = true;
@@ -78,9 +83,11 @@ uint32_t ChargingScreen(){
             *Render Printing
             * */
             SDL_RenderClear(renderTarget);
-            SDL_RenderCopy(renderTarget,texture[1],NULL,NULL);
-            SDL_RenderCopy(renderTarget,texture[0],NULL,NULL);
-        
+            printf("I cleared\n");
+            SDL_RenderCopy(renderTarget,background,NULL,NULL);
+            printf("I backgrounded\n");
+            SDL_RenderCopy(renderTarget,logo,NULL,NULL);
+            printf("I printed CIMAGE\n");
             for(int i=cont2; i<cont; i++){//charging rullete
                 aux = (360/MAX);
                 xAux = 20 * cos((i*aux)*RAD);
@@ -90,9 +97,10 @@ uint32_t ChargingScreen(){
                 }
                 SDL_SetRenderDrawColor(renderTarget,255,255,255,255);
                 SDL_FilledCircle(renderTarget,4,HEIGHT/2 + xAux, WIDTH/2 + 160 + yAux);
+                printf("I created circle %d\n",i);
             }
             SDL_RenderPresent(renderTarget);
-
+            printf("I Presented\n");
             Time.frameTime += Time.deltaTime;
             printf("%.2f\n",Time.frameTime);
             if(Time.frameTime>=.5){
@@ -128,7 +136,7 @@ uint32_t ChargingScreen(){
 //FIXME: Im not efficient
 //TODO: How Can This function be more eficcient
 //TODO: OPEN-GL?????
-void SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *Sans, SDL_Color Black,Color color, menuPos pos[5], bool selected, int numSelected){
+SDL_Texture * SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *Sans, SDL_Color Black,Color color, menuPos pos[5], bool selected, int numSelected){
     int i;
     if(!*menu){
         *menu = dlist_init(free);
@@ -163,6 +171,7 @@ void SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *Sans, SDL
     }
     SDL_Rect display, select[5];
     SDL_Surface *text; 
+    SDL_Texture *textureTarget = NULL;
     Color rectColor,blackColor,blue,white;
     //97, 193, 215
     blue.a=140;
@@ -180,6 +189,7 @@ void SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *Sans, SDL
     ListElement *e = LIST_START(*menu);
     display.w = 0;
     //FIXME:Maybe here is the problem
+    SDL_SetRenderTarget(*renderTarget,textureTarget);
     for(i=0; i<5; i++){
         menuData *h = (menuData *) e->data;
         strcpy(aux , h->dataTitle);
@@ -199,17 +209,19 @@ void SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *Sans, SDL
         }
         if(i==numSelected && selected){
             SDL_RenderFillRect(*renderTarget,&select[numSelected]);
-            text = TTF_RenderText_Solid(Sans,aux,White);//FIXME: Sometimes I give seg fault?
+            //text = TTF_RenderText_Solid(Sans,aux,White);//FIXME: Sometimes I give seg fault?
         }else{
-            text = TTF_RenderText_Solid(Sans,aux,Gray);//FIXME: Sometimes I give seg fault?
+            //text = TTF_RenderText_Solid(Sans,aux,Gray);//FIXME: Sometimes I give seg fault?
         }
-        texture = SDL_CreateTextureFromSurface(*renderTarget,text);    
-        SDL_FreeSurface(text);
+        //texture = SDL_CreateTextureFromSurface(*renderTarget,text);    
+        //SDL_FreeSurface(text);
     
-        SDL_RenderCopy(*renderTarget,texture,NULL, &display);
-        SDL_DestroyTexture(texture);
+        //SDL_RenderCopy(*renderTarget,texture,NULL, &display);
+        //SDL_DestroyTexture(texture);
         e=e->next;
     }
+    SDL_SetRenderTarget(*renderTarget,NULL);
+    return textureTarget;
 }
 
 
@@ -227,7 +239,7 @@ void randomDate(Image *imagenes){
         }
         imagenes[i].index = i;
         imagenes[i].rectImage.x=30 + (w+30)*x;
-        imagenes[i].rectImage.y=120 + (h+20)*y;
+        imagenes[i].rectImage.y=147 + (h+20)*y;
         imagenes[i].rectImage.h=h;
         imagenes[i].rectImage.w=w;
         x++;
@@ -241,16 +253,22 @@ void randomDate(Image *imagenes){
     }
 }
 
-void ImagePrinting(SDL_Renderer **renderTaget, Image *imagenes){
+SDL_Texture * ImagePrinting(SDL_Renderer **renderTarget, Image *imagenes){
     SDL_Rect camera;
-    SDL_Texture *cuadrito = LoadTexture(ResourcePath"/rectp.png",*renderTaget);
-    for(int i=0; i<36; i++){
+    SDL_Texture *cuadrito = IMG_LoadTexture(*renderTarget,ResourcePath"rectp.png");
+    SDL_Texture *imageTexture = SDL_CreateTexture(*renderTarget,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_TARGET,1270,600);
+    SDL_SetTextureBlendMode(imageTexture,SDL_BLENDMODE_BLEND);
+    if(!cuadrito){
+        printf("%s\n",SDL_GetError());
+    }
+    SDL_SetRenderTarget(*renderTarget,imageTexture);
+    for(int i=0; i<2; i++){
         if(imagenes[i].rectImage.y>140 && imagenes[i].rectImage.y<720){
-            SDL_Print(renderTaget,cuadrito,imagenes[i].rectImage.x,imagenes[i].rectImage.y,imagenes[i].rectImage.h,imagenes[i].rectImage.w);
-            
+            SDL_RenderCopy(*renderTarget,cuadrito,NULL,&imagenes[i].rectImage);
         }
     }
-
+    SDL_SetRenderTarget(*renderTarget,NULL);
+    return imageTexture;
 }
 
 void User(){
@@ -260,7 +278,7 @@ void User(){
     SDL_Renderer *renderTarget = NULL, *imageRenderer = NULL;
     SDL_Event event;
     SDL_Surface *surface = NULL;
-    SDL_Texture *texture[100];
+    SDL_Texture *texture[100], *menuTexture=NULL, *imageTexture=NULL;
     SDL_Color White = {255,255,255}, Black = {0,0,0};
     SDL_Rect clk,scrollbar,scrollbarPos,date,upBar,downBar;
     SDL_Texture *infoPhoto[100];
@@ -272,16 +290,16 @@ void User(){
     date.w  = 1280;
     date.h  = 20;
     scrollbar.x = 1270;
-    scrollbar.y  = 120;
+    scrollbar.y  = 125;
     scrollbar.h = 720-120;
     scrollbar.w = 10;
     scrollbarPos.x = 1270;
-    scrollbarPos.y = 120;
+    scrollbarPos.y = 125;
     scrollbarPos.h = 30;
     scrollbarPos.w  = 10;
     upBar.x = upBar.y = 0;
     upBar.w = 1280;
-    upBar.h = 120;
+    upBar.h = 125;
 //TTF Variables
     TTF_Init();
     DoubleList *menu=NULL;
@@ -306,7 +324,7 @@ void User(){
     timeInfo = localtime(&rawTime);
     int numSelected = -1, txCount = 0, LY = 0, NY = 0;
     char counter[100],timee[100];
-    bool exit=false, selected = false, in_menu=false,clicked = false, active_menu = false, FullScreen=false,scrollHang = false;
+    bool exit=false, selected = false, in_menu=false,clicked = false, active_menu = false, FullScreen=false,scrollHang = false,scroll=false;
 //Process
     if(SDL_STARTER_FIXED(&window,&renderTarget,"CIMAGE",1280,720)==0){
         color.r=color.g=color.b=230;//Light GRAY
@@ -316,6 +334,7 @@ void User(){
         imagenes = (Image *)  malloc (sizeof(Image) * 100);
         randomDate(imagenes);
         Time.frameTime = 0;
+        imageTexture = ImagePrinting(&renderTarget,imagenes);
         while(!exit){//APP cycle
             SDL_TIME(&Time.prevTime,&Time.currentTime, &Time.deltaTime);//TIME FUNCTION
             SDL_itoa(Time.frameTime,times,10);
@@ -355,8 +374,12 @@ void User(){
                 }else if(event.type == SDL_MOUSEWHEEL){
                     if(event.wheel.y < 0 && scrollbarPos.y <= 695){
                         scrollbarPos.y += 7;
-                    }else if(event.wheel.y > 0 && scrollbarPos.y >= 125){
+                        imagenes[1].rectImage.y += 7;
+                        scroll = true;
+                    }else if(event.wheel.y > 0 && scrollbarPos.y >= 130){
                         scrollbarPos.y -= 7;
+                        imagenes[1].rectImage.y -= 7;
+                        scroll = true;
                     }
                 }else if(event.type == SDL_MOUSEBUTTONUP && scrollHang){
                     scrollHang = false;
@@ -372,24 +395,34 @@ void User(){
                 }if(scrollHang){
                     SDL_GetMouseState(NULL,&scrollbarPos.y);
                     printf("New pos: %d\n",scrollbarPos.y - LY);
-                    imagenes[0].rectImage.y = LY-scrollbarPos.y;
-
+                    imagenes[1].rectImage.y = imagenes[0].rectImage.y - (LY-scrollbarPos.y);
+                    scroll = true;
                 }
             }
 /////////////////////////////////////////////////////////////////////////////////////////////Render             
             SDL_RenderClear(renderTarget);
             //UpBar
             SDL_RenderColor(&renderTarget,color);
-            ImagePrinting(&renderTarget,imagenes);
-
+            //FIXME: I dont charge the Texture always
+            //FIXME: It breaks :(
+            if(scroll){
+                printf("Changes were made");
+                //imageTexture = ImagePrinting(&renderTarget,imagenes);
+                if(!imageTexture){
+                    printf("Cant Charge images-- %s\n",SDL_GetError());
+                }
+            }
+            scroll = false;
+            //SDL_RenderCopy(renderTarget,imageTexture,NULL,NULL);
             SDL_SetRenderDrawColor(renderTarget,color.r,color.g,color.b,color.a);
             SDL_RenderFillRect(renderTarget,&upBar);
             SDL_Print(&renderTarget,texture[0],1280-138,0,128,128);
             SDL_RenderColor(&renderTarget,colorLine);
-            SDL_RenderDrawLine_Gross(&renderTarget,0,1280,120,120,2);
+            SDL_RenderDrawLine_Gross(&renderTarget,0,1280,125,125,2);
             if(active_menu){
-                SDL_menu(&renderTarget,&menu,Roboto,Black,color,pos,selected,numSelected);
+                menuTexture=SDL_menu(&renderTarget,&menu,Roboto,Black,color,pos,selected,numSelected);
             }
+            SDL_RenderCopy(renderTarget,menuTexture,NULL,NULL);
             SDL_RenderColor(&renderTarget,grayScroll);
             //ScrollBar
             SDL_RenderFillRect(renderTarget,&scrollbar);
@@ -400,15 +433,15 @@ void User(){
             //TODO: present images
             //TODO: Scroll bar should move the y value of all the rects
             //Clock
-            
             SDL_RenderCopy(renderTarget,texture[1],NULL,&clk);
             SDL_RenderPresent(renderTarget);
 ///////////////////////////////////////////////////////////////////////////////////////////////////            
             Time.frameTime += Time.deltaTime;
-            if(Time.frameTime==10){
+        
+            if(Time.frameTime==5){
                 printf("Entre");
                 system("pkill UIexec");
-                //exit=true;
+                exit=true;
             }
         }
         SDL_Texture *tex=NULL;
@@ -428,7 +461,8 @@ void User(){
 
 int main(void){
     uint32_t cont=0;
-
+    printf("Start");
+    //audio();
     //cont  = ChargingScreen();
     if(cont==-1){
         fprintf(stdout,"Exitted program\n");
