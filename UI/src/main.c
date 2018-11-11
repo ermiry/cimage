@@ -47,12 +47,29 @@ typedef struct{
     void cls();
 #endif
 
+// TODO: are we cleanning up the console and the screen??
+// do we want that to happen?
+// void renderScreen (SDL_Renderer *renderer, SDL_Texture *screen, UIScreen *scene) {
 
+//     // render the views from back to front for the current screen
+//     UIView *v = NULL;
+//     for (ListElement *e = LIST_START (scene->views); e != NULL; e = e->next) {
+//         v = (UIView *) LIST_DATA (e);
+//         clearConsole (v->console);
+//         v->render (v->console);
+//         SDL_UpdateTexture (screen, v->pixelRect, v->console->pixels, v->pixelRect->w * sizeof (u32));
+//     }
+
+//     SDL_RenderClear (renderer);
+//     SDL_RenderCopy (renderer, screen, NULL, NULL);
+//     SDL_RenderPresent (renderer);
+
+// }
 
 uint32_t ChargingScreen(){
-    printf("Entre");
+    // printf("Entre");
     SDL_Init(SDL_INIT_VIDEO);
-    bool exit = false, forced = false;;
+    bool eeeeeeeexit = false, forced = false;;
     int xAux,yAux,cont=0,cont2=0,ff=1,MaxCont=0,aux,MAX = 8;
     Tiempo Time;
     Color color;
@@ -60,49 +77,49 @@ uint32_t ChargingScreen(){
     //SDL_VARIABLES
     SDL_Window *window = NULL;//principal window
     SDL_Event event;//the event checker
-    SDL_Renderer *renderTarget;
+    SDL_Renderer *main_render;
     SDL_Texture *logo = NULL;
     SDL_Texture *background = NULL;
     //WE will use renderer for better results
-    if(SDL_STARTER(&window,&renderTarget,"cimage")==0){
-        printf("Image created");
-        logo = LoadTexture(ResourcePath"/CIMAGE33.png",renderTarget);
-        background = LoadTexture(ResourcePath"/background.jpg",renderTarget);
+    if(SDL_STARTER(&window,&main_render,"cimage")==0){
+        // printf("Image created");
+        logo = LoadTexture(ResourcePath"/CIMAGE33.png",main_render);
+        background = LoadTexture(ResourcePath"/background.jpg",main_render);
         Time.frameTime = Time.deltaTime = 0;
         Time.currentTime = Time.prevTime = 0;
         //game cycle
-        while(!exit){
+        while(!eeeeeeeexit){
             SDL_TIME(&Time.prevTime,&Time.currentTime,&Time.deltaTime);
                 while(SDL_PollEvent(&event)!=0){//EVENTS
                 if(event.type == SDL_QUIT){// || (event.type == SDL_KEYDOWN && event.pressedkey==SDLK_ESCAPE)){
-                    exit=true;
+                    eeeeeeeexit=true;
                     forced = true;
                 }
             }
             /*
             *Render Printing
             * */
-            SDL_RenderClear(renderTarget);
-            printf("I cleared\n");
-            SDL_RenderCopy(renderTarget,background,NULL,NULL);
-            printf("I backgrounded\n");
-            SDL_RenderCopy(renderTarget,logo,NULL,NULL);
-            printf("I printed CIMAGE\n");
+            SDL_RenderClear(main_render);
+            // printf("I cleared\n");
+            SDL_RenderCopy(main_render,background,NULL,NULL);
+            // printf("I backgrounded\n");
+            SDL_RenderCopy(main_render,logo,NULL,NULL);
+            // printf("I printed CIMAGE\n");
             for(int i=cont2; i<cont; i++){//charging rullete
                 aux = (360/MAX);
                 xAux = 20 * cos((i*aux)*RAD);
                 yAux = -20 * sin((i*aux)*RAD);
                 if(i%4==0){
-                    //SDL_RandomColor(renderTarget,color);
+                    //SDL_RandomColor(main_render,color);
                 }
-                SDL_SetRenderDrawColor(renderTarget,255,255,255,255);
-                SDL_FilledCircle(renderTarget,4,HEIGHT/2 + xAux, WIDTH/2 + 160 + yAux);
-                printf("I created circle %d\n",i);
+                SDL_SetRenderDrawColor(main_render,255,255,255,255);
+                SDL_FilledCircle(main_render,4,HEIGHT/2 + xAux, WIDTH/2 + 160 + yAux);
+                // printf("I created circle %d\n",i);
             }
-            SDL_RenderPresent(renderTarget);
-            printf("I Presented\n");
+            SDL_RenderPresent(main_render);
+            // printf("I Presented\n");
             Time.frameTime += Time.deltaTime;
-            printf("%.2f\n",Time.frameTime);
+            // printf("%.2f\n",Time.frameTime);
             if(Time.frameTime>=.5){
                 if(cont<MAX){
                     cont++;
@@ -119,12 +136,12 @@ uint32_t ChargingScreen(){
                     MaxCont++;
             }
             if(MaxCont==2*MAX){
-                exit=true;
+                eeeeeeeexit=true;
             }
             
         }
         SDL_DestroyWindow(window);
-        SDL_DestroyRenderer(renderTarget);
+        SDL_DestroyRenderer(main_render);
         SDL_Quit();
         if(forced){
             return -1;
@@ -136,7 +153,7 @@ uint32_t ChargingScreen(){
 //FIXME: Im not efficient
 //TODO: How Can This function be more eficcient
 //TODO: OPEN-GL?????
-SDL_Texture * SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *Sans, SDL_Color Black,Color color, menuPos pos[5], bool selected, int numSelected){
+SDL_Texture * SDL_menu(SDL_Renderer **main_render,DoubleList **menu, TTF_Font *Sans, SDL_Color Black,Color color, menuPos pos[5], bool selected, int numSelected){
     int i;
     if(!*menu){
         *menu = dlist_init(free);
@@ -189,7 +206,7 @@ SDL_Texture * SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *
     ListElement *e = LIST_START(*menu);
     display.w = 0;
     //FIXME:Maybe here is the problem
-    SDL_SetRenderTarget(*renderTarget,textureTarget);
+    SDL_SetRenderTarget(*main_render,textureTarget);
     for(i=0; i<5; i++){
         menuData *h = (menuData *) e->data;
         strcpy(aux , h->dataTitle);
@@ -208,19 +225,19 @@ SDL_Texture * SDL_menu(SDL_Renderer **renderTarget,DoubleList **menu, TTF_Font *
             pos[i].yF=display.h;
         }
         if(i==numSelected && selected){
-            SDL_RenderFillRect(*renderTarget,&select[numSelected]);
+            SDL_RenderFillRect(*main_render,&select[numSelected]);
             //text = TTF_RenderText_Solid(Sans,aux,White);//FIXME: Sometimes I give seg fault?
         }else{
             //text = TTF_RenderText_Solid(Sans,aux,Gray);//FIXME: Sometimes I give seg fault?
         }
-        //texture = SDL_CreateTextureFromSurface(*renderTarget,text);    
+        //texture = SDL_CreateTextureFromSurface(*main_render,text);    
         //SDL_FreeSurface(text);
     
-        //SDL_RenderCopy(*renderTarget,texture,NULL, &display);
+        //SDL_RenderCopy(*main_render,texture,NULL, &display);
         //SDL_DestroyTexture(texture);
         e=e->next;
     }
-    SDL_SetRenderTarget(*renderTarget,NULL);
+    SDL_SetRenderTarget(*main_render,NULL);
     return textureTarget;
 }
 
@@ -253,32 +270,84 @@ void randomDate(Image *imagenes){
     }
 }
 
-SDL_Texture * ImagePrinting(SDL_Renderer **renderTarget, Image *imagenes){
-    SDL_Rect camera;
-    SDL_Texture *cuadrito = IMG_LoadTexture(*renderTarget,ResourcePath"rectp.png");
-    SDL_Texture *imageTexture = SDL_CreateTexture(*renderTarget,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_TARGET,1270,600);
-    SDL_SetTextureBlendMode(imageTexture,SDL_BLENDMODE_BLEND);
-    if(!cuadrito){
-        printf("%s\n",SDL_GetError());
-    }
-    SDL_SetRenderTarget(*renderTarget,imageTexture);
-    for(int i=0; i<2; i++){
-        if(imagenes[i].rectImage.y>140 && imagenes[i].rectImage.y<720){
-            SDL_RenderCopy(*renderTarget,cuadrito,NULL,&imagenes[i].rectImage);
+SDL_Texture *ImagePrinting (SDL_Renderer **main_render, Image *imagenes) {
+
+    if (*(main_render) && imagenes) {
+        SDL_Rect camera;
+        SDL_Texture *cuadrito = LoadTexture ("./resources/rectp.png", *main_render);
+
+        if (cuadrito) {
+            SDL_Texture *main_texture = SDL_CreateTexture (*main_render,
+                SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 1270, 600);
+            SDL_SetTextureBlendMode(main_texture,SDL_BLENDMODE_BLEND);
+            SDL_SetRenderTarget (*main_render, main_texture);
+
+            for (int i = 0; i < 2; i++) 
+                if(imagenes[i].rectImage.y > 140 && imagenes[i].rectImage.y < 720)
+                    SDL_RenderCopy (*main_render,cuadrito, NULL, &imagenes[i].rectImage);
+
+            SDL_SetRenderTarget(*main_render,NULL);
+            return main_texture;
         }
+
+        else return NULL;
     }
-    SDL_SetRenderTarget(*renderTarget,NULL);
-    return imageTexture;
+
+    else return NULL;
+    
+}
+
+SDL_Texture *texture_loadImages (SDL_Renderer **main_render, Image *imagenes) {
+
+    if (*(main_render) && imagenes) {
+        SDL_Rect camera;
+        SDL_Texture *cuadrito = LoadTexture ("./resources/rectp.png", *main_render);
+
+        if (cuadrito) {
+            SDL_Texture *main_texture = SDL_CreateTexture (*main_render,
+                SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 1270, 600);
+            SDL_SetTextureBlendMode(main_texture,SDL_BLENDMODE_BLEND);
+            SDL_SetRenderTarget (*main_render, main_texture);
+
+            for (int i = 0; i < 2; i++) 
+                if(imagenes[i].rectImage.y > 140 && imagenes[i].rectImage.y < 720)
+                    SDL_RenderCopy (*main_render,cuadrito, NULL, &imagenes[i].rectImage);
+
+            SDL_SetRenderTarget (*main_render,NULL);
+            return main_texture;
+        }
+
+        else {
+            printf ("hola");
+            return NULL;
+        } 
+    }
+
+    else {
+        printf ("hola");
+        return NULL;
+    } 
+
+}
+
+SDL_Texture *texture_updateTexture (SDL_Renderer **main_render, Image *imagenes) {
+
+    // checar que la textura tenga imagenes que imprimir
+        // se movieron las posiciones de las imagenes con el scroll
+
+    imagenes[1].rectImage.y += 7;
+    imagenes[1].rectImage.y -= 7;
+
 }
 
 void User(){
 //SDL Variables
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = NULL;
-    SDL_Renderer *renderTarget = NULL, *imageRenderer = NULL;
+    SDL_Renderer *main_render = NULL, *imageRenderer = NULL;
     SDL_Event event;
     SDL_Surface *surface = NULL;
-    SDL_Texture *texture[100], *menuTexture=NULL, *imageTexture=NULL;
+    SDL_Texture *texture[100], *menuTexture=NULL, *main_texture = NULL;
     SDL_Color White = {255,255,255}, Black = {0,0,0};
     SDL_Rect clk,scrollbar,scrollbarPos,date,upBar,downBar;
     SDL_Texture *infoPhoto[100];
@@ -301,13 +370,13 @@ void User(){
     upBar.w = 1280;
     upBar.h = 125;
 //TTF Variables
-    TTF_Init();
+    // TTF_Init();
     DoubleList *menu=NULL;
     menuPos pos[5];
-    for(int i=0; i<5; i++){
-        memset(&pos[i],0,sizeof(menuPos));
-    }
-    TTF_Font *Roboto = TTF_OpenFont(ResourcePath"/Fonts/Roboto-Light.ttf",210);
+
+    memset (&pos, 0, sizeof (menuPos));
+
+    //  TTF_Font *Roboto = TTF_OpenFont(ResourcePath"/Fonts/Roboto-Light.ttf",210);
 //External variables
     Image *imagenes;
     Tiempo Time;
@@ -318,33 +387,47 @@ void User(){
     color.a = colorLine.a = grayScroll.a = darkGrayScroll.a =  255;
     char times[100];
     menuPos auxiliar;
-    time_t rawTime;
-    struct tm * timeInfo;
-    time (&rawTime);
-    timeInfo = localtime(&rawTime);
+    // time_t rawTime;
+    // struct tm * timeInfo;
+    // time (&rawTime);
+    // timeInfo = localtime(&rawTime);
     int numSelected = -1, txCount = 0, LY = 0, NY = 0;
     char counter[100],timee[100];
-    bool exit=false, selected = false, in_menu=false,clicked = false, active_menu = false, FullScreen=false,scrollHang = false,scroll=false;
+    bool eeeeeeeexit=false, selected = false;
+    bool in_menu=false,clicked = false, active_menu = false;
+    bool FullScreen=false,scrollHang = false,scroll=false;
+
 //Process
-    if(SDL_STARTER_FIXED(&window,&renderTarget,"CIMAGE",1280,720)==0){
+    if(!SDL_STARTER_FIXED(&window,&main_render,"CIMAGE",1280,720)){
         color.r=color.g=color.b=230;//Light GRAY
         colorLine.r = colorLine.g = colorLine.b = 120;//GRAY
         SDL_SetWindowResizable(window,SDL_WINDOW_RESIZABLE);
-        texture[0]=LoadTexture(ResourcePath"/CIMAGE10.png",renderTarget);
-        imagenes = (Image *)  malloc (sizeof(Image) * 100);
+        texture[0]=LoadTexture(ResourcePath"/CIMAGE10.png",main_render);
+        // imagenes = (Image *)  malloc (sizeof(Image) * 100);
+        imagenes = (Image *) calloc (100, sizeof (Image));
         randomDate(imagenes);
         Time.frameTime = 0;
-        imageTexture = ImagePrinting(&renderTarget,imagenes);
-        while(!exit){//APP cycle
-            SDL_TIME(&Time.prevTime,&Time.currentTime, &Time.deltaTime);//TIME FUNCTION
-            SDL_itoa(Time.frameTime,times,10);
-            texture[1]=SDL_CreateTextureFromSurface(renderTarget,TTF_RenderText_Solid(Roboto,times,Black));
-            while(SDL_PollEvent(&event)!=0){//EVENTS
+
+        // TODO: this have to be dynamic --> move inside main loop
+        // load images to memory
+        main_texture = ImagePrinting (&main_render, imagenes);
+        // main_texture = texture_loadImages (&main_render,imagenes);
+
+        // FIXME: mandarlo a una perra propia funcion!!!!!!!! ----->>>>> mainLoop ();
+
+        while(!eeeeeeeexit){//APP cycle
+            SDL_TIME (&Time.prevTime,&Time.currentTime, &Time.deltaTime);//TIME FUNCTION
+            // SDL_itoa(Time.frameTime,times,10);
+            //  texture[1]=SDL_CreateTextureFromSurface(main_render,TTF_RenderText_Solid(Roboto,times,Black));
+
+            /*** EVENTS ***/
+            // FIXME: mandarlo a una perra propia funcion!!!!!!!! ----->>>>> handleEvents ();
+            while(SDL_PollEvent(&event)!=0) {
                 if(event.type == SDL_KEYDOWN || event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN){
                     Time.frameTime=0;
                 }
                 if(event.type==SDL_QUIT || (event.type ==SDL_KEYDOWN && event.pressedkey==SDLK_ESCAPE)){
-                    exit = true;
+                    eeeeeeeexit = true;
                 }else if(event.type == click){
                     if(event.button.button == leftClick){
                         auxiliar.x = mouseX;
@@ -371,7 +454,10 @@ void User(){
                     active_menu = !active_menu;
                 }else if(event.type == SDL_KEYDOWN && event.pressedkey == SDLK_F11){
                     SDL_fullScreenToggle(window,&FullScreen);
-                }else if(event.type == SDL_MOUSEWHEEL){
+                }
+                
+                // OLD
+                else if(event.type == SDL_MOUSEWHEEL){
                     if(event.wheel.y < 0 && scrollbarPos.y <= 695){
                         scrollbarPos.y += 7;
                         imagenes[1].rectImage.y += 7;
@@ -381,7 +467,12 @@ void User(){
                         imagenes[1].rectImage.y -= 7;
                         scroll = true;
                     }
-                }else if(event.type == SDL_MOUSEBUTTONUP && scrollHang){
+                }
+
+                // NEW -> SDL_Texture *texture_updateTexture ()
+                // else if(event.type == SDL_MOUSEWHEEL) scroll = true;
+                
+                else if(event.type == SDL_MOUSEBUTTONUP && scrollHang){
                     scrollHang = false;
                     SDL_GetMouseState(NULL,&NY);
                     printf("realeased click; LY= %d, NY = %d\n",LY,NY);
@@ -399,49 +490,60 @@ void User(){
                     scroll = true;
                 }
             }
-/////////////////////////////////////////////////////////////////////////////////////////////Render             
-            SDL_RenderClear(renderTarget);
+
+            /*** RENDERER ***/
+            
+            SDL_RenderClear (main_render);
             //UpBar
-            SDL_RenderColor(&renderTarget,color);
-            //FIXME: I dont charge the Texture always
-            //FIXME: It breaks :(
-            if(scroll){
-                printf("Changes were made");
-                //imageTexture = ImagePrinting(&renderTarget,imagenes);
-                if(!imageTexture){
-                    printf("Cant Charge images-- %s\n",SDL_GetError());
-                }
+            SDL_RenderColor(&main_render,color);
+
+
+
+            if (scroll) {
+                // printf("Changes were made");
+                // main_texture = texture_updateTexture (&main_render,imagenes);
+                // if(!main_texture){
+                //     // printf("Cant Charge images-- %s\n",SDL_GetError());
+                // }
+
+                // TODO:
+                // SDL_UpdateTexture (screen, v->pixelRect, v->console->pixels, v->pixelRect->w * sizeof (u32));
+
+                // SDL_UpdateTexture (main_texture, image_rect, )
             }
+
+
+
             scroll = false;
-            //SDL_RenderCopy(renderTarget,imageTexture,NULL,NULL);
-            SDL_SetRenderDrawColor(renderTarget,color.r,color.g,color.b,color.a);
-            SDL_RenderFillRect(renderTarget,&upBar);
-            SDL_Print(&renderTarget,texture[0],1280-138,0,128,128);
-            SDL_RenderColor(&renderTarget,colorLine);
-            SDL_RenderDrawLine_Gross(&renderTarget,0,1280,125,125,2);
-            if(active_menu){
-                menuTexture=SDL_menu(&renderTarget,&menu,Roboto,Black,color,pos,selected,numSelected);
-            }
-            SDL_RenderCopy(renderTarget,menuTexture,NULL,NULL);
-            SDL_RenderColor(&renderTarget,grayScroll);
+            SDL_RenderCopy(main_render,main_texture,NULL,NULL);
+            SDL_SetRenderDrawColor(main_render,color.r,color.g,color.b,color.a);
+            SDL_RenderFillRect(main_render,&upBar);
+            SDL_Print(&main_render,texture[0],1280-138,0,128,128);
+            SDL_RenderColor(&main_render,colorLine);
+            SDL_RenderDrawLine_Gross(&main_render,0,1280,125,125,2);
+            // if(active_menu){
+            //     menuTexture=SDL_menu(&main_render,&menu,Roboto,Black,color,pos,selected,numSelected);
+            // }
+            SDL_RenderCopy(main_render,menuTexture,NULL,NULL);
+            SDL_RenderColor(&main_render,grayScroll);
             //ScrollBar
-            SDL_RenderFillRect(renderTarget,&scrollbar);
-            SDL_RenderColor(&renderTarget,darkGrayScroll);
-            SDL_RenderFillRect(renderTarget,&scrollbarPos);
+            SDL_RenderFillRect(main_render,&scrollbar);
+            SDL_RenderColor(&main_render,darkGrayScroll);
+            SDL_RenderFillRect(main_render,&scrollbarPos);
             //Images
-            SDL_RenderColor(&renderTarget,color);
+            SDL_RenderColor(&main_render,color);
             //TODO: present images
             //TODO: Scroll bar should move the y value of all the rects
             //Clock
-            SDL_RenderCopy(renderTarget,texture[1],NULL,&clk);
-            SDL_RenderPresent(renderTarget);
+            SDL_RenderCopy(main_render,texture[1],NULL,&clk);
+            SDL_RenderPresent(main_render);
 ///////////////////////////////////////////////////////////////////////////////////////////////////            
             Time.frameTime += Time.deltaTime;
         
             if(Time.frameTime==5){
                 printf("Entre");
                 system("pkill UIexec");
-                exit=true;
+                eeeeeeeexit=true;
             }
         }
         SDL_Texture *tex=NULL;
@@ -454,7 +556,7 @@ void User(){
         for(int i=0; i<txCount; i++){
             SDL_DestroyTexture(texture[i]);
         }*/
-        clean(&window,&renderTarget);
+        clean(&window,&main_render);
     
     }
 }
@@ -462,14 +564,13 @@ void User(){
 int main(void){
     uint32_t cont=0;
     printf("Start");
-    //audio();
-    //cont  = ChargingScreen();
-    if(cont==-1){
-        fprintf(stdout,"Exitted program\n");
-    }else{
-        User();
-        //cleanScreen();
-    }
-    return 0;
-} 
 
+    // if (!ChargingScreen()) User ();
+    // else return 1;
+
+    User ();
+
+    return 0;
+
+
+} 
