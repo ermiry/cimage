@@ -6,9 +6,10 @@
 #include <stdbool.h>
 
 // TODO: how do we want to manage this order?
-#define BPLUS_ORDER     18
+#define BPLUS_ORDER     32
 
 // TODO: what type of key do we want to store?
+// TODO: maybe add a generic key and a comparator like in the avl tree?
 typedef uint64_t BplusKey;
 typedef void*   BplusData;
 
@@ -55,6 +56,9 @@ typedef void (BplusForeachNodeFunc) (struct BplusTree *tree, BplusNode *node, vo
 #define bplus_node_first(node)          ((BplusNode*) bplus_value_first(node))
 #define bplus_node_last(node)           ((BplusNode*) bplus_value_last(node))
 
+#define bplus_node_overfilled(node)     ((node)->length > (BPLUS_ORDER - 1))
+#define bplus_node_underfilled(node)    ((node)->length <= 1)
+
 typedef struct BplusLeaf {
 
     BplusNode node;
@@ -95,11 +99,9 @@ typedef struct BplusTree {
 
     // TODO: allow duplicated keys?
 
-    // b+ tree stats
+    // tree stats
     size_t node_count;
     size_t leaf_count;
-    size_t underflow_count;     // TODO: what are these?
-    size_t overflow_count;
 
 } BplusTree;
 

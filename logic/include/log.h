@@ -1,6 +1,8 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <stdio.h>
+
 /*** LOG ***/
 
 #define COLOR_RED       "\x1b[31m"

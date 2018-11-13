@@ -4,7 +4,7 @@ CFLAGS = -I $(IDIR)
 IDIR = ./include/
 SRCDIR = ./src/
 
-SOURCES = $(SRCDIR)*.c 
+SOURCES = $(SRCDIR)*.c $(SRCDIR)utils/*.c
 
 all: cimage #run #clean
 
