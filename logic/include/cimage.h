@@ -13,6 +13,9 @@ typedef unsigned char uchar;
 typedef enum ReadMode {
 
     READ_METADATA = 1,
+    READ_IMAGE = 2,
+    READ_ALL = 3,
+    READ_ANY = 5  
 
 } ReadMode;
 
