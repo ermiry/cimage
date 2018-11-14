@@ -39,7 +39,27 @@ void jpeg_process_SOFn (const uchar *data, int marker) {
 
 }
 
-void jpeg_checkAllocatedSections (void) {
+// TODO: better handle critical errors
+// check sections array to see if it needs to be increased in size
+void jpeg_checkAllocatedSections (Cimage *cimage) {
+
+    if (cimage) {
+        if (cimage->sectionsRead > cimage->sectionsAllocated) {
+            logMsg (stderr, ERROR, NO_TYPE, "Sections allocation screwup!");
+            // TODO: how to handle this error?
+        }
+
+        if (cimage->sectionsRead >= cimage->sectionsAllocated) {
+            cimage->sectionsAllocated += cimage->sectionsAllocated / 2;
+            cimage->sections = (Section *) realloc (cimage->sections, 
+                sizeof (Section) * cimage->sectionsAllocated);
+
+            if (!cimage->sections) {
+                logMsg (stderr, ERROR, NO_TYPE, "Failed to realloc cimage sections!");
+                // TODO: how to handle this error?
+            }
+        }
+    }
 
 }
 
@@ -214,15 +234,15 @@ int jpeg_handleSection (int marker, ReadMode readmode) {
 }
 
 // parse the marker stream until SOS or EOI is seen
-int jpeg_readSections (FILE *file, ReadMode readmode, ImageData *imgData) {
+int jpeg_readSections (FILE *file, Cimage *cimage) {
 
     //  int HaveCom = FALSE;
 
     int a = fgetc (file);
     if (a != 0xff || fgetc (file) != M_SOI) return 1;
 
-    imgData->jfifHeader.xDensity = imgData->jfifHeader.yDensity = 300;
-    imgData->jfifHeader.resolutionUnits = 1;
+    cimage->imgData->jfifHeader.xDensity = cimage->imgData->jfifHeader.yDensity = 300;
+    cimage->imgData->jfifHeader.resolutionUnits = 1;
 
     // read jpeg sections based on marker
     int itemlen;
@@ -232,8 +252,7 @@ int jpeg_readSections (FILE *file, ReadMode readmode, ImageData *imgData) {
     uchar * Data;
 
     for (;;) {
-        // TODO:
-        jpeg_checkAllocatedSections ();
+        jpeg_checkAllocatedSections (cimage);
 
         // TODO: create a separate function for all the following...
 
@@ -310,11 +329,11 @@ int jpeg_readSections (FILE *file, ReadMode readmode, ImageData *imgData) {
 
     }
 
-    return 0;   // sucess
+    return 0;   // success
 
 }
 
-int jpeg_readFile (const char *filename, ReadMode readmode, ImageData *imgData) {
+int jpeg_readFile (const char *filename, Cimage *cimage) {
 
     FILE *file = fopen (filename, "rb");
     if (!file) {
@@ -323,7 +342,7 @@ int jpeg_readFile (const char *filename, ReadMode readmode, ImageData *imgData) 
     }
 
     // scan the jpeg headers
-    if (!jpeg_readSections (file, readmode, imgData)) {
+    if (!jpeg_readSections (file, cimage)) {
         logMsg (stdout, DEBUG, IMAGE, "Done getting jpeg sections.");
         fclose (file);
         return 0;
@@ -341,34 +360,71 @@ int jpeg_readFile (const char *filename, ReadMode readmode, ImageData *imgData) 
 
 #pragma region IMAGES
 
+// create a new cimage data
+Cimage *cimage_new_cimage (ReadMode readmode) {
+
+    Cimage *cimage = (Cimage *) malloc (sizeof (Cimage));
+    if (cimage) {
+        cimage->sections = (Section *) calloc (5, sizeof (Section));
+        cimage->sectionsAllocated = 5;
+        cimage->sectionsRead = 0;
+
+        // init the image data structre
+        cimage->imgData = (ImageData *) malloc (sizeof (ImageData)); 
+        if (cimage->imgData) {
+            cimage->imgData->flashUsed = -1;
+            cimage->imgData->meteringMode = -1;
+            cimage->imgData->whitebalance = -1;
+        }
+
+        cimage->readmode = readmode;
+    }
+
+    return cimage;
+
+}
+
+// TODO: 14/11/2018 -- are we correctly freing the sections array?
+void cimage_del_cimage (Cimage *cimage) {
+
+    if (cimage) {
+        if (cimage->sections) free (cimage->sections);
+        if (cimage->imgData) free (cimage->imgData);
+        free (cimage);
+    }
+
+}
+
+// TODO: 14/11/2018 - maybe we might need a return value?
 // do selected operations to one file a time
 void cimage_processFile (const char *filename) {
 
     bool modified = false;
 
+    // TODO: how do we select the correct readmode?
     ReadMode readmode = READ_METADATA;
 
-    // TODO: reset jpg file
-
     // start with an empty image data
-    ImageData *imgData = (ImageData *) malloc (sizeof (ImageData)); 
-    imgData->flashUsed = -1;
-    imgData->meteringMode = -1;
-    imgData->whitebalance = -1;
+    Cimage *cimage = cimage_new_cimage (readmode);
+    if (!cimage || !cimage->imgData) {
+        logMsg (stderr, ERROR, NO_TYPE, "Unable to allocate a new cimage structure!");
+        return;
+    }
     
     // TODO: store file date/time using fstat
     // thisis the creation day of the file in the current machine
 
-    strncpy (imgData->filename, filename, 256);
+    strncpy (cimage->imgData->filename, filename, 256);
 
     // no command option selected, so just read te img info
-    if (jpeg_readFile (filename, readmode, imgData)) {
-        // TODO: we got the exif header info
+    if (!jpeg_readFile (filename, cimage)) {
+        // TODO: we have got the image info, what do we do next?
         // we can now display it
     }
 
     else {
-        // TODO: discard data and return
+        // TODO: discard data and return NULL
+        cimage_del_cimage (cimage);
     }
 
 }

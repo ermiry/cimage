@@ -102,6 +102,21 @@ typedef struct ImageData {
 
 } ImageData;
 
+// TODO: what else do wa want to store here?
+// maybe the readmode?
+// 14/11/2018 -- we create a structure for each image data and sections
+typedef struct Cimage {
+
+    Section *sections;      // image's exif sections
+    int sectionsAllocated;
+    int sectionsRead;
+
+    ImageData *imgData;     // extracted image data
+
+    ReadMode readmode;
+
+} Cimage;
+
 #pragma region JPEG
 
 /*** JPEG marker codes of interest **/
