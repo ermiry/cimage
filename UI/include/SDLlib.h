@@ -36,7 +36,6 @@ typedef struct{
 }Color;
 
 
-
 extern int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]);
 extern void clean(SDL_Window **window, SDL_Renderer **renderer);
 extern int SDL_STARTER_FIXED(SDL_Window **window,SDL_Renderer **renderer, char title[100],int h,int w);

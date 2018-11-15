@@ -101,7 +101,6 @@ void menuPrint(SDL_Renderer **main_renderer, bool Selected, int numSelected,SDL_
         if(!MenuTexture){
             printf("Error Creating Menu Texture, %s\n",SDL_GetError());
         }
-
         SDL_SetRenderTarget(*main_renderer,*MenuTexture);
         for(i=0; !e; i++,e = e->next){
             menuData *h = (menuData *) e->data;

@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 #include "list.h"
+#include "SDLlib.h"
 #include <SDL2/SDL_ttf.h>
 #include "UIChargingScreen.h"
 #include "mainPage.h"

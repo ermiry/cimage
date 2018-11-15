@@ -5,6 +5,7 @@
 #include "SDLlib.h"
 
 
+
 int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]){
     /**
      * Initialize SDL, creates a window and asign a window surface
@@ -32,10 +33,13 @@ int SDL_STARTER_FIXED(SDL_Window **window,SDL_Renderer **renderer, char title[10
     int r_has_texture_support = 0;
     *window = SDL_CreateWindow(title,center,center,w,h,SDL_WINDOW_SHOWN);
     SDL_GetWindowSize(*window,&w,&h);
-    *renderer = SDL_CreateRenderer(*window,-1,0);
+    *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_ACCELERATED);
+    //SDL_RenderSetIntegerScale(*renderer,true);
+    SDL_RenderSetLogicalSize(*renderer,SCREEN_WIDTH,SCREEN_HEIGHT);
     SDL_GetRendererInfo(*renderer,&info);
     r_has_texture_support = info.flags & SDL_RENDERER_TARGETTEXTURE;
     SDL_Log("Renderer %s started.",info.name);
+    SDL_SetWindowResizable(*window,true);
     SDL_strlcat(titulo,info.name,sizeof(titulo));
     if(!r_has_texture_support){
         SDL_Log("Renderer has no target texture support");
