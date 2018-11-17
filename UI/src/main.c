@@ -12,6 +12,7 @@
 
 int main(void)
 {
+    // ChargingScreen();
     user();
     return 0;
 }

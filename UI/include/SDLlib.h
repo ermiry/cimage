@@ -27,7 +27,8 @@ typedef struct{
 
 typedef struct{
     float frameTime;
-    int prevTime ,currentTime;
+    int prevTime;
+    int currentTime;
     float deltaTime;
 }Tiempo;
 
@@ -51,5 +52,7 @@ extern void SDL_RandomColor(SDL_Renderer *renderTarget, Color color);
 extern void SDL_RenderColor(SDL_Renderer **renderTarget, Color color);
 extern void SDL_RenderDrawLine_Gross(SDL_Renderer **renderTarget, int x1, int x2, int y1, int y2, int thickness);
 extern void SDL_fullScreenToggle(SDL_Window *window, bool *FullScreen);
+extern SDL_DisplayMode currentWindow();
+
 
 #endif

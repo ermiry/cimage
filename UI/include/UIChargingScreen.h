@@ -10,5 +10,5 @@
 #define PI 3.1416
 #define RAD PI/180
 
-extern uint32_t ChargingScreen();
+extern int ChargingScreen();
 #endif

@@ -7,11 +7,12 @@
 #include "SDLlib.h"
 #include "UIChargingScreen.h"
 
+extern bool loading;
 
-uint32_t ChargingScreen(){
-    // printf("Entre");
-    SDL_Init(SDL_INIT_VIDEO);
-    bool continuar = false, forced = false;;
+int ChargingScreen(){
+    printf("Entre");
+    //SDL_Init(SDL_INIT_VIDEO);
+    bool forced = false;;
     int xAux,yAux,cont=0,cont2=0,ff=1,MaxCont=0,aux,MAX = 8;
     Tiempo Time;
     Color color;
@@ -30,17 +31,17 @@ uint32_t ChargingScreen(){
         Time.frameTime = Time.deltaTime = 0;
         Time.currentTime = Time.prevTime = 0;
         //game cycle
-        while(continuar){
+        while(loading){
             SDL_TIME(&Time.prevTime,&Time.currentTime,&Time.deltaTime);
                 while(SDL_PollEvent(&event)!=0){//EVENTS
                 if(event.type == SDL_QUIT){// || (event.type == SDL_KEYDOWN && event.pressedkey==SDLK_ESCAPE)){
-                    continuar=false;
+                    loading=false;
                     forced = true;
                 }
             }
-            /*
-            *Render Printing
-            * */
+        
+            // Render Printing
+            
             SDL_RenderClear(main_render);
             // printf("I cleared\n");
             SDL_RenderCopy(main_render,background,NULL,NULL);
@@ -55,6 +56,7 @@ uint32_t ChargingScreen(){
                 SDL_FilledCircle(main_render,4,HEIGHT/2 + xAux, WIDTH/2 + 160 + yAux);
                 // printf("I created circle %d\n",i);
             }
+
             SDL_RenderPresent(main_render);
             // printf("I Presented\n");
             Time.frameTime += Time.deltaTime;
@@ -72,19 +74,12 @@ uint32_t ChargingScreen(){
                 }
                     Time.frameTime = 0;
                     MaxCont++;
-            }
-            if(MaxCont==2*MAX){
-                continuar=false;
-            }
-            
+            }            
         }
         SDL_DestroyWindow(window);
         SDL_DestroyRenderer(main_render);
-        SDL_Quit();
-        if(forced){
-            return -1;
-        }else{
-            return 0;
-        }
-    }
+        //SDL_Quit();
+        
+    } 
+
 }

@@ -11,7 +11,7 @@ int SDL_STARTER(SDL_Window **window,SDL_Renderer **renderer, char title[100]){
      * Initialize SDL, creates a window and asign a window surface
     */
     *window = SDL_CreateWindow(title,center,center,HEIGHT,WIDTH,SDL_WINDOW_SHOWN);
-    *renderer = SDL_CreateRenderer(*window,-1,0);
+    *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_SOFTWARE);
     if(!*window){
         fprintf(stderr,"[ERR]ERROR CREATING WINDOW\n");
         return -1;
@@ -27,13 +27,28 @@ void clean(SDL_Window **window, SDL_Renderer **renderer){
     SDL_Quit();
 }
 
+SDL_DisplayMode currentWindow(){
+    SDL_DisplayMode current;
+    for(int i = 0 ; i<SDL_GetNumVideoDisplays(); i++){
+        int should_be_zero = SDL_GetCurrentDisplayMode(i,&current);
+        if(should_be_zero !=0){
+            SDL_Log("Could not get display mode for video display #%d: %s",i,SDL_GetError());
+        }else{
+            SDL_Log("Display #%d: current display mode is %dx%dpx @ %dhz.",
+                i, current.w, current.h, current.refresh_rate);
+            break;
+        }
+    }
+    return current;
+}
+
 int SDL_STARTER_FIXED(SDL_Window **window,SDL_Renderer **renderer, char title[100],int h,int w){
     SDL_RendererInfo info;
     char titulo[256] = {0};
     int r_has_texture_support = 0;
     *window = SDL_CreateWindow(title,center,center,w,h,SDL_WINDOW_SHOWN);
     SDL_GetWindowSize(*window,&w,&h);
-    *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_ACCELERATED);
+    *renderer = SDL_CreateRenderer(*window,-1,SDL_RENDERER_SOFTWARE);
     //SDL_RenderSetIntegerScale(*renderer,true);
     SDL_RenderSetLogicalSize(*renderer,SCREEN_WIDTH,SCREEN_HEIGHT);
     SDL_GetRendererInfo(*renderer,&info);
