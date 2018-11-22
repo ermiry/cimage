@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,17 +10,15 @@
 #include "UImenu.h"
 
 
-
-
 void menuCreator(SDL_Renderer **main_renderer,DoubleList **menu,menuPos pos[5], TTF_Font* Roboto, SDL_Color black){
     int i;
 
     SDL_Surface *aux=NULL;
     *menu = dlist_init(free);
     menuData *data;
-    menuData option;
+    menuData *option;
     char messages[6][100]={"File\0","Edit\0","Insert\0","View\0","Help\0",'\0'};
-    char Opt[5][20][20]={{"New","Open","Save","Save As", "Import", "Export", "Exit",'\0'},
+    char Opt[5][20][20]={{"Open Folder","New Folder","Preferences","", "", "", "",'\0'},
                         {"Copy","Cut","Paste",'\0'},
                         {"//NOT YET","//NOT YET","//NOT YET","//NOT YET",'\0'},
                         {"FullScreen","View As frames", "List",'\0'},
@@ -38,21 +37,23 @@ void menuCreator(SDL_Renderer **main_renderer,DoubleList **menu,menuPos pos[5], 
         aux=NULL;
         data->option = dlist_init(free);
         for(int j = 0;  Opt[i][j][0]!='\0'; j++){
-            strcpy(option.dataTitle , Opt[i][j]);
-            aux = TTF_RenderText_Solid(Roboto,option.dataTitle,black);
+            option = (menuData *)malloc(sizeof(menuData));
+            strcpy(option->dataTitle , Opt[i][j]);
+            printf("%s\n",Opt[i][j]);
+            aux = TTF_RenderText_Solid(Roboto,option->dataTitle,black);
             if(!aux){
                 printf("%s\n",SDL_GetError());
             }
-            option.text = SDL_CreateTextureFromSurface(*main_renderer,aux);
-            if(!option.text){
+            option->text = SDL_CreateTextureFromSurface(*main_renderer,aux);
+            if(!option->text){
                 printf("Error copying texture to List\n%s",SDL_GetError());
             }
             aux=NULL;
-            option.option = NULL;
+            option->option = NULL;
             if(data->option->start){
-                dlist_insert_after(data->option,LIST_END(data->option),&option);
+                dlist_insert_after(data->option,LIST_END(data->option),option);
             }else{
-                dlist_insert_after(data->option,LIST_START(data->option),&option);
+                dlist_insert_after(data->option,LIST_START(data->option),option);
             }
         } 
         if((*menu)->start){                
@@ -77,11 +78,45 @@ void menuCreator(SDL_Renderer **main_renderer,DoubleList **menu,menuPos pos[5], 
     }    
 }
 
-//FIXME: it doesnt print a shit
+void menuInmenus(SDL_Renderer **main_renderer, int numSelected,SDL_Texture **MenuTexture, TTF_Font *Roboto,menuPos pos[5],DoubleList **menu){
+    int x,y;
+    SDL_Rect MenuIn;
+    SDL_Rect MenuInParam;
+    ListElement *e = LIST_START(*menu);
+    for(int i=0; i<numSelected; i++){
+        e = e->next;
+    }
+    menuData *h = (menuData *)e->data;
+    if(!h){
+        printf("error");
+    }
+    DoubleList *f =h->option;
+    ListElement *g = LIST_START(f);
+    menuData *k= NULL;
+    x = pos[numSelected].x;
+    MenuInParam.x = MenuIn.x = x;
+    MenuInParam.y = MenuIn.y = 25;
+    MenuIn.h = 100;
+    MenuIn.w = 300;
+    MenuInParam.w = 80;
+    MenuInParam.h = 25;
+    SDL_SetRenderDrawColor(*main_renderer,250,250,250,200);
+    SDL_RenderFillRect(*main_renderer,&MenuIn);
+    SDL_SetRenderDrawColor(*main_renderer,220,220,220,255);
+    while(g){
+        k = (menuData *)g->data;
+        SDL_RenderCopy(*main_renderer,k->text,NULL,&MenuInParam);
+        MenuInParam.y +=25;
+        g=g->next;
+    }
+}
+
 void menuPrint(SDL_Renderer **main_renderer, bool Selected, int numSelected,SDL_Texture **MenuTexture, TTF_Font *Roboto, menuPos pos[5],DoubleList **menu){
     int i;
     SDL_Surface *text =NULL;
     SDL_Color blue,black={0,0,0};
+    SDL_Rect MenuIn;
+    TTF_Font *x = TTF_OpenFont("./resources/Fonts/Roboto-Regular.ttf",80);
     blue.r = 97;
     blue.g = 193;
     blue.b = 215;
@@ -90,7 +125,7 @@ void menuPrint(SDL_Renderer **main_renderer, bool Selected, int numSelected,SDL_
     black.a= 255;
     if(!*menu){
         printf("I created the menu\n");
-        menuCreator(main_renderer,menu,pos,Roboto,black);
+        menuCreator(main_renderer,menu,pos,x,black);
     }
     ListElement *e = LIST_START(*menu);
     if(!*MenuTexture){
@@ -118,6 +153,8 @@ void menuPrint(SDL_Renderer **main_renderer, bool Selected, int numSelected,SDL_
                 h = (menuData * ) e->data;
                 if(i==numSelected){
                     SDL_SetRenderDrawColor(*main_renderer,blue.r,blue.g,blue.b,blue.a);
+                    menuInmenus(main_renderer,numSelected,MenuTexture,Roboto,pos,menu);
+
                 }else{
                     SDL_SetRenderDrawColor(*main_renderer,220,220,220,255);
                 }

@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
@@ -9,34 +10,15 @@
 #include "UImenu.h"
 #include "mainPage.h"
 #include "UIChargingScreen.h"
+#include "photo.h"
 
-bool loading = false, imagesAreCharging = false;
-
-typedef struct{
-    float w;
-    float h;
-}porcentage;
-
-typedef struct{
-    char Path[100];
-    SDL_Texture *image;
-    SDL_Rect ImageRect;
-    bool isShown;
-    int index;
-    void *Info;
-}Image;
-
-typedef struct thread_data{
-    SDL_Renderer *renderer_t;
-    Image *imagenes;
-    int number;
-}th_data;
+bool loading = false,imageShown = false;
 
 
-void imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
+int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
     int x = 1, y = 1;
 
-    for(int i=0; i<100; i++){
+    for(int i=0; i<120; i++){
         imagenes[i].index = i;
         imagenes[i].ImageRect.x = (110 * x) - 60;
         imagenes[i].ImageRect.y = (140 * y);
@@ -61,12 +43,13 @@ void imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
         //imagenes[i].image = LoadTexture(imagenes[i].Path,main_renderer);
         imagenes[i].Info = b;
         x++;
-        if(x==12){
+        if(x==7){
             y++;
             x=1;
         }
     }
     loading = false;
+    return y;
 }
 
 void ImageMover(Image *imagenes, int Ymove){
@@ -75,17 +58,12 @@ void ImageMover(Image *imagenes, int Ymove){
     }
 }
 
-int imageLoader(void* data){
-    th_data *data_s = data;
-    SDL_Renderer *main_renderer = data_s ->renderer_t;
-    for(int i=data_s->number * 12; i<(data_s -> number *12) + 12; i++){
-        if(!(data_s->imagenes[i].image)){
-            data_s->imagenes[i].image = LoadTexture(data_s->imagenes[i].Path,main_renderer);
-            printf("Index Picture: %d --Texture Created\n",data_s->imagenes[i].index);
-        }
-        data_s->imagenes[i].isShown = true;
+int imageLoader(SDL_Renderer *main_renderer, Image *imagenes){
+    if(!(imagenes->image)){
+        imagenes->image = LoadTexture(imagenes->Path,main_renderer);
+        printf("Index Picture: %d --Texture Created\n",imagenes->index);
     }
-    imagesAreCharging = false;
+    imagenes->isShown = true;
 }
 
 
@@ -100,30 +78,17 @@ void imageCleaner(Image *imagenes){
 //TODO: To make an efficient way to work, We use threads, to charge and render gray rects while
 //the real photo is charging
 void imagePrinting(Image *imagenes, SDL_Renderer **main_renderer, SDL_Texture **imageTexture, SDL_Thread *ch_t){
-    th_data *data_t = (th_data*)malloc(sizeof(th_data));
-    int iInThreading=-1;
     SDL_SetRenderTarget(*main_renderer,*imageTexture);
-    for(int i=0; i<10; i++){
+    for(int i=0; i<120; i++){
         char *b = (char *)imagenes[i].Info;
         //printf("Info photo with index:%d -- %s\n",imagenes[i].index,b);
-        if(imagenes[i*12].ImageRect.y>70 && imagenes[i*12].ImageRect.y<775){
+        if(imagenes[i].ImageRect.y>80 && imagenes[i].ImageRect.y<745){
             //This line should enter just once per cycle and only if new information is charged
-            if(imagenes[i*12].isShown==false){
-                SDL_SetRenderDrawColor(*main_renderer,120,120,120,255);
-                data_t->imagenes = imagenes;
-                data_t->renderer_t = *main_renderer;
-                for(int j=0; j<12; j++){
-                    SDL_RenderFillRect(*main_renderer,&imagenes[i*12 + j].ImageRect);
-                }
-                iInThreading = i;
-                data_t->number = iInThreading;
-                ch_t = SDL_CreateThread(imageLoader,"Loading Images",data_t);
-                
+            if(imagenes[i].isShown==false){
+                imageLoader(*main_renderer,&imagenes[i]);
             }
+            SDL_RenderCopy(*main_renderer,imagenes[i].image,NULL,&imagenes[i].ImageRect);
             //TODO:I dont Access to this one if a thread in this line is running
-            for(int j=0; j<12 && iInThreading!=i; j++){
-                SDL_RenderCopy(*main_renderer,imagenes[i*12 +j].image,NULL,&imagenes[i*12 +j].ImageRect);
-            }
         }else{
             imageCleaner(&imagenes[i]);
         }
@@ -140,6 +105,30 @@ void scrollBarPrint(SDL_Rect scrollBar, SDL_Rect scrollBarPos, SDL_Texture **scr
     SDL_RenderFillRect(main_renderer,&scrollBarPos);
     SDL_SetRenderDrawColor(main_renderer,220,220,220,255);
     SDL_SetRenderTarget(main_renderer,NULL);
+}
+
+int photoSelector(void *data){
+    photoSelect_data *info = (photoSelect_data *)data;
+    Image *imagen = info->imagenes;
+    int i,x,y;
+    x = info->x;
+    y = info->y;
+    while(imagen[i].isShown==false){
+        i++;
+        SDL_Log("%d\n",i);
+    }
+    while(imagen[i].isShown){
+        if(x>=imagen[i].ImageRect.x && 
+            x<=imagen[i].ImageRect.w + imagen[i].ImageRect.x &&
+                y>=imagen[i].ImageRect.y && y<=imagen[i].ImageRect.y + imagen[i].ImageRect.h){
+            imageShown = true;
+            openPhoto(imagen[i]);
+                SDL_Log("4Here'snot");
+
+            break;
+        }
+        i++;
+    }
 }
 
 void user(){
@@ -160,7 +149,7 @@ void user(){
     scrollBar.y = scrollBarPos.y = 130;
     scrollBar.w = scrollBarPos.w = 20;
     scrollBar.h = SCREEN_HEIGHT - 125;
-    scrollBarPos.h = 50;
+    scrollBarPos.h = 30;
     logoRect.x = 1280-90;
     logoRect.y = 10;
     logoRect.w = logoRect.h = 90;
@@ -168,50 +157,66 @@ void user(){
     upBar.w = SCREEN_WIDTH;
     upBar.h = 124;
     bool running = true,showMenu = false, Selected = false,scrollHang = false;
-    bool fullScreen = false;
-    int numSelected = -1, newY=0,s;
+    bool fullScreen = false, menuInMenu[5];
+    for(int i=0; i<5; i++){
+        menuInMenu[i]=false;
+    }
+    int numSelected = -1, newY=0,s,numNumSelected = -1;
+    char Path[1024];
     DoubleList *menu = NULL;
     TTF_Font *Roboto = TTF_OpenFont("./resources/Fonts/Roboto-Regular.ttf",210);
     SDL_Event e;
     menuPos pos[5];
-    SDL_Thread *ChargeThread, *ch_t;
+    FILE *p = NULL;
+    SDL_Thread *ChargeThread, *ch_t, *photo_t;
     if(!SDL_STARTER_FIXED(&window,&main_renderer,"CIMAGE",SCREEN_HEIGHT,SCREEN_WIDTH)){
         imageTexture= SDL_CreateTexture(main_renderer,SDL_PIXELFORMAT_RGBA8888,
             SDL_TEXTUREACCESS_STREAMING  ,SCREEN_WIDTH,SCREEN_WIDTH);
-        if(!imageTexture){
-            printf("%s\n",SDL_GetError());
-        }
+
+        menuTexture = SDL_CreateTexture(main_renderer,SDL_PIXELFORMAT_RGBA8888,
+            SDL_TEXTUREACCESS_STREAMING,1280,720);
+
+        if(!imageTexture) printf("%s\n",SDL_GetError());
+
         SDL_Texture *logo = LoadTexture("./resources/CIMAGE10.png",main_renderer);
+
         scrollBarTexture = SDL_CreateTexture(main_renderer,SDL_PIXELFORMAT_RGBA8888,
             SDL_TEXTUREACCESS_STREAMING,scrollBar.w,scrollBar.h);
+
         SDL_Texture *mainTexture = NULL;
+
         SDL_Color white = {255,255,255,255};
+
         loading = true;
+
         ChargeThread = SDL_CreateThread(ChargingScreen,"Carga de pantalla",NULL);
-        imageCharger(imagenes,main_renderer);
-        if(!loading){
-            //SDL_WaitThread(ChargeThread,0);
-            SDL_DetachThread(ChargeThread);
-        }
+        int columns;
+        columns = imageCharger(imagenes,main_renderer);
+
+        if(!loading) SDL_DetachThread(ChargeThread);
+
         while(running){
+            while(imageShown);//Pause if an image is showing
             SDL_TIME(&Time.prevTime,&Time.currentTime,&Time.deltaTime);
+            
             while(SDL_PollEvent(&e)!=0){
                 if(e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.pressedKey == SDLK_ESCAPE)){
                     running = false;
-                }else if(e.type == SDL_KEYDOWN && (e.pressedKey == SDLK_LALT ||
+                }else if(e.type == SDL_KEYDOWN && (e.pressedKey == SDLK_LALT || 
                     e.pressedKey == SDLK_RALT)){
                     showMenu = !showMenu;
                 }else if(e.type == SDL_MOUSEWHEEL){
-                    if(e.wheel.y < 0 && scrollBarPos.y <=720-7){
-                        scrollBarPos.y += 7;
-                        newY += 7;
-                        ImageMover(imagenes,-7);
-                    }else if(e.wheel.y >0 && scrollBarPos.y >=137){
-                        scrollBarPos.y -= 7;
-                        newY  -= 7;
-                        ImageMover(imagenes,+7);
+                    if(e.wheel.y < 0 && scrollBarPos.y <=720-24){
+                        //imagenes[0].h + 10 
+                        //100% es columns *(imagenes[0].h + 10) //parte porcentual es 680
+                        scrollBarPos.y += 1;
+                        ImageMover(imagenes,-4.2);
+                    }else if(e.wheel.y >0 && scrollBarPos.y >=126){
+                        scrollBarPos.y -= 1;
+                        ImageMover(imagenes,+4.2);
                     }
                 }
+
                 else if(e.type == SDL_MOUSEBUTTONUP && scrollHang){
                     scrollHang = false;
                 }else if(e.type == SDL_MOUSEBUTTONDOWN  && e.button.button == leftClick && 
@@ -220,46 +225,76 @@ void user(){
 
                 }else if(e.type == SDL_KEYDOWN && e.pressedKey == SDLK_F11){
                     SDL_fullScreenToggle(window,&fullScreen);
-                } 
+                }else if(e.type == click && mouseY >125 && mouseY<720){
+                    photoSelect_data *data=(photoSelect_data*)malloc(sizeof(photoSelect_data));
+                    data->x = mouseX;
+                    data->y = mouseY;
+                    data->imagenes = imagenes;
+                    photo_t = SDL_CreateThread(photoSelector,"Photo Selector",data);
+                    SDL_Delay(10);
+                }
+                //TODO: I have to move scaled the scrollBar 
                 
                 if(scrollHang){
                     newY = scrollBarPos.y;
                     SDL_GetMouseState(NULL,&scrollBarPos.y);
-                    newY = -scrollBarPos.y + newY;
+                    newY = newY - scrollBarPos.y;
+                    newY = newY * 4.2;
                     ImageMover(imagenes,newY);  
                 }
                 
                 //MENU EVENTS
                 if(showMenu){
-                    if(e.type == click && mouseY<=25){
-                        for(int i=0; i<5; i++){
-                            if(mouseX >= pos[i].x-10 && mouseX <= pos[i].xF+10){
-                                Selected = !Selected;
-                                numSelected = i;
-                                break;
+                    if(e.type == click){
+                        if(mouseY<=25){
+                            for(int i=0; i<5; i++){
+                                if(mouseX >= pos[i].x-10 && mouseX <= pos[i].xF+10){
+                                    Selected = !Selected;
+                                    numSelected = i;
+                                    break;
+                                }
                             }
                         }
-                    }else if(e.type == click && mouseY >20 && Selected){
-                        Selected = !Selected;
-                        numSelected = -1;
+                        if(mouseX>= pos[numSelected].x &&
+                            mouseX<pos[numSelected].xF 
+                            && mouseY>=25 && mouseY<=125){
+                            if(numSelected==0){
+                                if(mouseY>=25 && mouseY<=50){
+                                    p = popen("zenity --file-selection --file-directory","r");
+                                    fgets(Path,1024,p);
+                                    pclose(p);
+                                    Selected = !Selected;
+                                    numSelected = -1;
+                                }
+                            }
+                        }
+                        if(mouseY>40 && Selected){
+                            Selected = !Selected;
+                            numSelected = -1;
+                        }
+
                     }
                 }
             }
+
             Time.frameTime += Time.deltaTime;
-            SDL_RenderClear(main_renderer);
-            SDL_SetRenderDrawColor(main_renderer,220,220,220,255);
-            if(showMenu){
-                menuPrint(&main_renderer,Selected,numSelected,&menuTexture,Roboto,pos,&menu);
+            if(Time.frameTime>=Time.deltaTime){
+                SDL_RenderClear(main_renderer);
+                SDL_SetRenderDrawColor(main_renderer,220,220,220,255);
+                scrollBarPrint(scrollBar,scrollBarPos,&scrollBarTexture,main_renderer);
+                imagePrinting(imagenes,&main_renderer,&imageTexture, ch_t);
+                SDL_SetRenderDrawColor(main_renderer,100,100,100,255);
+                SDL_RenderDrawLine_Gross(&main_renderer,0,1280,125,125,5);
+                SDL_SetRenderDrawColor(main_renderer,220,220,220,255);
+                SDL_RenderFillRect(main_renderer,&upBar);
+                if(showMenu){
+                    menuPrint(&main_renderer,Selected,numSelected,&menuTexture,Roboto,pos,&menu);
+                }
+                SDL_RenderCopy(main_renderer,logo,NULL,&logoRect);
+                SDL_RenderPresent(main_renderer); 
+                //SDL_Delay(5);  
+                Time.frameTime = 0;
             }
-            scrollBarPrint(scrollBar,scrollBarPos,&scrollBarTexture,main_renderer);
-            imagePrinting(imagenes,&main_renderer,&imageTexture, ch_t);
-            SDL_SetRenderDrawColor(main_renderer,100,100,100,255);
-            SDL_RenderDrawLine_Gross(&main_renderer,0,1280,125,125,5);
-            SDL_SetRenderDrawColor(main_renderer,220,220,220,255);
-            SDL_RenderFillRect(main_renderer,&upBar);
-            SDL_RenderCopy(main_renderer,logo,NULL,&logoRect);
-            SDL_RenderPresent(main_renderer); 
-            SDL_Delay(5);  
         }
         SDL_DestroyWindow(window);
         SDL_DestroyRenderer(main_renderer);

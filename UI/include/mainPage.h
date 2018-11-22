@@ -9,5 +9,26 @@
     #include "SDLlib.h"
     #include "UImenu.h"
 
+typedef struct{
+    char Path[100];
+    SDL_Texture *image;
+    SDL_Rect ImageRect;
+    bool isShown;
+    int index;
+    void *Info;
+}Image;
+
+
+typedef struct{
+    Image *imagenes;
+    int x;
+    int y;
+}photoSelect_data;
+
+typedef struct{
+    char nombre[100];
+    char path[100];
+}Info;
+
     extern void user();
 #endif
