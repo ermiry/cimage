@@ -24,6 +24,7 @@ int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
         imagenes[i].ImageRect.y = (140 * y);
         imagenes[i].ImageRect.w = 100;
         imagenes[i].ImageRect.h = 80;
+        imagenes[i].Info;
         char *b = (char *)  malloc(sizeof(char) * 100);
         if(i<=20){
             strcpy(imagenes[i].Path,"./resources/rectp.png");

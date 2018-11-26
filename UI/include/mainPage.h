@@ -27,7 +27,9 @@ typedef struct{
 
 typedef struct{
     char nombre[100];
-    char path[100];
+    char format[100];
+    char Date[100];
+    char wH[100];
 }Info;
 
     extern void user();

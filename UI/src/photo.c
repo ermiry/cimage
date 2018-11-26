@@ -1,6 +1,68 @@
 #include "photo.h"
 
 extern bool imageShown;
+bool infOpened = false;
+
+
+
+int infoPage(void *data, SDL_Event e){
+    Image *i = (Image *)data;
+    SDL_Window *info;
+    SDL_Renderer *renderInfo;
+    SDL_STARTER_FIXED(&info,&renderInfo,"Info",400,400);
+    TTF_Font *robotoInfo = TTF_OpenFont("./resources/Fonts/Roboto-Medium.ttf",255);
+    SDL_Color color = {250,250,250,255};
+    SDL_Surface *text = NULL, *textInPhoto = NULL;
+    SDL_Rect inf, inf2;
+    inf.h = 50;
+    inf.w = 150;
+    inf.x = 5;
+    inf.y = 10;
+    inf2.h = 50;
+    inf.w = 150;
+    inf.x = 155;
+    inf.y = 10;
+    Info *photoInfo = (Info*) i->Info;
+    bool running = true;
+    while(running){
+        inf.y = 10;
+        inf2.y = 10;
+        if(e.type == SDL_QUIT){
+            running = false;
+            infOpened = false;
+        }
+        SDL_RenderClear(renderInfo);
+        SDL_SetRenderDrawColor(renderInfo,100,100,100,255);
+        text = TTF_RenderText_Solid(robotoInfo,"Name",color);
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,text),NULL,&inf);
+        textInPhoto = TTF_RenderText_Solid(robotoInfo,photoInfo->nombre,color);
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,textInPhoto),NULL,&inf2);
+        SDL_FreeSurface(text);
+        SDL_FreeSurface(textInPhoto);
+        text = TTF_RenderText_Solid(robotoInfo,"Date",color);
+        inf.y = inf2.y = 80;
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,text),NULL,&inf);
+        textInPhoto = TTF_RenderText_Solid(robotoInfo,photoInfo->nombre,color);
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,textInPhoto),NULL,&inf2);
+        SDL_FreeSurface(text);
+        SDL_FreeSurface(textInPhoto);
+        text = TTF_RenderText_Solid(robotoInfo,"Format",color);
+        inf.y = inf2.y = 140;
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,text),NULL,&inf);
+        textInPhoto = TTF_RenderText_Solid(robotoInfo,photoInfo->nombre,color);
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,textInPhoto),NULL,&inf2);        
+        SDL_FreeSurface(text);
+        SDL_FreeSurface(textInPhoto);
+        text = TTF_RenderText_Solid(robotoInfo,"Size",color);
+        inf.y = inf2.y = 200;
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,text),NULL,&inf);
+        textInPhoto = TTF_RenderText_Solid(robotoInfo,photoInfo->nombre,color);
+        SDL_RenderCopy(renderInfo,SDL_CreateTextureFromSurface(renderInfo,textInPhoto),NULL,&inf2);
+        SDL_RenderPresent(renderInfo);
+    }
+    SDL_DestroyRenderer(renderInfo);
+    SDL_DestroyWindow(info);
+}
 
 void openPhoto(Image imagen){
     Info *name = (Info*)imagen.Info;
@@ -35,6 +97,7 @@ void openPhoto(Image imagen){
     }
     SDL_Texture *shownPhoto = LoadTexture(imagen.Path,renderPhoto);
     while(running){
+        
         while(SDL_PollEvent(&e)!=0){
             if(e.type == SDL_QUIT){
                 running = false;
@@ -43,20 +106,19 @@ void openPhoto(Image imagen){
                 running = false;
                 imageShown = false;
                 SDL_Delay(200);
+            }else if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_i && !infOpened){
+                infOpened = true;
+                Image *i = &imagen;
+                infoPage(i,e);
             }
         }
-        
         SDL_RenderClear(renderPhoto);
         SDL_Log("Rect: x=%d y=%d w=%d h=%d\n",fixedSize.x,fixedSize.y,fixedSize.w,fixedSize.h);
         SDL_RenderCopy(renderPhoto,shownPhoto,NULL,&fixedSize);
         SDL_RenderPresent(renderPhoto);
     }
-    SDL_Log("0Here'snot");
     SDL_DestroyWindow(photo);
-        SDL_Log("1Here'snot");
     SDL_DestroyTexture(shownPhoto);
-        SDL_Log("2Here'snot");
     SDL_DestroyRenderer(renderPhoto);
-        SDL_Log("3Here'snot");
     imageShown = false;
 }
