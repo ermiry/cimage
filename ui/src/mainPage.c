@@ -27,7 +27,7 @@ int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
         imagenes[i].Info;
         char *b = (char *)  malloc(sizeof(char) * 100);
         if(i<=20){
-            strcpy(imagenes[i].Path,"./resources/rectp.png");
+            strcpy(imagenes[i].Path,"./resources/background.jpg");
             strcpy(b,"I'm a red photo");
         }else{
             strcpy(imagenes[i].Path,"./resources/rectg.png");
