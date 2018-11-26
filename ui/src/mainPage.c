@@ -116,7 +116,7 @@ int photoSelector(void *data){
     y = info->y;
     while(imagen[i].isShown==false){
         i++;
-        SDL_Log("%d\n",i);
+        // SDL_Log("%d\n",i);
     }
     while(imagen[i].isShown){
         if(x>=imagen[i].ImageRect.x && 
