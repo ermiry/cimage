@@ -14,11 +14,12 @@
 
 bool loading = false,imageShown = false;
 
+unsigned int IMG_COUNT = 0;
 
 int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
     int x = 1, y = 1;
 
-    for(int i=0; i<120; i++){
+    for(int i=0; i<IMG_COUNT; i++){
         imagenes[i].index = i;
         imagenes[i].ImageRect.x = (110 * x) - 60;
         imagenes[i].ImageRect.y = (140 * y);
@@ -54,7 +55,7 @@ int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
 }
 
 void ImageMover(Image *imagenes, int Ymove){
-    for(int i=0; i<100; i++){
+    for(int i=0; i<IMG_COUNT; i++){
         imagenes[i].ImageRect.y += Ymove;
     }
 }
@@ -80,7 +81,7 @@ void imageCleaner(Image *imagenes){
 //the real photo is charging
 void imagePrinting(Image *imagenes, SDL_Renderer **main_renderer, SDL_Texture **imageTexture, SDL_Thread *ch_t){
     SDL_SetRenderTarget(*main_renderer,*imageTexture);
-    for(int i=0; i<120; i++){
+    for(int i=0; i<IMG_COUNT; i++){
         char *b = (char *)imagenes[i].Info;
         //printf("Info photo with index:%d -- %s\n",imagenes[i].index,b);
         if(imagenes[i].ImageRect.y>80 && imagenes[i].ImageRect.y<745){
@@ -133,11 +134,15 @@ int photoSelector(void *data){
 }
 
 void user(){
+
+    // FIXME: 
+    IMG_COUNT = 10;
+
     TTF_Init();
     void *res;
     SDL_DisplayMode current;
     SDL_Init(SDL_INIT_VIDEO);
-    Image *imagenes = (Image *)malloc(sizeof(Image)*120);
+    Image *imagenes = (Image *)malloc(sizeof(Image)*IMG_COUNT);
     current = currentWindow();
     Tiempo Time;
     Time.deltaTime=Time.frameTime=Time.currentTime=Time.prevTime=0;
