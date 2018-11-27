@@ -27,9 +27,109 @@ void printUsage (void) {
            "  -v    version     Display current version.\n");
 }
 
+static int Get16m (const void *Short) {
+
+    return (((uchar *) Short)[0] << 8) | ((uchar *) Short)[1];
+
+}
+
+
 #pragma endregion
 
 #pragma region JPEG
+
+// auxilliary struct 
+typedef struct SectionsData {
+
+    int itemlen;
+    int prev;
+    int marker;
+    int ll,lh, got;
+    uchar *Data;
+
+} SectionsData;
+
+// FIXME:
+void jpeg_processDQT (SectionsData secs_data) {
+
+    /* int a;
+    int c;
+    int tableindex, coefindex, row, col;
+    unsigned int table[64];
+    int *reftable = NULL;
+    double cumsf = 0.0, cumsf2 = 0.0;
+    int allones = 1;
+
+    a=2; // first two bytes is length
+    while (a<length)
+    {
+        c = Data[a++];
+        tableindex = c & 0x0f;
+        if (ShowTags>1){
+            printf("DQT:  table %d precision %d\n", tableindex, (c>>4) ? 16 : 8);
+        }
+        if (tableindex < 2){
+            reftable = deftabs[tableindex];
+        }
+
+        // Read in the table, compute statistics relative to reference table 
+        for (coefindex = 0; coefindex < 64; coefindex++) {
+            unsigned int val;
+            if (c>>4) {
+                register unsigned int temp;
+                temp=(unsigned int) (Data[a++]);
+                temp *= 256;
+                val=(unsigned int) Data[a++] + temp;
+            } else {
+                val=(unsigned int) Data[a++];
+            }
+            table[coefindex] = val;
+            if (reftable) {
+                double x;
+                // scaling factor in percent 
+                x = 100.0 * (double)val / (double)reftable[coefindex];
+                cumsf += x;
+                cumsf2 += x * x;
+                // separate check for all-ones table (Q 100)
+                if (val != 1) allones = 0;
+            }
+        }
+        // If requested, print table in normal array order 
+        if (ShowTags>2){
+            for (row=0; row<8; row++) {
+                printf("    ");
+                for (col=0; col<8; col++) {
+                    printf("%5u ", table[jpeg_zigzag_order[row*8+col]]);
+                }
+                printf("\n");
+            }
+        }
+        // Print summary stats 
+        if (reftable) { // terse output includes quality 
+            double qual, var;
+            cumsf /= 64.0;    // mean scale factor 
+            cumsf2 /= 64.0;
+            var = cumsf2 - (cumsf * cumsf); // variance 
+            if (allones){      // special case for all-ones table 
+                qual = 100.0;
+            }else if (cumsf <= 100.0){
+                qual = (200.0 - cumsf) / 2.0;
+            }else{
+                qual = 5000.0 / cumsf;
+            }
+            if (ShowTags>1)  printf("  ");
+
+            if (ShowTags){
+                printf("Approximate quality factor for qtable %d: %.0f (scale %.2f, var %.2f)\n",
+                     tableindex, qual, cumsf, var);
+            } else {
+                if (tableindex == 0){
+                    ImageInfo.QualityGuess = (int)(qual+0.5);
+                }
+            }
+        }
+    } */
+}
 
 // process a COM marker
 void jpeg_process_COM (const uchar *data, int length) {}
@@ -141,12 +241,32 @@ void jpeg_processJFIF () {
 
 }
 
-// TODO:
-void jpeg_processSOFn () {}
+void jpeg_processSOFn (Cimage *cimage, SectionsData secs_data) {
 
-int jpeg_handleSection (int marker, Cimage *cimage) {
+    int data_precision, num_components;
 
-    switch (marker) {
+    data_precision = secs_data.Data[2];
+
+    cimage->imgData->height = Get16m (secs_data.Data + 3);
+    cimage->imgData->width = Get16m (secs_data.Data + 5);
+
+    num_components = secs_data.Data[7];
+
+    if (num_components == 3) cimage->imgData->isColor = 1;
+    else cimage->imgData->isColor = 0;
+
+    cimage->imgData->process = secs_data.marker;
+
+    #ifdef CIMAGE_DEBUG
+    logMsg (stdout, DEBUG, IMAGE, createString ("JPEG image is %uw * %uh, %d color components, %d bits per sample.",
+        cimage->imgData->width, cimage->imgData->height, num_components, data_precision));
+    #endif
+
+}
+
+int jpeg_handleSection (Cimage *cimage, SectionsData secs_data) {
+
+    switch (secs_data.marker) {
         // stop before hitting compressed data 
         case M_SOS: 
             // if reading entire image is requested, read the rest of the data
@@ -155,16 +275,15 @@ int jpeg_handleSection (int marker, Cimage *cimage) {
             break;
 
          // used for jpeg quality guessing
-        case M_DQT: /* FIXME: jpeg_processDQT(Data, itemlen); */ break;
+        case M_DQT: jpeg_processDQT (secs_data); break;
 
         // also used for jpeg quality guessing
         case M_DHT: /* FIXME: process_DHT(Data, itemlen); */ break;
 
-        // FIXME:
-        case M_EOI:   // in case it's a tables-only JPEG stream
-            // fprintf(stderr,"No image in jpeg!\n");
-            // this is also from the func that called handle section ()
-            // return FALSE;
+        // in case it's a tables-only JPEG stream
+        case M_EOI: 
+            logMsg (stdout, ERROR, IMAGE, "No image in jpeg!");
+            return 1;
 
         // FIXME:
         // comment section
@@ -175,15 +294,17 @@ int jpeg_handleSection (int marker, Cimage *cimage) {
                 }else{
                     process_COM(Data, itemlen);
                     HaveCom = TRUE;
-                }
-                break; */
+                } */
+                break;
 
-        // TODO: M_JFIF: jpeg_processJFIF (); break;
+        // TODO:
+        case M_JFIF: /* jpeg_processJFIF (); */ break;
 
         // FIXME:
         case M_EXIF:
+            logMsg (stdout, DEBUG, NO_TYPE, "EXIF marker!");
             // There can be different section using the same marker.
-            /* if (ReadMode & READ_METADATA){
+            /* if (ReadMode & READ_METADATA) {
                 if (memcmp(Data+2, "Exif", 4) == 0){
                     process_EXIF(Data, itemlen);
                     break;
@@ -199,9 +320,9 @@ int jpeg_handleSection (int marker, Cimage *cimage) {
                 }
             }
             // Oterwise, discard this section.
-            free(Sections[--SectionsRead].Data);
-            break; */
-
+            free(Sections[--SectionsRead].Data); */
+            break; 
+ 
         // FIXME:
         case M_IPTC:
             /* if (ReadMode & READ_METADATA){
@@ -212,8 +333,8 @@ int jpeg_handleSection (int marker, Cimage *cimage) {
                 // and we don't act on any part of it, so just display it at parse time.
             }else{
                 free(Sections[--SectionsRead].Data);
-            }
-            break; */
+            } */
+            break;
 
         case M_SOF0: 
         case M_SOF1: 
@@ -228,98 +349,105 @@ int jpeg_handleSection (int marker, Cimage *cimage) {
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            // jpeg_processSOFn (Data, marker);
+            jpeg_processSOFn (cimage, secs_data);
             break;
 
         // skip any other section
-        default: break;
+        default: 
+            #ifdef CIMAGE_DEBUG
+            logMsg (stdout, WARNING, IMAGE,
+                createString ("Jpeg section marker 0x%02x size %d\n", 
+                secs_data.marker, secs_data.itemlen));
+            #endif
+            break;
     }
 
 }
 
 // parse the marker stream until SOS or EOI is seen
-int jpeg_readSections (FILE *file, Cimage *cimage) {
+int jpeg_readSections (Cimage *cimage) {
 
     //  int HaveCom = FALSE;
 
-    int a = fgetc (file);
-    if (a != 0xff || fgetc (file) != M_SOI) return 1;
+    int a = fgetc (cimage->file);
+    if (a != 0xff || fgetc (cimage->file) != M_SOI) return 1;
 
     cimage->imgData->jfifHeader.xDensity = cimage->imgData->jfifHeader.yDensity = 300;
     cimage->imgData->jfifHeader.resolutionUnits = 1;
 
     // read jpeg sections based on marker
-    int itemlen;
-    int prev;
-    int marker = 0;
-    int ll,lh, got;
-    uchar * Data;
+    SectionsData secs_data;
 
     for (;;) {
+        secs_data.marker = 0;
+
         if (jpeg_checkAllocatedSections (cimage)) {
             logMsg (stderr, ERROR, IMAGE, "Failed to allocate sections!");
             return 1;
         }
 
-        prev = 0;
+        secs_data.prev = 0;
         for (a = 0; ; a++) {
-            marker = fgetc (file);
-            if (marker != 0xff && prev == 0xff) break;
-            if (marker == EOF) {
-                logMsg (stderr,ERROR, IMAGE, "Unexpected end of file!");
+            secs_data.marker = fgetc (cimage->file);
+            if (secs_data.marker != 0xff && secs_data.prev == 0xff) break;
+            if (secs_data.marker == EOF) {
+                logMsg (stderr, ERROR, IMAGE, "Unexpected end of file -- secs_data.marker");
                 return 1;
             }
-            prev = marker;
+            secs_data.prev = secs_data.marker;
         }
 
+        // FIXME: err non fatal
         if (a > 10) {
-            logMsg (stderr, ERROR, IMAGE, 
-                createString ("Extraneous %d padding bytes before section %02X", a - 1, marker));
-            return 1;
+            // logMsg (stderr, ERROR, IMAGE, 
+            //     createString ("Extraneous %d padding bytes before section %02X", a - 1, secs_data.marker));
+            // return 1;
         }
 
-        cimage->sections[cimage->sectionsRead].type = marker;
+        cimage->sections[cimage->sectionsRead].type = secs_data.marker;
 
         // read the length of the section
-        lh = fgetc (file);
-        ll = fgetc (file);
-        if (lh == EOF || ll == EOF) {
-            logMsg (stderr, ERROR, IMAGE, "Unexpected end of file!");
+        secs_data.lh = fgetc (cimage->file);
+        secs_data.ll = fgetc (cimage->file);
+        if (secs_data.lh == EOF || secs_data.ll == EOF) {
+            logMsg (stderr, ERROR, IMAGE, "Unexpected end of file -- secs_data.lh");
             return 1;
         }
 
-        itemlen = (lh << 8) | ll;
+        secs_data.itemlen = (secs_data.lh << 8) | secs_data.ll;
 
-         if (itemlen < 2) {
+         if (secs_data.itemlen < 2) {
             logMsg (stderr, ERROR, IMAGE, "Invalid marker!");
             return 1;
         }
 
-        cimage->sections[cimage->sectionsRead].size = itemlen;
+        cimage->sections[cimage->sectionsRead].size = secs_data.itemlen;
 
-        Data = (uchar *) malloc (itemlen);
-        if (!Data) {
+        secs_data.Data = (uchar *) malloc (secs_data.itemlen);
+        if (!secs_data.Data) {
             logMsg (stderr, ERROR, IMAGE, "Could not allocate memory!");
             return 1;
         }
 
-        cimage->sections[cimage->sectionsRead].data = Data;
+        cimage->sections[cimage->sectionsRead].data = secs_data.Data;
 
         // Store first two pre-read bytes.
-        Data[0] = (uchar) lh;
-        Data[1] = (uchar) ll;
+        secs_data.Data[0] = (uchar) secs_data.lh;
+        secs_data.Data[1] = (uchar) secs_data.ll;
 
         // Read the whole section.
-        got = fread (Data + 2, 1, itemlen - 2, file); 
-        if (got != itemlen - 2) {
-            logMsg (stderr, ERROR, IMAGE, "Premature end of file!");
+        secs_data.got = fread (secs_data.Data + 2, 1, secs_data.itemlen - 2, cimage->file); 
+        if (secs_data.got != secs_data.itemlen - 2) {
+            logMsg (stderr, ERROR, IMAGE, "Premature end of file -- secs_data.got");
             return 1;
         }
 
         cimage->sectionsRead++;
 
         // now we handle the section
-        jpeg_handleSection (marker, cimage->readmode);
+        jpeg_handleSection (cimage, secs_data);
+
+        free (secs_data.Data);
     }
 
     return 0;   // success
@@ -328,22 +456,22 @@ int jpeg_readSections (FILE *file, Cimage *cimage) {
 
 int jpeg_readFile (const char *filename, Cimage *cimage) {
 
-    FILE *file = fopen (filename, "rb");
-    if (!file) {
+    cimage->file = fopen (filename, "rb");
+    if (!cimage->file) {
         logMsg (stderr, ERROR, IMAGE, createString ("Failed to open: %s", filename));
         return 1;
     }
 
     // scan the jpeg headers
-    if (!jpeg_readSections (file, cimage)) {
+    if (!jpeg_readSections (cimage)) {
         logMsg (stdout, DEBUG, IMAGE, "Done getting jpeg sections.");
-        fclose (file);
+        fclose (cimage->file);
         return 0;
     }
 
     else {
         logMsg (stderr, ERROR, IMAGE, "Failed to read jpeg sections!");
-        fclose (file);
+        fclose (cimage->file);
         return 1;
     }
 
