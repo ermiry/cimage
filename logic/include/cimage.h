@@ -148,4 +148,20 @@ typedef struct Cimage {
 
 #pragma endregion
 
+#pragma region EXIF
+
+static const char * OrientTab[9] = {
+    "Undefined",
+    "Normal",           // 1
+    "flip horizontal",  // left right reversed mirror
+    "rotate 180",       // 3
+    "flip vertical",    // upside down mirror
+    "transpose",        // Flipped about top-left <--> bottom-right axis.
+    "rotate 90",        // rotate 90 cw to right it.
+    "transverse",       // flipped about top-right <--> bottom-left axis
+    "rotate 270",       // rotate 270 to right it.
+};
+
+#pragma endregion
+
 #endif

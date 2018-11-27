@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I $(IDIR)
+CFLAGS = -I $(IDIR) -D CIMAGE_DEBUG
 
 IDIR = ./include/
 SRCDIR = ./src/
