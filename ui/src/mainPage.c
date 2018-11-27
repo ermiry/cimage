@@ -12,28 +12,133 @@
 #include "UIChargingScreen.h"
 #include "photo.h"
 
+#pragma region OTHER
+
+#include <stdarg.h>
+
+char *createString (const char *stringWithFormat, ...) {
+
+    char *fmt;
+
+    if (stringWithFormat != NULL) fmt = strdup (stringWithFormat);
+    else fmt = strdup ("");
+
+    va_list argp;
+    va_start (argp, stringWithFormat);
+    char oneChar[1];
+    int len = vsnprintf (oneChar, 1, fmt, argp);
+    if (len < 1) return NULL;
+    va_end (argp);
+
+    char *str = (char *) calloc (len + 1, sizeof (char));
+    if (!str) return NULL;
+
+    va_start (argp, stringWithFormat);
+    vsnprintf (str, len + 1, fmt, argp);
+    va_end (argp);
+
+    free (fmt);
+
+    return str;
+
+}
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <errno.h>
+
+// DoubleList *fileNames = NULL;
+char **fileNames = NULL;
+
+void file_openAllFilesInDir (char *directory) {
+
+    if (directory) {
+        DIR *FD;
+        struct dirent *in_file;
+        FILE *common_file;
+
+        if (NULL == (FD = opendir (directory))){
+            fprintf(stderr, "Error : Failed to open input directory - %s\n", strerror(errno));
+            fclose(common_file);
+
+            return;
+        }
+
+        // fileNames = dlist_init (free);
+        fileNames = (char **) calloc (30, sizeof (char *));
+        int count = 0;
+
+        while ((in_file = readdir(FD))) {
+            /* On linux/Unix we don't want current and parent directories
+            * On windows machine too, thanks Greg Hewgill
+            */
+            if (!strcmp (in_file->d_name, "."))
+                continue;
+            if (!strcmp (in_file->d_name, ".."))    
+                continue;
+            /* Open directory entry file for common operation */
+            /* TODO : change permissions to meet your need! */
+            // entry_file = fopen(in_file->d_name, "rw");
+            // if (entry_file == NULL)
+            // {
+            //     fprintf(stderr, "Error : Failed to open entry file - %s\n", strerror(errno));
+            //     fclose(common_file);
+
+            //     return 1;
+            // }
+
+            
+            char *filename = createString ("./imgs/%s", in_file->d_name);
+            fileNames[count] = filename;
+            count++;
+            // printf ("%s\n", in_file->d_name);
+        }
+
+        void set_total_img_count (unsigned int count);
+        void set_render_img_count (unsigned int count);
+        set_total_img_count (count);
+        set_render_img_count (count);
+
+    }
+
+}
+
+
+#pragma endregion
+
 bool loading = false,imageShown = false;
 
-unsigned int IMG_COUNT = 0;
+// images being rendered to the secreen
+unsigned int RENDER_IMG_COUNT = 0;
+
+// total number of imgs that we expect to be on the list
+unsigned int TOTAL_IMG_COUNT = 0;
+
+void set_total_img_count (unsigned int count) { TOTAL_IMG_COUNT = count; }
+void set_render_img_count (unsigned int count) { RENDER_IMG_COUNT = count; }
 
 int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
     int x = 1, y = 1;
 
-    for(int i=0; i<IMG_COUNT; i++){
+    for(int i=0; i < RENDER_IMG_COUNT; i++){
         imagenes[i].index = i;
         imagenes[i].ImageRect.x = (110 * x) - 60;
         imagenes[i].ImageRect.y = (140 * y);
         imagenes[i].ImageRect.w = 100;
         imagenes[i].ImageRect.h = 80;
         imagenes[i].Info;
-        char *b = (char *)  malloc(sizeof(char) * 100);
-        if(i<=20){
-            strcpy(imagenes[i].Path,"./resources/background.jpg");
-            strcpy(b,"I'm a red photo");
-        }else{
-            strcpy(imagenes[i].Path,"./resources/rectg.png");
-            strcpy(b,"I'm a green photo");
-        }
+        char *b = (char *) calloc (100, sizeof (char));
+        // if(i<=20){
+        //     // strcpy(imagenes[i].Path,"./resources/background.jpg");
+        //     // strcpy(b,"I'm a red photo");
+        // }else{
+        //     // strcpy(imagenes[i].Path,"./resources/rectg.png");
+        //     // strcpy(b,"I'm a green photo");
+        // }
+
+        strcpy(imagenes[i].Path, fileNames[i]);
+
         if(imagenes[i].ImageRect.y>70 && imagenes[i].ImageRect.y<765){
             imagenes[i].isShown = true;
             imagenes[i].image = LoadTexture(imagenes[i].Path,main_renderer);
@@ -55,7 +160,7 @@ int imageCharger(Image *imagenes,SDL_Renderer *main_renderer){
 }
 
 void ImageMover(Image *imagenes, int Ymove){
-    for(int i=0; i<IMG_COUNT; i++){
+    for(int i=0; i < RENDER_IMG_COUNT; i++){
         imagenes[i].ImageRect.y += Ymove;
     }
 }
@@ -63,7 +168,7 @@ void ImageMover(Image *imagenes, int Ymove){
 int imageLoader(SDL_Renderer *main_renderer, Image *imagenes){
     if(!(imagenes->image)){
         imagenes->image = LoadTexture(imagenes->Path,main_renderer);
-        printf("Index Picture: %d --Texture Created\n",imagenes->index);
+        // printf("Index Picture: %d --Texture Created\n",imagenes->index);
     }
     imagenes->isShown = true;
 }
@@ -72,7 +177,7 @@ int imageLoader(SDL_Renderer *main_renderer, Image *imagenes){
 void imageCleaner(Image *imagenes){
     if(imagenes->image){
         SDL_DestroyTexture(imagenes->image);
-        printf("Index Picture: %d --Texture Destroyed\n",imagenes->index);
+        // printf("Index Picture: %d --Texture Destroyed\n",imagenes->index);
         imagenes->image=NULL;
     }
     imagenes->isShown = false;
@@ -81,7 +186,7 @@ void imageCleaner(Image *imagenes){
 //the real photo is charging
 void imagePrinting(Image *imagenes, SDL_Renderer **main_renderer, SDL_Texture **imageTexture, SDL_Thread *ch_t){
     SDL_SetRenderTarget(*main_renderer,*imageTexture);
-    for(int i=0; i<IMG_COUNT; i++){
+    for(int i=0; i < RENDER_IMG_COUNT; i++){
         char *b = (char *)imagenes[i].Info;
         //printf("Info photo with index:%d -- %s\n",imagenes[i].index,b);
         if(imagenes[i].ImageRect.y>80 && imagenes[i].ImageRect.y<745){
@@ -135,14 +240,16 @@ int photoSelector(void *data){
 
 void user(){
 
+    file_openAllFilesInDir ("./imgs/");
+
     // FIXME: 
-    IMG_COUNT = 10;
+    // RENDER_IMG_COUNT = 10;
 
     TTF_Init();
     void *res;
     SDL_DisplayMode current;
     SDL_Init(SDL_INIT_VIDEO);
-    Image *imagenes = (Image *)malloc(sizeof(Image)*IMG_COUNT);
+    Image *imagenes = (Image *)malloc(sizeof(Image)*RENDER_IMG_COUNT);
     current = currentWindow();
     Tiempo Time;
     Time.deltaTime=Time.frameTime=Time.currentTime=Time.prevTime=0;
@@ -305,5 +412,6 @@ void user(){
         SDL_DestroyWindow(window);
         SDL_DestroyRenderer(main_renderer);
         SDL_Quit();
+        printf ("Done cleaning up!");
     }
 }
