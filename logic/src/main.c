@@ -66,33 +66,37 @@ int jpeg_checkAllocatedSections (Cimage *cimage) {
 
 }
 
-// FIXME:
-void jpeg_readEntireImage () {
+int jpeg_readEntireImage (Cimage *cimage) {
 
-    /* int cp, ep, size;
+    int cp, ep, size;
     // Determine how much file is left.
-    cp = ftell(infile);
-    fseek(infile, 0, SEEK_END);
-    ep = ftell(infile);
-    fseek(infile, cp, SEEK_SET);
+    cp = ftell (cimage->file);
+    fseek (cimage->file, 0, SEEK_END);
+    ep = ftell(cimage->file);
+    fseek (cimage->file, cp, SEEK_SET);
 
-    size = ep-cp;
-    Data = (uchar *)malloc(size);
-    if (Data == NULL){
-        ErrFatal("could not allocate data for entire image");
+    size = ep - cp;
+    uchar *Data = (uchar *) malloc (size);
+    if (!Data) {
+        logMsg (stderr, ERROR, IMAGE, "Could not allocate data for entire image!");
+        return 1;
     }
 
-    got = fread(Data, 1, size, infile);
-    if (got != size){
-        ErrFatal("could not read the rest of the image");
+    int got = fread (Data, 1, size, cimage->file);
+    if (got != size) {
+        logMsg (stderr, ERROR, IMAGE, "Could not read the rest of the image!");
+        return 1;
     }
 
-    CheckSectionsAllocated();
-    Sections[SectionsRead].Data = Data;
-    Sections[SectionsRead].Size = size;
-    Sections[SectionsRead].Type = PSEUDO_IMAGE_MARKER;
-    SectionsRead ++;
-    HaveAll = 1; */
+    jpeg_checkAllocatedSections (cimage);
+    cimage->sections[cimage->sectionsRead].data = Data;
+    cimage->sections[cimage->sectionsRead].size = size;
+    cimage->sections[cimage->sectionsRead].type = PSEUDO_IMAGE_MARKER;
+    cimage->sectionsRead++;
+
+    // HaveAll = 1;
+
+    return 0;
 
 }
 
@@ -140,17 +144,14 @@ void jpeg_processJFIF () {
 // TODO:
 void jpeg_processSOFn () {}
 
-int jpeg_handleSection (int marker, ReadMode readmode) {
+int jpeg_handleSection (int marker, Cimage *cimage) {
 
     switch (marker) {
         // stop before hitting compressed data 
         case M_SOS: 
             // if reading entire image is requested, read the rest of the data
-            if (readmode & READ_IMAGE) {
-                jpeg_readEntireImage ();
-                // FIXME: this return is from the function that called handle section!!
-                // return TRUE;
-            } 
+            if (cimage->readmode & READ_IMAGE) 
+                return jpeg_readEntireImage (cimage);
             break;
 
          // used for jpeg quality guessing
@@ -260,60 +261,49 @@ int jpeg_readSections (FILE *file, Cimage *cimage) {
             return 1;
         }
 
-        // TODO: create a separate function for all the following...
-
         prev = 0;
         for (a = 0; ; a++) {
             marker = fgetc (file);
             if (marker != 0xff && prev == 0xff) break;
             if (marker == EOF) {
-                // FIXME: 
-                // fatal error -> just return? -> also discard the data
                 logMsg (stderr,ERROR, IMAGE, "Unexpected end of file!");
+                return 1;
             }
             prev = marker;
         }
 
         if (a > 10) {
-            // FIXME: 
-            // fatal error -> just return? -> also discard the data
             logMsg (stderr, ERROR, IMAGE, 
                 createString ("Extraneous %d padding bytes before section %02X", a - 1, marker));
+            return 1;
         }
 
-        // FIXME: allocate sections -> do we need this to be global?
-        // Sections[SectionsRead].Type = marker;
+        cimage->sections[cimage->sectionsRead].type = marker;
 
         // read the length of the section
         lh = fgetc (file);
         ll = fgetc (file);
         if (lh == EOF || ll == EOF) {
-            // FIXME: 
-            // fatal error -> just return? -> also discard the data
             logMsg (stderr, ERROR, IMAGE, "Unexpected end of file!");
+            return 1;
         }
 
         itemlen = (lh << 8) | ll;
 
          if (itemlen < 2) {
-            // FIXME: 
-            // fatal error -> just return? -> also discard the data
             logMsg (stderr, ERROR, IMAGE, "Invalid marker!");
+            return 1;
         }
 
-        // FIXME: where do we put sections?
-        // Sections[SectionsRead].Size = itemlen;
+        cimage->sections[cimage->sectionsRead].size = itemlen;
 
         Data = (uchar *) malloc (itemlen);
-        // TODO: do we need this check?
         if (!Data) {
-            // FIXME: 
-            // fatal error -> just return? -> also discard the data
-            // ErrFatal("Could not allocate memory");
+            logMsg (stderr, ERROR, IMAGE, "Could not allocate memory!");
+            return 1;
         }
 
-        // FIXME: where do we put sections?
-        // Sections[SectionsRead].Data = Data;
+        cimage->sections[cimage->sectionsRead].data = Data;
 
         // Store first two pre-read bytes.
         Data[0] = (uchar) lh;
@@ -322,17 +312,14 @@ int jpeg_readSections (FILE *file, Cimage *cimage) {
         // Read the whole section.
         got = fread (Data + 2, 1, itemlen - 2, file); 
         if (got != itemlen - 2) {
-            // FIXME: 
-            // fatal error -> just return? -> also discard the data
             logMsg (stderr, ERROR, IMAGE, "Premature end of file!");
+            return 1;
         }
 
-        // FIXME:
-        // SectionsRead += 1;
+        cimage->sectionsRead++;
 
         // now we handle the section
-        // FIXME: jpeg_handleSection ();
-
+        jpeg_handleSection (marker, cimage->readmode);
     }
 
     return 0;   // success

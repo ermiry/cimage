@@ -115,6 +115,8 @@ typedef struct Cimage {
 
     ReadMode readmode;
 
+    FILE *file;
+
 } Cimage;
 
 #pragma region JPEG
@@ -145,6 +147,8 @@ typedef struct Cimage {
 #define M_DHT   0xC4          // Define Huffmann Table
 #define M_DRI   0xDD
 #define M_IPTC  0xED          // IPTC marker
+
+#define PSEUDO_IMAGE_MARKER 0x123; // Extra value.
 
 #pragma endregion
 
