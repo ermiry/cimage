@@ -46,9 +46,9 @@ void openPhoto(Image imagen){
                 running = false;
                 imageShown = false;
                 SDL_Delay(200);
-            }else if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_i && !infOpened){
+            }else if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_i){
                 infOpened = !infOpened;
-                SDL_Delay(1000);
+                SDL_Delay(200);
             }
         }
         
