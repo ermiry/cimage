@@ -1,0 +1,1 @@
+gcc foo.c -o foo `sdl2-config --cflags --libs` -l SDL2_image -l SDL2_ttf -lavutil -lavformat -lavcodec -lz -lavutil -lm -lswscale
