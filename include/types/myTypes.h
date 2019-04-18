@@ -1,5 +1,5 @@
-#ifndef MY_TYPES_H  
-#define MY_TYPES_H  
+#ifndef _MY_TYPES_H_
+#define _MY_TYPES_H_
 
 #define EXIT_FAILURE    1
 
@@ -26,4 +26,4 @@ typedef void (*Action)(void *);
 // takes an argument and returns a value (int)
 typedef u8 (*delegate)(void *);
 
-#endif%   
+#endif

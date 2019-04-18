@@ -1,5 +1,5 @@
-#ifndef MY_THREAD_H
-#define MY_THREAD_H
+#ifndef _CENGINE_THREAD_H_
+#define _CENGINE_THREAD_H_
 
 #include "myos.h"
 

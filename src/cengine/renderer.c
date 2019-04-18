@@ -2,11 +2,11 @@
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
 #include "settings.h"
 
-#include "engine/renderer.h"
+#include "cengine/renderer.h"
 
 #include "game/game.h"
 #include "ui/ui.h"

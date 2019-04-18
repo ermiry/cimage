@@ -2,10 +2,10 @@
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
-#include "engine/sprites.h"
-#include "engine/textures.h"
+#include "cengine/sprites.h"
+#include "cengine/textures.h"
 
 /*** SPRITES ***/
 

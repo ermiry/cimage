@@ -1,12 +1,12 @@
-#ifndef ANIMATION_H
-#define ANIMATION_H
+#ifndef _CENGINE_ANIMATION_H_
+#define _CENGINE_ANIMATION_H_
 
 #include <stdbool.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
-#include "engine/timer.h"
-#include "engine/sprites.h"
+#include "cengine/timer.h"
+#include "cengine/sprites.h"
 
 #define DEFAULT_ANIM_SPEED      100
 

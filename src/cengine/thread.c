@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 #include "myos.h"
 
 #if defined OS_LINUX
     #include <sys/prctl.h>
 #endif
 
-#include "engine/mythread.h"
+#include "cengine/mythread.h"
 
 #include "utils/log.h"
 

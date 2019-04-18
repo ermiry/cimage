@@ -1,5 +1,5 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef _CENGINE_INPUT_H_
+#define _CENGINE_INPUT_H_
 
 #include <SDL2/SDL.h>
 

@@ -1,11 +1,11 @@
-#ifndef TEXTURES_H
-#define TEXTURES_H
+#ifndef _CENGINE_TEXTURES_H_
+#define _CENGINE_TEXTURES_H_
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
-#include "engine/sprites.h"
+#include "cengine/sprites.h"
 
 extern SDL_Texture *texture_load (const char *filename, SDL_Renderer *renderer);
 extern void texture_get_dimensions (SDL_Texture *texture, u32 *w, u32 *h);

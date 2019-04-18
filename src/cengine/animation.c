@@ -4,16 +4,16 @@
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
 #include "myos.h"
 
 #include "game/game.h"
 
-#include "engine/mythread.h"
-#include "engine/timer.h"
-#include "engine/sprites.h"
-#include "engine/animation.h"
+#include "cengine/mythread.h"
+#include "cengine/timer.h"
+#include "cengine/sprites.h"
+#include "cengine/animation.h"
 
 #include "collections/llist.h"
 

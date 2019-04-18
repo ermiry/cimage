@@ -1,9 +1,9 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef _CENGINE_TIMER_H_
+#define _CENGINE_TIMER_H_
 
 #include <stdbool.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
 typedef struct Timer {
 

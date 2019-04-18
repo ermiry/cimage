@@ -1,6 +1,6 @@
 // #include <stdbool.h>
 
-// #include "blackrock.h"
+// #include "types/myTypes.h"
 
 // #include "game/game.h"
 // #include "game/player.h"
@@ -386,11 +386,11 @@
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
 #include "game/vector2d.h" 
 
-#include "engine/input.h"
+#include "cengine/input.h"
 
 extern void quit (void);
 

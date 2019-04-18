@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 #include "ui/ui.h"
 
 #include "engine/renderer.h"

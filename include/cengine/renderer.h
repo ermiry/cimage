@@ -1,5 +1,5 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#ifndef _CENGINE_RENDERER_H_
+#define _CENGINE_RENDERER_H_
 
 #include <SDL2/SDL.h>
 

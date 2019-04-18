@@ -1,12 +1,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
 #include "game/camera.h"
 
-#include "engine/renderer.h"
-#include "engine/sprites.h"
+#include "cengine/renderer.h"
+#include "cengine/sprites.h"
 
 #include "utils/log.h"
 #include "utils/myUtils.h"

@@ -1,9 +1,9 @@
-#ifndef SPRITES_H
-#define SPRITES_H
+#ifndef _CENGINE_SPRITES_H_
+#define _CENGINE_SPRITES_H_
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
+#include "types/myTypes.h"
 
 typedef struct Sprite {
 
