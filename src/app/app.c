@@ -229,8 +229,8 @@ GameObject *game_object_new (const char *name, const char *tag) {
 void game_object_add_child (GameObject *parent, GameObject *child) {
 
     if (parent && child) {
-        if (!parent->children) parent->children = llist_init (NULL);
-        llist_insert_next (parent->children, llist_end (parent->children), child);
+        if (!parent->children) parent->children = dlist_init (NULL, NULL);
+        dlist_insert_after (parent->children, dlist_end (parent->children), child);
     }
 
 }
@@ -240,7 +240,7 @@ GameObject *game_object_remove_child (GameObject *parent, GameObject *child) {
     if (parent && child) {
         if (parent->children) { 
             GameObject *go = NULL;
-            ListNode *n = llist_start (parent->children);
+            ListElement *n = dlist_start (parent->children);
             while (n != NULL) { 
                 go = (GameObject *) n->data;
                 if (go->id == child->id) break;
@@ -403,12 +403,12 @@ static u8 game_init (void) {
         // spawn items
 
         // init player(s)
-        llist_insert_next (world->players, llist_start (world->players), player_init ());
+        llist_insert_next (world->players, dlist_start (world->players), player_init ());
 
         // spawn players
         GameObject *go = NULL;
         Transform *transform = NULL;
-        for (ListNode *n = llist_start (world->players); n != NULL; n = n->next) {
+        for (ListElement *n = dlist_start (world->players); n != NULL; n = n->next) {
             go = (GameObject *) n->data;
             transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
             Coord spawnPoint = map_get_free_spot (world->game_map);
@@ -418,7 +418,7 @@ static u8 game_init (void) {
         }
 
         // update camera
-        GameObject *main_player = (GameObject *) (llist_start (world->players)->data );
+        GameObject *main_player = (GameObject *) (dlist_start (world->players)->data );
         transform = (Transform *) game_object_get_component (main_player, TRANSFORM_COMP);
         world->game_camera->center = transform->position;
 
