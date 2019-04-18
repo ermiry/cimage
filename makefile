@@ -1,15 +1,11 @@
 TARGET      := cimage
 
-# blackrock specific
-
 SDL2 = `sdl2-config --cflags --libs` -l SDL2_image -l SDL2_ttf
 MATH = -lm 
 PTHREAD := -l pthread
 
 # development
-DEVELOPMENT = -D DEV
-
-DEFINES = 
+DEVELOPMENT = -g -D DEV
 
 CC          := gcc
 
@@ -21,8 +17,8 @@ SRCEXT      := c
 DEPEXT      := d
 OBJEXT      := o
 
-CFLAGS      := -g
-LIB         :=  $(PTHREAD) $(SDL2) $(MATH)
+CFLAGS      := $(DEVELOPMENT)
+LIB         := $(PTHREAD) $(SDL2) $(MATH)
 INC         := -I $(INCDIR) -I /usr/local/include
 INCDEP      := -I $(INCDIR)
 
