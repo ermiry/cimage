@@ -238,6 +238,8 @@ int photoSelector(void *data){
     }
 }
 
+
+// old ui entry point
 void user(){
 
     file_openAllFilesInDir ("./imgs/");
