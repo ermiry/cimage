@@ -1,0 +1,13 @@
+- add settings for adjusting resolution and other parameters
+- fix main loop and renderer using new settings
+- clean resources folder -> rename to assets
+- test a success run with an empty panel
+- finish jpeg and exif logic
+- open image folders
+    - perform actions on folder:
+        - display all miniture images in main view
+        - sort images in floder by date
+            - save into a test json -> add json capabilities with libson
+- work on main ui
+- show logo on the preload state
+    - show as a floating screen in a separte window while loading images of the last folder with json data
