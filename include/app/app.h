@@ -78,14 +78,14 @@ typedef struct GameObject {
 
 } GameObject;
 
-extern GameObject *app_object_new (const char *name, const char *tag);
-extern void app_object_destroy (GameObject *go);
-extern void app_object_destroy_ref (void *data);
+extern GameObject *game_object_new (const char *name, const char *tag);
+extern void game_object_destroy (GameObject *go);
+extern void game_object_destroy_ref (void *data);
 
-extern void app_object_add_child (GameObject *parent, GameObject *child);
-extern GameObject *app_object_remove_child (GameObject *parent, GameObject *child);
+extern void game_object_add_child (GameObject *parent, GameObject *child);
+extern GameObject *game_object_remove_child (GameObject *parent, GameObject *child);
 
-extern GameObject *app_object_get_by_id (u32 id);
+extern GameObject *game_object_get_by_id (u32 id);
 
 /*** COMPONENTS ***/
 
@@ -97,9 +97,9 @@ typedef enum GameComponent {
 
 } GameComponent;
 
-extern void *app_object_add_component (GameObject *go, GameComponent component);
-extern void *app_object_get_component (GameObject *go, GameComponent component);
-extern void app_object_remove_component (GameObject *go, GameComponent component);
+extern void *game_object_add_component (GameObject *go, GameComponent component);
+extern void *game_object_get_component (GameObject *go, GameComponent component);
+extern void game_object_remove_component (GameObject *go, GameComponent component);
 
 typedef struct Transform {
 

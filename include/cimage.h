@@ -8,6 +8,24 @@
 #define EXIT_SUCCESS        0
 #define EXIT_FAILURE        1
 
+#define FPS_LIMIT   30
+
+#define DEFAULT_SCREEN_WIDTH    1280    
+#define DEFAULT_SCREEN_HEIGHT   720
+
+#define THREAD_OK   0
+
+#ifdef DEV
+    #define ASSETS_PATH "./assets/"
+#elif PRODUCTION
+    #define ASSETS_PATH "../assets/"
+#else 
+    #define ASSETS_PATH "./assets/"
+#endif
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 typedef unsigned char uchar;
 
 typedef enum ReadMode {
@@ -119,11 +137,6 @@ typedef struct Cimage {
 
 } Cimage;
 
-#pragma region JPEG
-
-
-#pragma endregion
-
 #pragma region EXIF
 
 static const char * OrientTab[9] = {
@@ -139,5 +152,12 @@ static const char * OrientTab[9] = {
 };
 
 #pragma endregion
+
+extern bool running;
+extern bool inGame;
+extern bool wasInGame;
+
+extern void quit (int code);
+extern void die (const char *error);
 
 #endif

@@ -1,4 +1,17 @@
-void exif_process (unsigned char * ExifSection, unsigned int length) {
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+#include "myos.h"
+#include "types/myTypes.h"
+
+#include "cimage.h"
+
+#include "utils/myUtils.h"
+#include "utils/log.h"
+
+void exif_process (unsigned char *ExifSection, unsigned int length) {
 
     /* unsigned int FirstOffset;
 

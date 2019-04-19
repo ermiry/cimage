@@ -15,6 +15,8 @@
 #include "cengine/textures.h"
 #include "cengine/animation.h"
 
+#include "app/app.h"
+
 #include "collections/dllist.h"
 
 // #include "utils/objectPool.h"
@@ -247,7 +249,7 @@ GameObject *game_object_remove_child (GameObject *parent, GameObject *child) {
                 n = n->next;
             }
 
-            if (n) return (GameObject *) llist_remove (parent->children, n);
+            if (n) return (GameObject *) dlist_remove_element (parent->children, n);
         }
     }
 
@@ -357,20 +359,16 @@ void game_object_remove_component (GameObject *go, GameComponent component) {
 
 #pragma region GAME 
 
-// FIXME: how do we want to manage the score?
-// Score
-Score *playerScore = NULL;
-
-// TODO:
+// FIXME: do we still need this?
 static u8 load_game_data (void) {
 
     // connect to items db
     // items_init ();
     // connect to enemies db and load enemy data
-    if (!enemies_connect_db ()) 
-        return 0;
+    // if (!enemies_connect_db ()) 
+    //     return 0;
 
-    return 0;
+    // return 0;
 
 }
 
@@ -387,7 +385,7 @@ static u8 game_init (void) {
 
     if (!load_game_data ()) {
         // init world
-        world = world_create ();
+        /* world = world_create ();
 
         // init map
         // FIXME: from where do we get this values?
@@ -426,7 +424,7 @@ static u8 game_init (void) {
 
         // FIXME: we are ready to start updating the game
         game_state->update = game_update;
-        // app_manager->currState->update = game_update;
+        // app_manager->currState->update = game_update; */
 
         return 0;
     } 
@@ -466,7 +464,8 @@ static void app_update (void) {
 // FIXME: we need to implement occlusion culling!
 static void app_render (void) {
 
-    Transform *transform = NULL;
+    // FIXME: camera
+    /* Transform *transform = NULL;
     Graphics *graphics = NULL;
     for (u32 i = 0; i < curr_max_objs; i++) {
         transform = (Transform *) game_object_get_component (gameObjects[i], TRANSFORM_COMP);
@@ -483,7 +482,7 @@ static void app_render (void) {
                 transform->position.x, transform->position.y, 
                 graphics->flip);
         }
-    }
+    } */
 
 }
 
@@ -497,7 +496,7 @@ void app_clean_up (void) {
     free (gameObjects);
 
     #ifdef DEV
-    logMsg (stdout, SUCCESS, GAME, "Done cleaning up app data!");
+    logMsg (stdout, SUCCESS, APP, "Done cleaning up app data!");
     #endif
     
 }
@@ -510,10 +509,10 @@ AppState *app_state_new (void) {
 
         // new_game_state->update = game_update;
         new_game_state->update = NULL;
-        new_game_state->render = game_render;
+        new_game_state->render = app_render;
 
-        new_game_state->onEnter = game_onEnter;
-        new_game_state->onExit = game_onExit;
+        new_game_state->onEnter = app_onEnter;
+        new_game_state->onExit = app_onExit;
     }
 
 }

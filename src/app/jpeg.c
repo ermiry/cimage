@@ -7,7 +7,8 @@
 #include "types/myTypes.h"
 
 #include "cimage.h"
-#include "jpeg.h"
+#include "app/jpeg.h"
+#include "app/exif.h"
 
 #include "utils/myUtils.h"
 #include "utils/log.h"
@@ -437,7 +438,7 @@ int jpeg_readSections (Cimage *cimage) {
 
 }
 
-int jpeg_readFile (const char *filename, Cimage *cimage) {
+int jpeg_read_file (const char *filename, Cimage *cimage) {
 
     cimage->file = fopen (filename, "rb");
     if (!cimage->file) {

@@ -9,7 +9,7 @@
     #include <sys/prctl.h>
 #endif
 
-#include "cengine/mythread.h"
+#include "cengine/thread.h"
 
 #include "utils/log.h"
 

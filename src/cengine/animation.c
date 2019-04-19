@@ -7,8 +7,9 @@
 #include "types/myTypes.h"
 
 #include "myos.h"
+#include "cimage.h"
 
-#include "game/game.h"
+#include "app/app.h"
 
 #include "cengine/thread.h"
 #include "cengine/timer.h"
@@ -177,8 +178,8 @@ void *animations_update (void *data) {
              // update all animations
             Animator *animator = NULL;
             Graphics *graphics = NULL;
-            for (ListNode *node = dlist_start (animators); node != NULL; node = node->next) {
-                animator = (Animator *) node->data;
+            for (ListElement *le = dlist_start (animators); le != NULL; le = le->next) {
+                animator = (Animator *) le->data;
                 graphics = (Graphics *) game_object_get_component (game_object_get_by_id (animator->goID), GRAPHICS_COMP);
 
                 animator->currFrame = (int) (((animator->timer->ticks / animator->currAnimation->speed) %
@@ -205,8 +206,8 @@ void *animations_update (void *data) {
         // update animators timers
         if (dlist_size (animators) > 0) {
             Animator *animator = NULL;
-            for (ListNode *node = dlist_start (animators); node != NULL; node = node->next) {
-                animator = (Animator *) node->data;
+            for (ListElement *le = dlist_start (animators); le != NULL; le = le->next) {
+                animator = (Animator *) le->data;
                 animator->timer->ticks = SDL_GetTicks () - animator->timer->startTicks;
             }
         }

@@ -7,6 +7,8 @@
 #include "types/myTypes.h"
 #include "cimage.h"
 
+#include "app/jpeg.h"
+
 #include "utils/myUtils.h"
 #include "utils/log.h"
 
@@ -347,7 +349,7 @@ void cimage_processFile (const char *filename) {
 
     // TODO: set command line options
     // no command option selected, so just read te img info
-    if (!jpeg_readFile (filename, cimage)) {
+    if (!jpeg_read_file (filename, cimage)) {
         // TODO: we have got the image info, what do we do next?
         // TODO: we need to return the image info!!!
         // we can now display it

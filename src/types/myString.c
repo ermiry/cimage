@@ -2,8 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdio.h>
 
-#include "myString.h"
+#include "types/myString.h"
 
 static inline void char_copy (char *to, char *from) {
 
@@ -21,7 +22,7 @@ String *str_new (const char *str) {
         if (str) {
             string->len = strlen (str);
             string->str = (char *) calloc (string->len + 1, sizeof (char));
-            char_copy (string->str, str);
+            char_copy (string->str, (char *) str);
         }
     }
 

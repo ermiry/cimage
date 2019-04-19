@@ -4,13 +4,16 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "cimage.h"
 #include "types/myTypes.h"
-#include "ui/ui.h"
 
-#include "engine/renderer.h"
-#include "engine/sprites.h"
-#include "engine/textures.h"
-#include "engine/input.h"
+#include "cengine/renderer.h"
+#include "cengine/sprites.h"
+#include "cengine/textures.h"
+#include "cengine/input.h"
+
+#include "app/app.h"
+#include "ui/ui.h"
 
 #include "utils/log.h"
 #include "utils/myUtils.h"
@@ -1076,7 +1079,7 @@ u8 ui_destroy (void) {
     SDL_FreeCursor (sysCursor);
 
     #ifdef DEV
-    logMsg (stdout, SUCCESS, GAME, "Done cleaning up the UI!");
+    logMsg (stdout, SUCCESS, APP, "Done cleaning up the UI!");
     #endif
 
     return 0;

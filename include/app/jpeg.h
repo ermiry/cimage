@@ -32,6 +32,6 @@
 
 #define PSEUDO_IMAGE_MARKER 0x123; // Extra value.
 
-extern int jpeg_readFile (const char *filename, Cimage *cimage);
+extern int jpeg_read_file (const char *filename, Cimage *cimage);
 
 #endif

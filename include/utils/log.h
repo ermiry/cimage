@@ -3,8 +3,6 @@
 
 #include <stdio.h>
 
-/*** LOG ***/
-
 #define COLOR_RED       "\x1b[31m"
 #define COLOR_GREEN     "\x1b[32m"
 #define COLOR_YELLOW    "\x1b[33m"
@@ -24,6 +22,7 @@ typedef enum LogMsgType {
     TEST,
 
     IMAGE,
+    APP,
 
 } LogMsgType;
 

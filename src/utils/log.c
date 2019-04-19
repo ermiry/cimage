@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "log.h"
+#include "utils/log.h"
 
 #include "utils/myUtils.h"
 
@@ -18,6 +18,7 @@ char *getMsgType (LogMsgType type) {
         case TEST: strcpy (temp, "[TEST]"); break;
 
         case IMAGE: strcpy (temp, "[IMAGE]"); break;
+        case APP: strcpy (temp, "[APP]"); break;
 
         default: break;
     }
