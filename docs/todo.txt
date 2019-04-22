@@ -11,3 +11,13 @@
 - work on main ui
 - show logo on the preload state
     - show as a floating screen in a separte window while loading images of the last folder with json data
+
+
+further implementations
+
+- support for other image formats
+- video playback
+- memories and/or albums creation 
+- facial recognition and organization
+- sync photos and/or settings with ermiry account
+    - different sharing options
