@@ -54,9 +54,7 @@ static int init (void) {
 
     else {
         logMsg (stderr, ERROR, NO_TYPE, "Unable to initialize SDL!");
-        #ifdef BLACK_DEBUG
         logMsg (stderr, ERROR, NO_TYPE, createString ("%s", SDL_GetError ()));
-        #endif
         errors = 1;
     }
 
