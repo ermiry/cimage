@@ -2,13 +2,13 @@
 
 #include <SDL2/SDL.h>
 
-#include "types/myTypes.h"
+#include "blackrock.h"
 
-// #include "settings.h"
+#include "settings.h"
 
 #include "cengine/renderer.h"
 
-#include "app/app.h"
+#include "game/game.h"
 #include "ui/ui.h"
 
 #ifdef DEV
@@ -33,8 +33,8 @@ void render (void) {
     SDL_RenderClear (main_renderer);
 
     // render current game screen
-    if (app_manager->currState->render)
-        app_manager->currState->render ();
+    if (game_manager->currState->render)
+        game_manager->currState->render ();
 
     ui_render ();       // render ui elements
 
@@ -53,7 +53,7 @@ void render (void) {
 
     // render the views from back to front for the current screen
     // UIView *v = NULL;
-    // for (ListElement *e = LIST_START (scene->views); e != NULL; e = e->next) {
+    // for (ListElement *e = dlist_start (scene->views); e != NULL; e = e->next) {
     //     v = (UIView *) LIST_DATA (e);
     //     clearConsole (v->console);
     //     v->render (v->console);
@@ -92,7 +92,7 @@ void window_update_size (SDL_Window *window) {
     if (window) {
         SDL_GetWindowSize (main_window, &windowSize.width, &windowSize.height);
         #ifdef DEV
-        logMsg (stdout, DEBUG, NO_TYPE, 
+        logMsg (stdout, DEBUG_MSG, NO_TYPE, 
             createString ("Window size: %dx%dpx.", windowSize.width, windowSize.height));
         #endif
     }
@@ -132,17 +132,16 @@ static int window_init_main (const char *title) {
 
     SDL_GetCurrentDisplayMode (0, &displayMode); 
     #ifdef DEV
-    logMsg (stdout, DEBUG, NO_TYPE, 
+    logMsg (stdout, DEBUG_MSG, NO_TYPE, 
         createString ("Main display mode is %dx%dpx @ %dhz.", 
         displayMode.w, displayMode.h, displayMode.refresh_rate));
     #endif
 
-    // FIXME: add settings
     // creates a window of the size of the screen
-    // main_window = SDL_CreateWindow (title,
-    //     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-    //     main_settings->resolution.width, main_settings->resolution.height,
-    //     main_settings->window ? 0 : SDL_WINDOW_FULLSCREEN);
+    main_window = SDL_CreateWindow (title,
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+        main_settings->resolution.width, main_settings->resolution.height,
+        main_settings->window ? 0 : SDL_WINDOW_FULLSCREEN);
 
     if (main_window) {
         window_update_size (main_window);

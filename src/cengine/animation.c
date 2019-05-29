@@ -4,19 +4,23 @@
 
 #include <SDL2/SDL.h>
 
-#include "types/myTypes.h"
-
 #include "myos.h"
-#include "cimage.h"
 
-#include "app/app.h"
+#include "blackrock.h"
+
+#include "types/types.h"
+#include "types/string.h"
 
 #include "cengine/thread.h"
 #include "cengine/timer.h"
 #include "cengine/sprites.h"
 #include "cengine/animation.h"
+#include "cengine/game/go.h"
 
-#include "collections/dllist.h"
+#include "collections/dlist.h"
+
+#include "utils/file.h"
+#include "utils/json.h"
 
 #ifdef DEV
     #include "utils/log.h"
@@ -24,15 +28,110 @@
 
 static bool anim_init = false;
 
-/*** ANIMATION ***/
+static AnimData *anim_data_new (void) {
 
-Animation *animation_create (u8 n_frames, ...) {
+    AnimData *anim_data = (AnimData *) malloc (sizeof (AnimData));
+    if (anim_data) {
+        memset (anim_data, 0, sizeof (AnimData));
+        anim_data->animations = dlist_init (animation_delete, NULL);
+    }
+
+    return anim_data;
+
+}
+
+// the animations list is used in the entity's component
+void anim_data_delete (AnimData *data) { 
+    
+    if (data) {
+        dlist_destroy (data->animations);
+        free (data); 
+    } 
+    
+}
+
+/*** Animation Files ***/
+
+// parse the array of anim points for a given animation and return them in a list
+static DoubleList *animation_file_parse_anim_points (unsigned int n_points, json_value *points_array) {
+
+    DoubleList *points = NULL;
+
+    if (points_array) {
+        points = dlist_init (free, NULL);
+
+        IndividualSprite *p = NULL;
+        json_value *point_object = NULL;
+        for (unsigned int i = 0; i < n_points; i++) {
+            point_object = points_array->u.array.values[i];
+            if (point_object) {
+                p = (IndividualSprite *) malloc (sizeof (IndividualSprite));
+                memset (p, 0, sizeof (IndividualSprite));
+
+                p->col = point_object->u.object.values[0].value->u.integer;
+                p->row = point_object->u.object.values[1].value->u.integer;
+
+                dlist_insert_after (points, dlist_end (points), p);
+            }
+        }
+    }
+
+    return points;
+
+}
+
+// parses an animation json file into a list of animations
+AnimData *animation_file_parse (const char *filename) {
+
+    AnimData *anim_data = NULL;
+
+    if (filename) {
+        json_value *value = file_json_parse (filename);
+
+        if (value) {
+            anim_data = anim_data_new ();
+
+            // process json values into individual animations
+            json_value *size_object = value->u.object.values[0].value;
+            anim_data->w = size_object->u.object.values[0].value->u.integer;
+            anim_data->h = size_object->u.object.values[1].value->u.integer;
+
+            anim_data->scale = value->u.object.values[1].value->u.integer;
+
+            json_value *animations_array = value->u.object.values[2].value;
+            json_value *anim_object = NULL;
+            Animation *anim = NULL;
+            for (unsigned int i = 0; i < animations_array->u.array.length; i++) {
+                anim_object = animations_array->u.array.values[i];
+
+                int n_frames = anim_object->u.object.values[1].value->u.integer;
+                DoubleList *anim_points = animation_file_parse_anim_points (n_frames, anim_object->u.object.values[2].value);
+
+                const char *name = anim_object->u.object.values[0].value->u.string.ptr;
+                int speed = anim_object->u.object.values[3].value->u.integer;
+
+                anim = animation_create (name, n_frames, anim_points, speed);
+                dlist_insert_after (anim_data->animations, dlist_end (anim_data->animations), anim);
+            }
+
+            json_value_free (value);
+        }
+    }
+
+    return anim_data;
+
+}
+
+/*** Animation ***/
+
+Animation *animation_new (u8 n_frames, ...) {
 
     va_list valist;
     va_start (valist, n_frames);
 
     Animation *animation = (Animation *) malloc (sizeof (Animation));
     if (animation) {
+        animation->name = NULL;
         animation->speed = DEFAULT_ANIM_SPEED;
         animation->n_frames = n_frames;
         animation->frames = (IndividualSprite **) calloc (n_frames, sizeof (IndividualSprite *));
@@ -47,13 +146,44 @@ Animation *animation_create (u8 n_frames, ...) {
 
 }
 
-void animation_destroy (Animation *animation) {
+// create an animation with the requested values
+Animation *animation_create (const char *name, u8 n_frames, DoubleList *anim_points, unsigned int speed) {
 
-    if (animation) {
+    Animation *anim = (Animation *) malloc (sizeof (Animation));
+    if (anim) {
+        anim->name = str_create (name);
+        anim->speed = speed;
+
+        anim->n_frames = n_frames;
+        anim->frames = (IndividualSprite **) calloc (n_frames, sizeof (IndividualSprite *));
+        unsigned int i = 0;
+        for (ListElement *le = dlist_start (anim_points); le; le = le->next) {
+            anim->frames[i] = (IndividualSprite *) le->data;
+            i++;
+        }
+
+        dlist_clean (anim_points);
+    }
+
+    return anim;
+
+}
+
+void animation_delete (void *ptr) {
+
+    if (ptr) {
+        Animation *animation = (Animation *) ptr;
+        str_delete (animation->name);
         if (animation->frames) free (animation->frames);
 
         free (animation);
     }
+
+}
+
+void animation_set_name (Animation *animation, const char *name) {
+
+    if (animation && name) animation->name = str_new (name);
 
 }
 
@@ -63,7 +193,26 @@ void animation_set_speed (Animation *animation, u32 speed) {
 
 }
 
-/*** ANIMATOR ***/
+Animation *animation_get_by_name (DoubleList *animations, const char *name) {
+
+    Animation *retval = NULL;
+
+    if (animations && name) {
+        Animation *anim = NULL;
+        for (ListElement *le = dlist_start (animations); le; le = le->next) {
+            anim = (Animation *) le->data;
+            if (!strcmp (anim->name->str, name)) {
+                retval = anim;
+                break;
+            }
+        }
+    }
+
+    return retval;
+
+}
+
+/*** Animator ***/
 
 DoubleList *animators = NULL;
 
@@ -94,7 +243,7 @@ void animator_destroy (Animator *animator) {
         if (animator->animations) {
             for (u8 i = 0; i < animator->n_animations; i++)
                 if (animator->animations[i])
-                    animation_destroy (animator->animations[i]);
+                    animation_delete (animator->animations[i]);
 
             free (animator->animations);
         }
@@ -114,7 +263,7 @@ static void animator_destroy_ref (void *data) {
     
 }
 
-static int animator_compare (void *one, void *two) {
+static int animator_comparator (void *one, void *two) {
 
     if (one && two) {
         Animator *anim_one = (Animator *) one;
@@ -124,9 +273,6 @@ static int animator_compare (void *one, void *two) {
         else if (anim_one->goID == anim_two->goID) return 0;
         else return 1;
     }
-
-    return -1;      // default return 
-
 }
 
 void animator_set_default_animation (Animator *animator, Animation *animation) {
@@ -206,7 +352,7 @@ void *animations_update (void *data) {
         // update animators timers
         if (dlist_size (animators) > 0) {
             Animator *animator = NULL;
-            for (ListElement *le = dlist_start (animators); le != NULL; le = le->next) {
+            for (ListElement *le = dlist_start (animators); le; le = le->next) {
                 animator = (Animator *) le->data;
                 animator->timer->ticks = SDL_GetTicks () - animator->timer->startTicks;
             }
@@ -229,7 +375,7 @@ int animations_init (void) {
 
     int errors = 0;
 
-    animators = dlist_init (animator_destroy_ref, animator_compare);
+    animators = dlist_init (animator_destroy_ref, animator_comparator);
     if (animators) {
         if (!pthread_create (&anim_thread, NULL, animations_update, NULL)) anim_init = true;
         else {

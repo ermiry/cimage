@@ -1,12 +1,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "types/myTypes.h"
-
-// #include "game/camera.h"
+#include "blackrock.h"
 
 #include "cengine/renderer.h"
 #include "cengine/sprites.h"
+#include "cengine/game/camera.h"
 
 #include "utils/log.h"
 #include "utils/myUtils.h"
@@ -37,8 +36,7 @@ void texture_get_dimensions (SDL_Texture *texture, u32 *w, u32 *h) {
 
 }
 
-// FIXME:
-/* void texture_draw (Camera *cam, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip) {
+void texture_draw (Camera *cam, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip) {
 
     if (cam && sprite) {
         sprite->dest_rect.x = x;
@@ -69,4 +67,4 @@ void texture_draw_frame (Camera *cam, SpriteSheet *spriteSheet,
             0, 0, flip);
     }
 
-} */
+}

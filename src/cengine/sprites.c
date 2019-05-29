@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "types/myTypes.h"
+#include "blackrock.h"
 
 #include "cengine/sprites.h"
 #include "cengine/textures.h"
@@ -48,18 +48,33 @@ void sprite_destroy (Sprite *sprite) {
 
 /*** SPRITES SHEET ***/
 
+SpriteSheet *sprite_sheet_new (void) {
+
+    SpriteSheet *sp = (SpriteSheet *) malloc (sizeof (SpriteSheet));
+    if (sp) {
+        memset (sp, 0, sizeof (SpriteSheet));
+        sp->texture = NULL;
+        sp->individualSprites = NULL;
+    }
+
+    return sp;
+
+}
+
 void sprite_sheet_destroy (SpriteSheet *spriteSheet) {
 
     if (spriteSheet) {
-        u8 x_num_sprites = spriteSheet->w / spriteSheet->sprite_w;
-        u8 y_num_sprites = spriteSheet->h / spriteSheet->sprite_h;
+        if (spriteSheet->individualSprites) {
+            u8 x_num_sprites = spriteSheet->w / spriteSheet->sprite_w;
+            u8 y_num_sprites = spriteSheet->h / spriteSheet->sprite_h;
 
-        for (u8 i = 0; i < x_num_sprites; i++)
-            for (u8 j = 0; j < y_num_sprites; j++)
-                if (spriteSheet->individualSprites[i][j])
-                    free (spriteSheet->individualSprites[i][j]);
+            for (u8 i = 0; i < x_num_sprites; i++)
+                for (u8 j = 0; j < y_num_sprites; j++)
+                    if (spriteSheet->individualSprites[i][j])
+                        free (spriteSheet->individualSprites[i][j]);
 
-        free (spriteSheet->individualSprites);
+            free (spriteSheet->individualSprites);
+        }
 
         if (spriteSheet->texture) SDL_DestroyTexture (spriteSheet->texture);
 
@@ -71,7 +86,7 @@ void sprite_sheet_destroy (SpriteSheet *spriteSheet) {
 SpriteSheet *sprite_sheet_load (const char *filename, SDL_Renderer *renderer) {
 
     if (filename && renderer) {
-        SpriteSheet *new_sprite_sheet = (SpriteSheet *) malloc (sizeof (SpriteSheet));
+        SpriteSheet *new_sprite_sheet = sprite_sheet_new ();
         if (new_sprite_sheet) {
             new_sprite_sheet->texture = texture_load (filename, renderer);
             if (new_sprite_sheet->texture) {
