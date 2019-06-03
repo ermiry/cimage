@@ -7,9 +7,9 @@
 #include "cengine/renderer.h"
 #include "cengine/thread.h"
 #include "cengine/game/go.h"
-
-#include "utils/log.h"
-#include "utils/myUtils.h"
+#include "cengine/manager/manager.h"
+#include "cengine/utils/log.h"
+#include "cengine/utils/utils.h"
 
 static unsigned int fps_limit = 30;
 
@@ -22,6 +22,7 @@ int cengine_init (const char *window_name) {
     int errors = 0;
 
     if (!SDL_Init (SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_VIDEO)) {
+        errors = thread_hub_init_global ();
         errors = video_init_main (window_name);
         errors = animations_init ();
         errors = game_objects_init_all ();
@@ -29,9 +30,9 @@ int cengine_init (const char *window_name) {
     }
 
     else {
-        logMsg (stderr, ERROR, NO_TYPE, "Unable to initialize SDL!");
-        #ifdef BLACK_DEBUG
-        logMsg (stderr, ERROR, NO_TYPE, createString ("%s", SDL_GetError ()));
+        cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to init SDL!");
+        #ifdef CENGINE_DEBUG
+        cengine_log_msg (stderr, ERROR, NO_TYPE, c_string_create ("%s", SDL_GetError ()));
         #endif
         errors = 1;
     }
@@ -46,6 +47,7 @@ int cengine_end (void) {
     animations_end ();
     ui_destroy ();
     video_destroy_main ();
+    thread_hub_end_global ();
 
     SDL_Quit ();
 
@@ -70,9 +72,8 @@ void *cengine_update (void *args) {
     while (running) {
         frameStart = SDL_GetTicks ();
 
-        // FIXME:
-        // if (game_manager->currState->update)
-        //     game_manager->currState->update ();
+        if (manager->curr_state->update)
+            manager->curr_state->update ();
 
         // limit the FPS
         sleepTime = timePerFrame - (SDL_GetTicks () - frameStart);
@@ -120,7 +121,9 @@ static void cengine_run (void) {
         deltaTicks += deltaTime;
         fps++;
         if (deltaTicks >= 1000) {
-            // printf ("main fps: %i\n", fps);
+            #ifdef CENGINE_DEBUG
+            printf ("main fps: %i\n", fps);
+            #endif
             main_fps = fps;
             deltaTicks = 0;
             fps = 0;
@@ -133,10 +136,8 @@ int cengine_start (int fps) {
 
     fps_limit = fps > 0 ? fps : 30;
 
-    // FIXME: use our own thread logic
-    // start the update thread
-    if (pthread_create (&update_thread, NULL, cengine_update, NULL)) {
-        logMsg (stderr, ERROR, NO_TYPE, "Failed to create update thread!");
+    if (thread_create_detachable (cengine_update, NULL, "update")) {
+        cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create update thread!");
         running = false;
     }
 

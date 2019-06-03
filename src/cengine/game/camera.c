@@ -5,7 +5,7 @@
 #include "cengine/renderer.h"
 #include "cengine/input.h"
 #include "cengine/game/camera.h"
-#include "cengine/game/vector2d.h"
+#include "cengine/types/vector2d.h"
 
 #include "utils/myUtils.h"
 

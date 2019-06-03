@@ -3,27 +3,34 @@
 
 #define DEFAULT_MAX_GOS     200
 
-#define COMP_COUNT      7
+#define COMP_COUNT      4
 
-#include "types/types.h"
+#include "cengine/types/types.h"
+#include "cengine/types/string.h"
+
+#include "cengine/game/components/graphics.h"
+#include "cengine/game/components/transform.h"
+
 #include "collections/dlist.h"
 
-#include "cengine/sprites.h"
-#include "cengine/game/vector2d.h"
-
-// TODO: better tag management -> create a list for each tag?
 typedef struct GameObject {
     
     i32 id;
 
     char *name;
-    char *tag;
+    char *tag;      // FIXME: change this when adding to tags!!
     void *components[COMP_COUNT];
+    DoubleList *user_components;
 
     DoubleList *children;
     void (*update)(void *data);
 
 } GameObject;
+
+extern GameObject **gameObjects;
+extern u32 max_gos;
+extern u32 curr_max_objs;
+extern u32 new_go_id;
 
 // init our game objects array
 extern u8 game_objects_init_all (void);
@@ -43,6 +50,25 @@ extern void game_object_destroy_all (void);
 // update every game object
 extern void game_object_update_all (void);
 
+/*** Tags ***/
+
+typedef struct GameObjectTag {
+
+    String *name;
+    DoubleList *gos;
+
+} GameObjectTag;
+
+// create a new go tag with that name
+extern void game_object_tag_create (const char *name);
+
+extern GameObjectTag *game_object_tag_get_by_name (const char *tag_name);
+
+// adds a game object to a tag, returns 0 on success, 1 on error
+extern int game_object_add_to_tag (GameObject *go, const char *tag_name);
+// removes a game object from a tag, returns 0 on success, 1 on error
+extern int game_object_remove_from_tag (GameObject *go, const char *tag_name);
+
 /*** Components ***/
 
 typedef enum GameComponent {
@@ -50,11 +76,7 @@ typedef enum GameComponent {
     TRANSFORM_COMP = 0,
     GRAPHICS_COMP,
     ANIMATOR_COMP,
-    BOX_COLLIDER_COMP,
-
-    PLAYER_COMP,
-    ENEMY_COMP,
-    ITEM_COMP,
+    BOX_COLLIDER_COMP
 
 } GameComponent;
 
@@ -62,53 +84,31 @@ extern void *game_object_add_component (GameObject *go, GameComponent component)
 extern void *game_object_get_component (GameObject *go, GameComponent component);
 extern void game_object_remove_component (GameObject *go, GameComponent component);
 
-typedef enum Layer {
+/*** User defined componets ***/
 
-    UNSET_LAYER = 0,
-    GROUND_LAYER = 1,
-    LOWER_LAYER = 2,
-    MID_LAYER = 3,
-    TOP_LAYER = 4,
+typedef struct UserComponent {
 
-} Layer;
+    String *name;
+    void *component;
+    void *(*add)(u32);
+    void (*remove)(void *);
+    void (*update)(void *);
 
-typedef struct Transform {
+} UserComponent;
 
-    u32 goID;
-    Vector2D position;
-    // Layer layer;
+// creates a new user component
+extern UserComponent *user_component_new (const char *name, 
+    void *(*add)(u32), void (*remove)(void *), void (*update)(void *));
+extern void user_component_delete (void *ptr);
 
-} Transform;
+// registers a new user component, returns 0 on success, 1 on error
+extern int user_component_register (UserComponent *user_comp);
 
-typedef enum Flip {
+// returns the component inside the user component for quick access
+extern void *game_object_add_user_component (GameObject *go, const char *component_name);
 
-    NO_FLIP = 0x00000000,
-    FLIP_HORIZONTAL = 0x00000001,
-    FLIP_VERTICAL = 0x00000002
+extern void *game_object_get_user_component (GameObject *go, const char *name);
 
-} Flip;
-
-typedef struct Graphics {
-
-    u32 goID;
-
-    Sprite *sprite;
-    SpriteSheet *spriteSheet;
-    bool refSprite;
-
-    u32 x_sprite_offset, y_sprite_offset;
-    bool multipleSprites;
-    Layer layer; 
-    Flip flip;
-    bool hasBeenSeen;
-    bool visibleOutsideFov;
-
-} Graphics;
-
-extern void graphics_set_sprite (Graphics *graphics, const char *filename);
-extern void graphics_set_sprite_sheet (Graphics *graphics, const char *filename);
-
-extern void graphics_ref_sprite (Graphics *graphics, Sprite *sprite);
-extern void graphics_ref_sprite_sheet (Graphics *graphics, SpriteSheet *spriteSheet);
+extern void game_object_user_component_remove (GameObject *go, const char *name);
 
 #endif

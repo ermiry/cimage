@@ -2,18 +2,13 @@
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
-
-#include "settings.h"
-
 #include "cengine/renderer.h"
+#include "cengine/manager/manager.h"
+#include "cengine/ui/ui.h"
 
-#include "game/game.h"
-#include "ui/ui.h"
-
-#ifdef DEV
-#include "utils/myUtils.h"
-#include "utils/log.h"
+#ifdef CENGINE_DEBUG
+#include "cengine/utils/utils.h"
+#include "cengine/utils/log.h"
 #endif
 
 SDL_Window *main_window = NULL;
@@ -33,38 +28,14 @@ void render (void) {
     SDL_RenderClear (main_renderer);
 
     // render current game screen
-    if (game_manager->currState->render)
-        game_manager->currState->render ();
+    if (manager->curr_state->render)
+        manager->curr_state->render ();
 
     ui_render ();       // render ui elements
 
     SDL_RenderPresent (main_renderer);
 
 }
-
-/*** OLD WAY OF RENDERING ***/
-
-/*** SCREEN ***/
-
-// FIXME: move this to a separate file
-// TODO: are we cleanning up the console and the screen??
-// do we want that to happen?
-// void renderScreen (SDL_Renderer *renderer, SDL_Texture *screen, UIScreen *scene) {
-
-    // render the views from back to front for the current screen
-    // UIView *v = NULL;
-    // for (ListElement *e = dlist_start (scene->views); e != NULL; e = e->next) {
-    //     v = (UIView *) LIST_DATA (e);
-    //     clearConsole (v->console);
-    //     v->render (v->console);
-    //     SDL_UpdateTexture (screen, v->pixelRect, v->console->pixels, v->pixelRect->w * sizeof (u32));
-    // }
-
-    // SDL_RenderClear (renderer);
-    // SDL_RenderCopy (renderer, screen, NULL, NULL);
-    // SDL_RenderPresent (renderer);
-
-// }
 
 static int render_init_main (void) {
 
@@ -91,9 +62,9 @@ void window_update_size (SDL_Window *window) {
 
     if (window) {
         SDL_GetWindowSize (main_window, &windowSize.width, &windowSize.height);
-        #ifdef DEV
-        logMsg (stdout, DEBUG_MSG, NO_TYPE, 
-            createString ("Window size: %dx%dpx.", windowSize.width, windowSize.height));
+        #ifdef CENGINE_DEBUG
+        cengine_log_msg (stdout, DEBUG_MSG, NO_TYPE, 
+            c_string_create ("Window size: %dx%dpx.", windowSize.width, windowSize.height));
         #endif
     }
 
@@ -122,6 +93,7 @@ void window_resize (SDL_Window *window, u32 newWidth, u32 newHeight) {
 
 }
 
+// FIXME: we need a way to pass the settings to the renderer
 // FIXME: players with higher resolution have an advantage -> they see more of the world
 // TODO: check SDL_GetCurrentDisplayMode
 // TODO: get refresh rate -> do we need vsync?
@@ -131,17 +103,17 @@ static int window_init_main (const char *title) {
     int retval = 1;
 
     SDL_GetCurrentDisplayMode (0, &displayMode); 
-    #ifdef DEV
-    logMsg (stdout, DEBUG_MSG, NO_TYPE, 
-        createString ("Main display mode is %dx%dpx @ %dhz.", 
-        displayMode.w, displayMode.h, displayMode.refresh_rate));
+    #ifdef CENGINE_DEBUG
+    cengine_log_msg (stdout, DEBUG_MSG, NO_TYPE,
+        c_string_create ("Main display mode is %dx%dpx @ %dhz.", 
+        displayMode.w, displayMode.h, displayMode.refresh_rate))
     #endif
 
     // creates a window of the size of the screen
-    main_window = SDL_CreateWindow (title,
+    /* main_window = SDL_CreateWindow (title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
         main_settings->resolution.width, main_settings->resolution.height,
-        main_settings->window ? 0 : SDL_WINDOW_FULLSCREEN);
+        main_settings->window ? 0 : SDL_WINDOW_FULLSCREEN); */
 
     if (main_window) {
         window_update_size (main_window);

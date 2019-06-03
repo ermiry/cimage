@@ -1,12 +1,12 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef _CENGINE_CAMERA_H_
+#define _CENGINE_CAMERA_H_
 
 #include <stdbool.h>
 
 #include <SDL2/SDL.h>
 
 #include "cengine/game/go.h"
-#include "cengine/game/vector2d.h"
+#include "cengine/types/vector2d.h"
 
 #define DEFAULT_CAM_ACCEL           1
 #define DEFAULT_CAM_MAX_VEL         2

@@ -386,10 +386,8 @@
 
 #include <SDL2/SDL.h>
 
-#include "blackrock.h"
-
 #include "cengine/input.h"
-#include "cengine/game/vector2d.h" 
+#include "cengine/types/vector2d.h" 
 
 extern void quit (void);
 

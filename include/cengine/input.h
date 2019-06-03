@@ -5,16 +5,12 @@
 
 #include "ui/ui.h"
 
-#include "game/vector2d.h"
+#include "cengine/types/vector2d.h"
 
 extern bool typing;
 
 extern void input_start_typing (void);
 extern void input_stop_typing (void);
-
-// extern void hanldeMenuEvent (UIScreen *activeScreen, SDL_Event event);
-// extern void hanldeGameEvent (UIScreen *activeScreen, SDL_Event event);
-// extern void handlePostGameEvent (UIScreen *activeScreen, SDL_Event event);
 
 /*** NEW INPUT ***/
 

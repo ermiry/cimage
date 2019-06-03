@@ -4,12 +4,10 @@
 
 #include <SDL2/SDL.h>
 
-#include "myos.h"
+#include "cengine/os.h"
 
-#include "blackrock.h"
-
-#include "types/types.h"
-#include "types/string.h"
+#include "cengine/types/types.h"
+#include "cengine/types/string.h"
 
 #include "cengine/thread.h"
 #include "cengine/timer.h"
@@ -22,8 +20,8 @@
 #include "utils/file.h"
 #include "utils/json.h"
 
-#ifdef DEV
-    #include "utils/log.h"
+#ifdef CENGINE_DEBUG
+    #include "cengine/utils/log.h"
 #endif
 
 static bool anim_init = false;
@@ -379,16 +377,16 @@ int animations_init (void) {
     if (animators) {
         if (!pthread_create (&anim_thread, NULL, animations_update, NULL)) anim_init = true;
         else {
-            #ifdef DEV
-            logMsg (stderr, ERROR, NO_TYPE, "Failed to create animations thread.");
+            #ifdef CENGINE_DEBUG
+            cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create animations thread.");
             #endif
             errors = 1;
         }
     }
 
     else {
-        #ifdef DEV
-        logMsg (stderr, ERROR, NO_TYPE, "Failed to create animators list!");
+        #ifdef CENGINE_DEBUG
+        cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create animators list!");
         #endif
         errors = 1;
     }
