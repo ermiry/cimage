@@ -10,7 +10,7 @@
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
-#include "collections/dlist.h"
+#include "cengine/collections/dlist.h"
 
 DoubleList *fonts = NULL;
 

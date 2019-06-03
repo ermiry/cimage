@@ -1,6 +1,10 @@
 #ifndef _CENGINE_H_
 #define _CENGINE_H_
 
+extern bool running;
+
+extern unsigned int fps_limit;
+
 extern unsigned int main_fps;
 extern unsigned int update_fps;
 

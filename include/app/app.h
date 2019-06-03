@@ -2,9 +2,6 @@
 #define GAME_H_
 
 #include "myos.h"
-#include "types/myTypes.h"
-
-#include "types/vector2D.h"
 
 #include "cengine/sprites.h"
 

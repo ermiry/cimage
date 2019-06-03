@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <SDL2/SDL.h>
 
@@ -11,7 +12,9 @@
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
-static unsigned int fps_limit = 30;
+bool running = false;
+
+unsigned int fps_limit = 30;
 
 unsigned int main_fps = 0;
 unsigned int update_fps = 0;

@@ -1,13 +1,9 @@
 #include <stdlib.h>
 
-#include "game/game.h"
-
 #include "cengine/renderer.h"
 #include "cengine/input.h"
 #include "cengine/game/camera.h"
 #include "cengine/types/vector2d.h"
-
-#include "utils/myUtils.h"
 
 static void camera_init (Camera *cam, u32 windowWidth, u32 windowHeight);
 
