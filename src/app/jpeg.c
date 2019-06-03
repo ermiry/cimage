@@ -3,10 +3,11 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "myos.h"
-#include "types/myTypes.h"
-
 #include "cimage.h"
+
+#include "cengine/os.h"
+#include "cengine/types/types.h"
+
 #include "app/jpeg.h"
 #include "app/exif.h"
 

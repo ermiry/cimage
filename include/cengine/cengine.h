@@ -13,4 +13,7 @@ extern int cengine_end (void);
 
 extern int cengine_start (int fps);
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #endif

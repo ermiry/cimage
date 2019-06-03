@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
+#include "cengine/cengine.h"
 #include "cengine/renderer.h"
 #include "cengine/sprites.h"
 #include "cengine/textures.h"

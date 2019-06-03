@@ -1,5 +1,5 @@
-#ifndef CIMAGE_H
-#define CIMAGE_H
+#ifndef _CIMAGE_H_
+#define _CIMAGE_H_
 
 #include <stdio.h>
 
@@ -22,9 +22,6 @@
 #else 
     #define ASSETS_PATH "./assets/"
 #endif
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef unsigned char uchar;
 
@@ -153,7 +150,6 @@ static const char * OrientTab[9] = {
 
 #pragma endregion
 
-extern bool running;
 extern bool inGame;
 extern bool wasInGame;
 
