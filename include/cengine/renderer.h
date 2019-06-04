@@ -7,24 +7,48 @@
 
 #include "cengine/types/types.h"
 
-extern SDL_Window *main_window;
-extern SDL_Renderer *main_renderer;
-
 typedef struct WindowSize {
 
     u32 width, height;
 
 } WindowSize;
 
-extern WindowSize windowSize;;
-extern bool isFullscreen;
+typedef struct Renderer {
 
-extern void window_toggle_full_screen (SDL_Window *window);
-extern void window_resize (SDL_Window *window, u32 newWidth, u32 newHeight);
+    String *name;
+    SDL_Renderer *renderer;
+    int index;
+    Uint32 flags;
 
-extern int video_init_main (const char *title);
-extern void video_destroy_main (void);
+    int display_index;
+    SDL_DisplayMode display_mode;
 
-extern void render (void);
+    String *window_title;
+    SDL_Window *window;
+    WindowSize window_size;
+    bool full_screen;
+
+} Renderer;
+
+/*** Window ***/
+
+// gets window size into renderer data struct
+// returns 0 on success, 1 on error
+extern int window_get_size (SDL_Window *window, WindowSize *window_size);
+
+// toggle full screen on and off
+// returns 0 on success, 1 on error
+extern int window_toggle_full_screen (Renderer *renderer);
+
+// resizes the window asscoaited with a renderer
+// returns 0 on success, 1 on error
+extern int window_resize (Renderer *renderer, u32 new_width, u32 new_height);
+
+/*** Renderer ***/
+
+// creates a new renderer
+// returns 0 on success, 1 on error
+extern int render_create_renderer (const char *renderer_name, Uint32 flags, int display_index,
+    const char *window_title, WindowSize window_size, bool full_screen);
 
 #endif
