@@ -171,7 +171,7 @@ void ui_render (void) {
             case UI_TEXTBOX: 
                 textBox = (TextBox *) ui_elements[i]->element;
                 if (textBox->isVolatile) ui_textbox_draw (textBox);
-                else SDL_RenderCopy (main_renderer, textBox->texture, NULL, &textBox->bgrect);
+                else SDL_RenderCopy (main_renderer->renderer, textBox->texture, NULL, &textBox->bgrect);
 
                 break;
             case UI_BUTTON: break;

@@ -83,6 +83,10 @@ static SDL_Window *window_create (const char *title, WindowSize window_size, boo
 
 #pragma region Renderer
 
+// TODO: as of 03/06/2019 we only have support for one renderer, the main one
+// the plan is to have as many as you want in order to support multiple windows 
+Renderer *main_renderer = NULL;
+
 static Renderer *renderer_new (void) {
 
     Renderer *renderer = (Renderer *) malloc (sizeof (Renderer));
@@ -90,7 +94,8 @@ static Renderer *renderer_new (void) {
         memset (renderer, 0, sizeof (Renderer));
         renderer->name = NULL;
         renderer->window_title = NULL;
-        renderer->window = renderer->renderer = NULL;
+        renderer->window = NULL;
+        renderer->renderer = NULL;
     }
 
     return renderer;
@@ -115,7 +120,7 @@ static void *renderer_delete (void *ptr) {
 // FIXME: players with higher resolution have an advantage -> they see more of the world
 // TODO: check SDL_GetCurrentDisplayMode
 // TODO: get refresh rate -> do we need vsync?
-int render_create_renderer (const char *renderer_name, Uint32 flags, int display_index,
+Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int display_index,
     const char *window_title, WindowSize window_size, bool full_screen) {
 
     Renderer *renderer = renderer_new ();
@@ -182,16 +187,27 @@ int render_create_renderer (const char *renderer_name, Uint32 flags, int display
 // TODO: render by layers
 void render (void) {
 
-    // SDL_RenderClear (main_renderer);
+    SDL_RenderClear (main_renderer->renderer);
 
-    // // render current game screen
+    // FIXME: we dont want the user to be resposible of this!!
+    // render current game screen
     // if (manager->curr_state->render)
     //     manager->curr_state->render ();
 
-    // ui_render ();       // render ui elements
+    ui_render ();       // render ui elements
 
-    // SDL_RenderPresent (main_renderer);
+    SDL_RenderPresent (main_renderer->renderer);
 
 }
+
+int renderer_init_main (Uint32 flags,
+    const char *window_title, WindowSize window_size, bool full_screen) {
+
+    return ((main_renderer = render_create_renderer ("main", flags, 0, 
+        window_title, window_size, full_screen)) ? 0 : 1);
+
+}
+
+void renderer_delete_main (void) { renderer_delete (main_renderer); }
 
 #pragma endregion

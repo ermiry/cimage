@@ -66,8 +66,8 @@ void camera_set_target (Camera *cam, Transform *target) {
 static void camera_init (Camera *cam, u32 windowWidth, u32 windowHeight) {
 
     // position
-    cam->transform.position.x = windowSize.width / 2;
-    cam->transform.position.y = windowSize.height / 2;
+    cam->transform.position.x = main_renderer->window_size.width / 2;
+    cam->transform.position.y = main_renderer->window_size.height / 2;
 
     cam->windowWidth = windowWidth;
     cam->windowHeight = windowHeight;
