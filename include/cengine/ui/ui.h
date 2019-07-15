@@ -26,6 +26,9 @@ typedef SDL_Color RGBA_Color;
 extern RGBA_Color RGBA_NO_COLOR;
 extern RGBA_Color RGBA_WHITE;
 extern RGBA_Color RGBA_BLACK;
+extern RGBA_Color RGBA_RED;
+extern RGBA_Color RGBA_GREEN;
+extern RGBA_Color RGBA_BLUE;
 
 /*** UI ELEMENTS ***/
 
@@ -33,6 +36,7 @@ typedef enum UIElementType {
 
     UI_TEXTBOX,
     UI_BUTTON,
+    UI_INPUT,
 
 } UIElementType;
 
@@ -48,11 +52,13 @@ typedef struct UIElement {
 
 // ui element constructor
 extern UIElement *ui_element_new (UIElementType type);
+extern void ui_element_delete (UIElement *ui_element);
 
 typedef SDL_Rect UIRect;
 
 extern UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h);
 extern UIRect ui_rect_union (UIRect a, UIRect b);
+extern UIRect ui_rect_render (SDL_Texture *srcTexture, UIRect *srcRect, u32 x, u32 y);
 
 extern RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a);
 

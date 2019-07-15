@@ -23,7 +23,7 @@ int window_get_size (SDL_Window *window, WindowSize *window_size) {
     if (window) {
         SDL_GetWindowSize (window, &window_size->width, &window_size->height);
         #ifdef CENGINE_DEBUG
-        cengine_log_msg (stdout, DEBUG_MSG, NO_TYPE, 
+        cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, 
             c_string_create ("Window size: %dx%dpx.", window_size->width, window_size->height));
         #endif
         retval = 0;
@@ -131,7 +131,7 @@ Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int d
     renderer->display_index = display_index;
     if (!SDL_GetCurrentDisplayMode (display_index, &renderer->display_mode)) {
         #ifdef CENGINE_DEBUG
-        cengine_log_msg (stdout, DEBUG_MSG, NO_TYPE,
+        cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE,
             c_string_create ("Display with idx %i mode is %dx%dpx @ %dhz.",
             renderer->display_index, 
             renderer->display_mode.w, renderer->display_mode.h, 
@@ -159,24 +159,24 @@ Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int d
             }
 
             else {
-                cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create renderer!"); 
+                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create renderer!"); 
                 renderer_delete (renderer);
                 renderer = NULL;
             }
         }
 
         else {
-            cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create window!"); 
+            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
             renderer_delete (renderer);
             renderer = NULL;
         }
     }
 
     else {
-        cengine_log_msg (stderr, ERROR, NO_TYPE, 
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
             c_string_create ("Failed to get display mode for display with idx %i", display_index));
         #ifdef CENGINE_DEBUG
-        cengine_log_msg (stderr, ERROR, NO_TYPE, SDL_GetError ());
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, SDL_GetError ());
         #endif
         renderer_delete (renderer);
         renderer = NULL;
@@ -285,7 +285,7 @@ static void layer_delete (void *ptr) {
 
 }
 
-static int layer_comparator (void *one, void *two) {
+static int layer_comparator (const void *one, const void *two) {
 
     if (one && two) {
         Layer *layer_one = (Layer *) one;
@@ -377,6 +377,7 @@ void layers_end (void) {
 // FIXME: we need to implement occlusion culling!
 void render (void) {
 
+    SDL_SetRenderDrawColor (main_renderer->renderer, 0, 0, 0, 255);
     SDL_RenderClear (main_renderer->renderer);
 
     // render by layers
@@ -414,3 +415,59 @@ void render (void) {
     SDL_RenderPresent (main_renderer->renderer);
 
 }
+
+#pragma region Basic
+
+// renders a dot
+void render_basic_dot (int x, int y, SDL_Color color) {
+
+    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawPoint (main_renderer->renderer, x ,y);
+
+}
+
+// renders a horizontal line of dots
+void render_basic_dot_line_horizontal (int start, int y, int length, int offset, SDL_Color color) {
+
+    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);
+    for (unsigned int i = start; i < length; i += offset)
+        SDL_RenderDrawPoint (main_renderer->renderer, i, y);
+
+}
+
+// renders a vertical line of dots
+void render_basic_dot_line_vertical (int x, int start, int length, int offset, SDL_Color color) {
+
+    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);
+    for (unsigned int i = start; i < length; i += offset)
+        SDL_RenderDrawPoint (main_renderer->renderer, x, i);
+
+}
+
+// renders a filled rect
+void render_basic_filled_rect (SDL_Rect *rect, SDL_Color color) {
+
+    if (rect) {
+        SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
+        SDL_RenderFillRect (main_renderer->renderer, rect);
+    }
+
+}
+
+// renders an outline rect
+void render_basic_outline_rect (SDL_Rect *rect, SDL_Color color) {
+
+    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
+    SDL_RenderDrawRect (main_renderer->renderer, rect);
+
+}
+
+// renders a line
+void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color) {
+
+    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
+    SDL_RenderDrawLine (main_renderer->renderer, x1, y1, x2, y2);
+
+}
+
+#pragma endregion

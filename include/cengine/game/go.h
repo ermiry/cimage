@@ -48,7 +48,7 @@ extern void game_object_destroy_ref (void *data);
 // this is used to avoid go destruction when destroying go's children
 extern void game_object_destroy_dummy (void *ptr);
 
-extern int game_object_comparator (void *one, void *two);
+extern int game_object_comparator (const void *one, const void *two);
 
 extern void game_object_add_child (GameObject *parent, GameObject *child);
 extern GameObject *game_object_remove_child (GameObject *parent, GameObject *child);

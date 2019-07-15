@@ -4,14 +4,19 @@
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
+
 #include "cengine/cengine.h"
 #include "cengine/renderer.h"
 #include "cengine/sprites.h"
 #include "cengine/textures.h"
+
 #include "cengine/ui/ui.h"
 #include "cengine/ui/cursor.h"
 #include "cengine/ui/font.h"
 #include "cengine/ui/textbox.h"
+#include "cengine/ui/button.h"
+#include "cengine/ui/inputfield.h"
+
 #include "cengine/utils/log.h"
 
 /*** COMMON RGBA COLORS ***/
@@ -19,6 +24,9 @@
 RGBA_Color RGBA_NO_COLOR = { 0, 0, 0, 0 };
 RGBA_Color RGBA_WHITE = { 255, 255, 255, 255 };
 RGBA_Color RGBA_BLACK = { 0, 0, 0, 255 };
+RGBA_Color RGBA_RED = { 255, 0, 0, 255 };
+RGBA_Color RGBA_GREEN = { 0, 255, 0, 255 };
+RGBA_Color RGBA_BLUE = { 0, 0, 255, 255 };
 
 /*** BASIC UI ELEMENTS ***/
 
@@ -39,6 +47,25 @@ UIRect ui_rect_union (UIRect a, UIRect b) {
     u32 y2 = MAX (a.y + a.h, b.y + b.h);
 
     UIRect retval = { x1, y1, MAX (0, x2 - x1), MAX (0, y2 - y1) };
+    return retval;
+
+}
+
+// FC_Default_RenderCallback
+UIRect ui_rect_render (SDL_Texture *srcTexture, UIRect *srcRect, u32 x, u32 y) {
+
+    UIRect retval;
+
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+    UIRect r = *srcRect;
+    UIRect dr = { x, y, r.w, r.h };
+    SDL_RenderCopyEx (main_renderer->renderer, srcTexture, &r, &dr, 0, NULL, flip);
+
+    retval.x = x;
+    retval.y = y;
+    retval.w = srcRect->w;
+    retval.h = srcRect->h;
+
     return retval;
 
 }
@@ -136,26 +163,19 @@ UIElement *ui_element_new (UIElementType type) {
 
 }
 
-// mark as inactive or reusable the ui element
-static void ui_element_destroy (UIElement *ui_element) {
+void ui_element_delete (UIElement *ui_element) {
 
     if (ui_element) {
         ui_element->id = -1;
         
         switch (ui_element->type) {
-            case UI_TEXTBOX: ui_textBox_destroy ((TextBox *) ui_element->element); break;
-            case UI_BUTTON: break;
+            case UI_TEXTBOX: ui_textbox_delete (ui_element->element); break;
+            case UI_BUTTON: ui_button_delete (ui_element->element); break;
+            case UI_INPUT: ui_input_field_delete (ui_element->element); break;
 
             default: break;
         }
-    }
 
-}
-
-static void ui_element_delete (UIElement *ui_element) {
-
-    if (ui_element) {
-        ui_element_destroy (ui_element);
         free (ui_element);
     }
 
@@ -165,16 +185,21 @@ static void ui_element_delete (UIElement *ui_element) {
 
 void ui_render (void) {
 
-    TextBox *textBox = NULL;
     for (u32 i = 0; i < curr_max_ui_elements; i++) {
         switch (ui_elements[i]->type) {
-            case UI_TEXTBOX: 
-                textBox = (TextBox *) ui_elements[i]->element;
-                if (textBox->isVolatile) ui_textbox_draw (textBox);
-                else SDL_RenderCopy (main_renderer->renderer, textBox->texture, NULL, &textBox->bgrect);
+            case UI_TEXTBOX: {
+                ui_textbox_draw ((TextBox *) ui_elements[i]->element);
+            }
+            break;
 
-                break;
-            case UI_BUTTON: break;
+            case UI_BUTTON: {
+                ui_button_draw ((Button *) ui_elements[i]->element);
+            }
+            break;
+
+            case UI_INPUT: {
+                ui_input_field_draw ((InputField *) ui_elements[i]->element);
+            } break;
 
             default: break;
         }
@@ -216,7 +241,7 @@ u8 ui_destroy (void) {
     ui_font_end ();     // fonts
 
     #ifdef CENGINE_DEBUG
-    cengine_log_msg (stdout, SUCCESS, NO_TYPE, "Done cleaning cengine ui.");
+    cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done cleaning cengine ui.");
     #endif
 
     return 0;

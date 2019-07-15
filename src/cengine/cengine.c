@@ -6,10 +6,15 @@
 #include "cengine/animation.h"
 #include "cengine/input.h"
 #include "cengine/renderer.h"
-#include "cengine/thread.h"
+
+#include "cengine/threads/thread.h"
+
 #include "cengine/game/go.h"
 #include "cengine/game/camera.h"
 #include "cengine/manager/manager.h"
+
+#include "cengine/ui/ui.h"
+
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
@@ -33,15 +38,16 @@ int cengine_init (const char *window_title, WindowSize window_size, bool full_sc
         layers_init ();
         errors = game_objects_init_all ();
         errors = ui_init ();
+        input_init ();
 
         main_camera = camera_new (main_renderer->window_size.width, main_renderer->window_size.height);
         errors = main_camera ? 0 : 1;
     }
 
     else {
-        cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to init SDL!");
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init SDL!");
         #ifdef CENGINE_DEBUG
-        cengine_log_msg (stderr, ERROR, NO_TYPE, c_string_create ("%s", SDL_GetError ()));
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, c_string_create ("%s", SDL_GetError ()));
         #endif
         errors = 1;
     }
@@ -52,6 +58,7 @@ int cengine_init (const char *window_title, WindowSize window_size, bool full_sc
 
 int cengine_end (void) {
 
+    input_end ();
     camera_destroy (main_camera);
     ui_destroy ();
     layers_end ();
@@ -132,9 +139,9 @@ static void cengine_run (void) {
         deltaTicks += deltaTime;
         fps++;
         if (deltaTicks >= 1000) {
-            #ifdef CENGINE_DEBUG
-            printf ("main fps: %i\n", fps);
-            #endif
+            // #ifdef CENGINE_DEBUG
+            // printf ("main fps: %i\n", fps);
+            // #endif
             main_fps = fps;
             deltaTicks = 0;
             fps = 0;
@@ -148,7 +155,7 @@ int cengine_start (int fps) {
     fps_limit = fps > 0 ? fps : 30;
 
     if (thread_create_detachable (cengine_update, NULL, "update")) {
-        cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create update thread!");
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create update thread!");
         running = false;
     }
 

@@ -10,9 +10,9 @@
 #include "cengine/types/string.h"
 
 #include "cengine/cengine.h"
-#include "cengine/thread.h"
 #include "cengine/timer.h"
 #include "cengine/sprites.h"
+#include "cengine/threads/thread.h"
 #include "cengine/animation.h"
 #include "cengine/game/go.h"
 
@@ -259,7 +259,7 @@ static void animator_destroy_ref (void *data) {
     
 }
 
-static int animator_comparator (void *one, void *two) {
+static int animator_comparator (const void *one, const void *two) {
 
     if (one && two) {
         Animator *anim_one = (Animator *) one;
@@ -373,14 +373,14 @@ int animations_init (void) {
     animators = dlist_init (animator_destroy_ref, animator_comparator);
     if (animators) {
         if (thread_create_detachable (animations_update, NULL, "animations")) {
-            cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create animations thread!");
+            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create animations thread!");
             errors = 1;
         }
     }
 
     else {
         #ifdef CENGINE_DEBUG
-        cengine_log_msg (stderr, ERROR, NO_TYPE, "Failed to create animators list!");
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create animators list!");
         #endif
         errors = 1;
     }

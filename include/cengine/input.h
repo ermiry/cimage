@@ -1,18 +1,18 @@
 #ifndef _CENGINE_INPUT_H_
 #define _CENGINE_INPUT_H_
 
+#include <stdbool.h>
+
 #include <SDL2/SDL.h>
 
-#include "ui/ui.h"
-
+#include "cengine/types/types.h"
 #include "cengine/types/vector2d.h"
+
+#include "cengine/ui/inputfield.h"
 
 extern bool typing;
 
-extern void input_start_typing (void);
-extern void input_stop_typing (void);
-
-/*** NEW INPUT ***/
+extern void input_set_active_text (InputField *text);
 
 #define N_MOUSE_BUTTONS     3
 
@@ -26,11 +26,15 @@ typedef enum MouseButton {
 
 extern Vector2D mousePos;
 
+// creates a new command with an action to be triggered by ctrl + key
+extern u8 input_command_create (SDL_Keycode key, Action action, void *args);
+
 extern bool input_get_mouse_button_state (MouseButton button);
 
 extern bool input_is_key_down (const SDL_Scancode key);
 
 extern void input_init (void);
+extern void input_end (void);
 extern void input_handle (SDL_Event event);
 
 #endif

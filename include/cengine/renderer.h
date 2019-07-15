@@ -95,4 +95,24 @@ extern void layers_end (void);
 
 extern void render (void);
 
+/*** Render Basic ***/
+
+// renders a dot
+extern void render_basic_dot (int x, int y, SDL_Color color);
+
+// renders a horizontal line of dots
+extern void render_basic_dot_line_horizontal (int start, int y, int length, int offset, SDL_Color color);
+
+// renders a vertical line of dots
+extern void render_basic_dot_line_vertical (int x, int start, int length, int offset, SDL_Color color);
+
+// renders a filled rect
+extern void render_basic_filled_rect (SDL_Rect *rect, SDL_Color color);
+
+// renders an outline rect
+extern void render_basic_outline_rect (SDL_Rect *rect, SDL_Color color);
+
+// renders a line
+extern void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color);
+
 #endif
