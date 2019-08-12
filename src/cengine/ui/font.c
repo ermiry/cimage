@@ -13,7 +13,7 @@
 
 #include "cengine/collections/dlist.h"
 
-DoubleList *fonts = NULL;
+static DoubleList *fonts = NULL;
 
 static u8 has_render_target_support = 0;
 
@@ -25,9 +25,9 @@ static int u8_charsize (const char *character) {
 
     if (!character) return 0;
 
-    if((unsigned char) *character <= 0x7F) return 1;
-    else if((unsigned char) *character < 0xE0) return 2;
-    else if((unsigned char) *character < 0xF0) return 3;
+    if ((unsigned char) *character <= 0x7F) return 1;
+    else if ((unsigned char) *character < 0xE0) return 2;
+    else if ((unsigned char) *character < 0xF0) return 3;
     else return 4;
 
     return 1;
@@ -354,6 +354,15 @@ u8 ui_font_load (Font *font, int style) {
 
 }
 
+// get a refrence to the default font --> the first one that was added
+Font *ui_font_get_default (void) {
+
+    void *font_data = (dlist_start (fonts))->data;
+    if (font_data) return (Font *) font_data;
+    else return NULL;
+
+}
+
 // gets a refrence to a ui font by its name -> it should be ready to use
 Font *ui_font_get_by_name (const char *name) {
 
@@ -391,7 +400,7 @@ u8 ui_fonts_init (void) {
 
 void ui_font_end (void) {
 
-    dlist_destroy (fonts);
+    dlist_delete (fonts);
     TTF_Quit ();
 
 }

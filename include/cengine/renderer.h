@@ -4,6 +4,9 @@
 #include <stdbool.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_surface.h>
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
@@ -91,9 +94,9 @@ extern void layers_init (void);
 
 extern void layers_end (void);
 
-/*** Render func ***/
+/*** Surfaces ***/
 
-extern void render (void);
+extern SDL_Surface *surface_create (int width, int height);
 
 /*** Render Basic ***/
 
@@ -114,5 +117,14 @@ extern void render_basic_outline_rect (SDL_Rect *rect, SDL_Color color);
 
 // renders a line
 extern void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color);
+
+/*** Render Complex ***/
+
+// renders a rect with transparency
+extern SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color);
+
+/*** Render ***/
+
+extern void render (void);
 
 #endif

@@ -8,12 +8,11 @@
 
 #include "cengine/collections/dlist.h"
 
+#include "cengine/cengine.h"
 #include "cengine/input.h"
 
 #include "cengine/ui/inputfield.h"
 #include "cengine/ui/components/text.h"
-
-extern void quit (void);
 
 bool typing = false;
 
@@ -30,16 +29,16 @@ void input_set_active_text (InputField *text) {
 
 Vector2D mousePos = { 0, 0 };
 
-static bool mouseButtonStates[N_MOUSE_BUTTONS];
+static bool mouse_button_states[N_MOUSE_BUTTONS];
 
-bool input_get_mouse_button_state (MouseButton button) { return mouseButtonStates[button]; }
+bool input_get_mouse_button_state (MouseButton button) { return mouse_button_states[button]; }
 
 static void input_on_mouse_button_down (SDL_Event event) {
 
     switch (event.button.button) {
-        case SDL_BUTTON_LEFT: mouseButtonStates[MOUSE_LEFT] = true; break;
-        case SDL_BUTTON_MIDDLE: mouseButtonStates[MOUSE_MIDDLE] = true; break;
-        case SDL_BUTTON_RIGHT: mouseButtonStates[MOUSE_RIGHT] = true; break;
+        case SDL_BUTTON_LEFT: mouse_button_states[MOUSE_LEFT] = true; break;
+        case SDL_BUTTON_MIDDLE: mouse_button_states[MOUSE_MIDDLE] = true; break;
+        case SDL_BUTTON_RIGHT: mouse_button_states[MOUSE_RIGHT] = true; break;
 
         default: break;
     }
@@ -49,16 +48,16 @@ static void input_on_mouse_button_down (SDL_Event event) {
 static void input_on_mouse_button_up (SDL_Event event) {
 
     switch (event.button.button) {
-        case SDL_BUTTON_LEFT: mouseButtonStates[MOUSE_LEFT] = false; break;
-        case SDL_BUTTON_MIDDLE: mouseButtonStates[MOUSE_MIDDLE] = false; break;
-        case SDL_BUTTON_RIGHT: mouseButtonStates[MOUSE_RIGHT] = false; break;
+        case SDL_BUTTON_LEFT: mouse_button_states[MOUSE_LEFT] = false; break;
+        case SDL_BUTTON_MIDDLE: mouse_button_states[MOUSE_MIDDLE] = false; break;
+        case SDL_BUTTON_RIGHT: mouse_button_states[MOUSE_RIGHT] = false; break;
 
         default: break;
     }
 
 }
 
-/*** KEYBOARD ***/
+/*** Keyboard ***/
 
 // a custom action performed with a combination of ctl + key
 typedef struct Command {
@@ -91,7 +90,7 @@ static void command_delete (void *command_ptr) {
 }
 
 // creates a new command with an action to be triggered by ctrl + key
-u8 input_command_create (SDL_Keycode key, Action action, void *args) {
+u8 input_command_register (SDL_Keycode key, Action action, void *args) {
 
     u8 retval = 1;
 
@@ -110,10 +109,73 @@ u8 input_command_create (SDL_Keycode key, Action action, void *args) {
 
 }
 
+void input_command_unregister (SDL_Keycode key) {
+
+    Command *command = NULL;
+    for (ListElement *le = dlist_start (command_actions); le; le = le->next) {
+        command = (Command *) le->data;
+        if (key == command->key) {
+            command_delete ((Command *) dlist_remove_element (command_actions, le));
+
+            break;
+        }
+    }   
+
+}
+
 static const u8 *keys_states = NULL;
 
+typedef struct KeyEvent {
+
+    SDL_Keycode key;            // they key code this event refers to
+    Action action;              // action to be triggered when key is pressed
+    void *args;                 // arguments to be passed to the action
+
+} KeyEvent;
+
+static DoubleList *keys_events = NULL;
+
+static KeyEvent *key_event_new (const SDL_Keycode key, Action action, void *args) {
+
+    KeyEvent *key_event = (KeyEvent *) malloc (sizeof (KeyEvent));
+    if (key_event) {
+        key_event->key = (SDL_Keycode) key;
+        key_event->action = action;
+        key_event->args = args;
+    }
+
+    return key_event;
+
+}
+
+static void key_event_delete (void *key_event) {
+
+    if (key_event) free (key_event);
+
+}
+
+// registers an action to be triggered whenever a key is pressed
+void input_key_event_register (const SDL_Keycode key, Action action, void *args) {
+
+    dlist_insert_after (keys_events, dlist_end (keys_events), key_event_new (key, action, args));
+
+}
+
+void input_key_event_unregister (const SDL_Keycode key) {
+
+    KeyEvent *key_event = NULL;
+    for (ListElement *le = dlist_start (keys_events); le; le = le->next) {
+        key_event = (KeyEvent *) le->data;
+        if (key == key_event->key) {
+            key_event_delete ((KeyEvent *) dlist_remove_element (keys_events, le));
+            break;
+        }
+    }
+
+}
+
 static void input_key_down (SDL_Event event) { 
-    
+
     keys_states = SDL_GetKeyboardState (NULL); 
     
     // handle escape
@@ -132,8 +194,6 @@ static void input_key_down (SDL_Event event) {
                 str_remove_last_char (active_text->text->text);
 
             ui_input_field_update (active_text);
-
-            // printf ("%s\n", active_text->text->str);
         }
     }
 
@@ -143,8 +203,6 @@ static void input_key_down (SDL_Event event) {
             if (active_text->is_password) SDL_SetClipboardText (active_text->password->str);
             else SDL_SetClipboardText (active_text->text->text->str);
         }
-        
-        // printf ("copy!\n");
     }
 
     // handle paste from clipboard
@@ -156,19 +214,15 @@ static void input_key_down (SDL_Event event) {
                 str_append_c_string (active_text->text->text, SDL_GetClipboardText ());
             
             ui_input_field_update (active_text);
-
-            // printf ("%s\n", active_text->text->str);
         }
-
-        // printf ("paste!\n");
     }
 
     // handle any custom command + key action set by the user
-    else {
+    else if (SDL_GetModState () & KMOD_CTRL) {
         Command *command = NULL;
         for (ListElement *le = dlist_start (command_actions); le; le = le->next) {
             command = (Command *) le->data;
-            if (event.key.keysym.sym == command->key && SDL_GetModState () & KMOD_CTRL) {
+            if (event.key.keysym.sym == command->key) {
                 if (command->action) {
                     command->action (command->args);
                 }
@@ -178,26 +232,42 @@ static void input_key_down (SDL_Event event) {
         }   
     }
 
+    // handle user defined key events
+    else {
+        KeyEvent *key_event = NULL;
+        for (ListElement *le = dlist_start (keys_events); le; le = le->next) {
+            key_event = (KeyEvent *) le->data;
+            if (event.key.keysym.sym == key_event->key) {
+                if (key_event->action) {
+                    key_event->action (key_event->args);
+                }
+
+                break;      // we only want one to happen each time
+            }
+        }
+    }
+
 }
 
 static void input_key_up (void) { keys_states = SDL_GetKeyboardState (NULL); }
 
 bool input_is_key_down (const SDL_Scancode key) { 
     
-    if (keys_states) if (keys_states[key]) return true;
-    return false;
+    return (keys_states ? keys_states[key] : false);
     
 }
 
-/*** INPUT ***/
+/*** Input ***/
 
 void input_init (void) {
 
     SDL_StartTextInput ();
 
-    for (u8 i = 0; i < N_MOUSE_BUTTONS; i++) mouseButtonStates[i] = false;
+    for (u8 i = 0; i < N_MOUSE_BUTTONS; i++) mouse_button_states[i] = false;
 
     command_actions = dlist_init (command_delete, NULL);
+
+    keys_events = dlist_init (key_event_delete, NULL);
 
 }
 
@@ -205,7 +275,9 @@ void input_end (void) {
 
     SDL_StopTextInput ();
 
-    dlist_destroy (command_actions);
+    dlist_delete (command_actions);
+
+    dlist_delete (keys_events);
 
 }
 
@@ -236,7 +308,7 @@ void input_handle (SDL_Event event) {
 
     while (SDL_PollEvent (&event)) {
         switch (event.type) {
-            case SDL_QUIT: quit (); break;
+            case SDL_QUIT: if (cengine_quit) cengine_quit (); break;
 
             case SDL_MOUSEMOTION: 
                 mousePos.x = event.motion.x;

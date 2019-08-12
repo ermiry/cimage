@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
+#include "cengine/types/string.h"
 
 #include "cengine/cengine.h"
 #include "cengine/renderer.h"
@@ -14,12 +15,16 @@
 #include "cengine/ui/cursor.h"
 #include "cengine/ui/font.h"
 #include "cengine/ui/textbox.h"
+#include "cengine/ui/image.h"
+#include "cengine/ui/panel.h"
 #include "cengine/ui/button.h"
 #include "cengine/ui/inputfield.h"
+#include "cengine/ui/check.h"
+#include "cengine/ui/notification.h"
 
 #include "cengine/utils/log.h"
 
-/*** COMMON RGBA COLORS ***/
+/*** Common RGBA Colors ***/
 
 RGBA_Color RGBA_NO_COLOR = { 0, 0, 0, 0 };
 RGBA_Color RGBA_WHITE = { 255, 255, 255, 255 };
@@ -28,9 +33,9 @@ RGBA_Color RGBA_RED = { 255, 0, 0, 255 };
 RGBA_Color RGBA_GREEN = { 0, 255, 0, 255 };
 RGBA_Color RGBA_BLUE = { 0, 0, 255, 255 };
 
-/*** BASIC UI ELEMENTS ***/
+/*** Basic UI Elements ***/
 
-#pragma region BASIC UI ELEMENTS
+#pragma region Basic UI Elements
 
 UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h) {
 
@@ -51,25 +56,6 @@ UIRect ui_rect_union (UIRect a, UIRect b) {
 
 }
 
-// FC_Default_RenderCallback
-UIRect ui_rect_render (SDL_Texture *srcTexture, UIRect *srcRect, u32 x, u32 y) {
-
-    UIRect retval;
-
-    SDL_RendererFlip flip = SDL_FLIP_NONE;
-    UIRect r = *srcRect;
-    UIRect dr = { x, y, r.w, r.h };
-    SDL_RenderCopyEx (main_renderer->renderer, srcTexture, &r, &dr, 0, NULL, flip);
-
-    retval.x = x;
-    retval.y = y;
-    retval.w = srcRect->w;
-    retval.h = srcRect->h;
-
-    return retval;
-
-}
-
 RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a) { 
 
     RGBA_Color retval = { r, g, b, a };
@@ -79,9 +65,9 @@ RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a) {
 
 #pragma endregion
 
-/*** UI ELEMENTS ***/
+/*** ui elements ***/
 
-#pragma region UI ELEMENTS
+#pragma region ui elements
 
 UIElement **ui_elements = NULL;
 static u32 max_ui_elements;
@@ -141,6 +127,7 @@ UIElement *ui_element_new (UIElementType type) {
     if (spot >= 0) {
         new_element = ui_elements[spot];
         new_element->id = spot;
+        new_element->active = true;
         new_element->type = type;
         new_element->element = NULL;
     }
@@ -152,6 +139,7 @@ UIElement *ui_element_new (UIElementType type) {
         if (new_element) {
             new_element->id = new_ui_element_id;
             new_element->type = type;
+            new_element->active = true;
             new_element->element = NULL;
             ui_elements[new_element->id] = new_element;
             new_ui_element_id++;
@@ -168,12 +156,18 @@ void ui_element_delete (UIElement *ui_element) {
     if (ui_element) {
         ui_element->id = -1;
         
-        switch (ui_element->type) {
-            case UI_TEXTBOX: ui_textbox_delete (ui_element->element); break;
-            case UI_BUTTON: ui_button_delete (ui_element->element); break;
-            case UI_INPUT: ui_input_field_delete (ui_element->element); break;
+        if (ui_element->element) {
+            switch (ui_element->type) {
+                case UI_TEXTBOX: ui_textbox_delete (ui_element->element); break;
+                case UI_IMAGE: ui_image_delete (ui_element->element); break;
+                case UI_PANEL: ui_panel_delete (ui_element->element); break;
+                case UI_BUTTON: ui_button_delete (ui_element->element); break;
+                case UI_INPUT: ui_input_field_delete (ui_element->element); break;
+                case UI_CHECK: ui_check_delete (ui_element->element); break;
+                case UI_NOTI_CENTER: ui_noti_center_delete (ui_element->element); break;
 
-            default: break;
+                default: break;
+            }
         }
 
         free (ui_element);
@@ -183,25 +177,89 @@ void ui_element_delete (UIElement *ui_element) {
 
 #pragma endregion
 
+#pragma region default assets
+
+static const String *ui_default_assets_path = NULL;
+
+// sets the location of cengine's default ui assets
+void ui_default_assets_set_path (const char *pathname) {
+
+    str_delete ((String *) ui_default_assets_path);
+    ui_default_assets_path = pathname ? str_new (pathname) : NULL;
+
+}
+
+static u8 ui_default_assets_load_checks (void) {
+
+    u8 retval = 1;
+
+    // TODO:
+
+    return retval;
+
+}
+
+// loads cengine's default ui assets
+u8 ui_default_assets_load (void) {
+
+    u8 retval = 1;
+
+    if (ui_default_assets_path) {
+        // printf ("%s\n", ui_default_assets_path->str);
+
+        retval = 0;
+    }
+
+    else {
+        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
+            "Failed to load cengine's default assets - ui default assets path set to NULL!");
+    }
+
+    return retval;
+
+}
+
+#pragma endregion
+
+#pragma region public
+
 void ui_render (void) {
 
     for (u32 i = 0; i < curr_max_ui_elements; i++) {
-        switch (ui_elements[i]->type) {
-            case UI_TEXTBOX: {
-                ui_textbox_draw ((TextBox *) ui_elements[i]->element);
+        if (ui_elements[i]->active) {
+            switch (ui_elements[i]->type) {
+                case UI_TEXTBOX: {
+                    ui_textbox_draw ((TextBox *) ui_elements[i]->element);
+                }
+                break;
+
+                case UI_IMAGE: {
+                    ui_image_draw ((Image *) ui_elements[i]->element);
+                } break;
+
+                case UI_PANEL: {
+                    ui_panel_draw ((Panel *) ui_elements[i]->element);
+                } break;
+
+                case UI_BUTTON: {
+                    ui_button_draw ((Button *) ui_elements[i]->element);
+                }
+                break;
+
+                case UI_INPUT: {
+                    ui_input_field_draw ((InputField *) ui_elements[i]->element);
+                } break;
+
+                case UI_CHECK: {
+                    ui_check_draw ((Check *) ui_elements[i]->element);
+                } break;
+
+                case UI_NOTI_CENTER: {
+                    ui_noti_center_draw ((NotiCenter *) ui_elements[i]->element);
+                } break;
+
+                default: break;
             }
-            break;
-
-            case UI_BUTTON: {
-                ui_button_draw ((Button *) ui_elements[i]->element);
-            }
-            break;
-
-            case UI_INPUT: {
-                ui_input_field_draw ((InputField *) ui_elements[i]->element);
-            } break;
-
-            default: break;
         }
     }
 
@@ -240,6 +298,8 @@ u8 ui_destroy (void) {
 
     ui_font_end ();     // fonts
 
+    str_delete ((String *) ui_default_assets_path);
+
     #ifdef CENGINE_DEBUG
     cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done cleaning cengine ui.");
     #endif
@@ -247,3 +307,5 @@ u8 ui_destroy (void) {
     return 0;
 
 }
+
+#pragma endregion

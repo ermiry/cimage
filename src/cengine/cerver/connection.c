@@ -8,7 +8,11 @@
 #include "cengine/cerver/network.h"
 #include "cengine/cerver/cerver.h"
 #include "cengine/cerver/connection.h"
+#include "cengine/cerver/handler.h"
 
+#include "cengine/threads/thread.h"
+
+#include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
 void connection_remove_auth_data (Connection *connection);
@@ -22,7 +26,12 @@ Connection *connection_new (void) {
         connection->ip = NULL;
         memset (&connection->address, 0, sizeof (struct sockaddr_storage));
 
+        connection->connected = false;
+        connection->max_sleep = CONNECTION_MAX_SLEEP;
+
         connection->cerver = NULL;
+
+        connection->sock_receive = NULL;
 
         connection->auth_action = NULL;
         connection->auth_data = NULL;
@@ -44,7 +53,11 @@ void connection_delete (void *ptr) {
         str_delete (connection->name);
         str_delete (connection->ip);
 
+        close (connection->sock_fd);
+
         cerver_delete (connection->cerver);
+
+        sock_receive_delete (connection->sock_receive);
 
         connection_remove_auth_data (connection);
 
@@ -55,8 +68,14 @@ void connection_delete (void *ptr) {
 
 int connection_comparator (void *one, void *two) {
 
-    if (one && two) 
-        return str_compare (((Connection *) one)->name, ((Connection *) two)->name);
+    return str_compare (((Connection *) one)->name, ((Connection *) two)->name);
+
+}
+
+// sets the connection max sleep (wait time) to try to connect to the cerver
+void connection_set_max_sleep (Connection *connection, u32 max_sleep) {
+
+    if (connection) connection->max_sleep = max_sleep;
 
 }
 
@@ -112,13 +131,13 @@ void connection_set_success_auth (Connection *connection, Action succes_action, 
 static u8 connection_try (Connection *connection, const struct sockaddr_storage address) {
 
     i32 numsec;
-    for (numsec = 2; numsec <= CONNECTION_MAX_SLEEP; numsec <<= 1) {
+    for (numsec = 2; numsec <= connection->max_sleep; numsec <<= 1) {
         if (!connect (connection->sock_fd, 
             (const struct sockaddr *) &address, 
             sizeof (struct sockaddr))) 
             return 0;
 
-        if (numsec <= CONNECTION_MAX_SLEEP / 2) sleep (numsec);
+        if (numsec <= connection->max_sleep / 2) sleep (numsec);
     } 
 
     return 1;
@@ -144,9 +163,9 @@ static u8 connection_init (Connection *connection) {
         }
 
         if (connection->sock_fd > 0) {
-            if (connection->async) {
-                if (sock_set_blocking (connection->sock_fd, connection->blocking)) {
-                    connection->blocking = false;
+            // if (connection->async) {
+            //     if (sock_set_blocking (connection->sock_fd, connection->blocking)) {
+            //         connection->blocking = false;
 
                     // get the address ready
                     if (connection->use_ipv6) {
@@ -164,16 +183,16 @@ static u8 connection_init (Connection *connection) {
                     }
 
                     retval = 0;     // connection setup was successfull
-                }
+                // }
 
-                else {
-                    #ifdef CLIENT_DEBUG
-                    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
-                        "Failed to set the socket to non blocking mode!");
-                    #endif
-                    close (connection->sock_fd);
-                }
-            }
+                // else {
+                //     #ifdef CLIENT_DEBUG
+                //     cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
+                //         "Failed to set the socket to non blocking mode!");
+                //     #endif
+                //     close (connection->sock_fd);
+            //     }
+            // }
         }
 
         else cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create new socket!");
@@ -185,7 +204,7 @@ static u8 connection_init (Connection *connection) {
 
 // creates a new connection that is ready to be started
 Connection *connection_create (const char *name,
-     const char *ip_address, u16 port, u8 protocol, bool use_ipv6, bool async) {
+     const char *ip_address, u16 port, Protocol protocol, bool use_ipv6) {
 
     Connection *connection = NULL;
 
@@ -197,10 +216,10 @@ Connection *connection_create (const char *name,
             connection->port = port;
             connection->protocol = protocol;
             connection->use_ipv6 = use_ipv6;
-            connection->async = async;
-            connection->blocking = true;
 
-            connection->isConnected = false;
+            connection->connected = false;
+
+            connection->sock_receive = sock_receive_new ();
 
             // set up the new connection to be ready to be started
             if (connection_init (connection)) {
@@ -225,22 +244,39 @@ int connection_start (Connection *connection) {
 
 }
 
-// FIXME:
-// ends a connection
-// returns 0 on success, 1 on error
-int connection_end (Connection *connection) {
+// starts listening and receiving data in the connection sock
+void client_connection_update (void *ptr) {
 
-    int retval = 1;
+    if (ptr) {
+        ClientConnection *cc = (ClientConnection *) ptr;
+        thread_set_name (c_string_create ("connection-%s", cc->connection->name->str));
 
-    if (connection) {
-        close (connection->sock_fd);
+        while (cc->client->running && cc->connection->connected) {
+            client_receive (cc->client, cc->connection);
+        }
 
-        // if (connection->server) {
-        //     if (connection->server->ip) free (connection->server->ip);
-        //     free (connection->server);
-        // }
+        client_connection_aux_delete (cc);
     }
 
-    return retval;
+}
+
+// ends a connection
+void connection_end (Client *client, Connection *connection) {
+
+    if (connection) {
+        if (connection->connected) {
+            // send a close connection packet
+            Packet *packet = packet_generate_request (REQUEST_PACKET, CLIENT_CLOSE_CONNECTION, NULL, 0);
+            if (packet) {
+                packet_set_network_values (packet, client, connection);
+                packet_send (packet, 0, NULL);
+                packet_delete (packet);
+            }
+
+            close (connection->sock_fd);
+
+            connection->connected = false;
+        } 
+    } 
 
 }

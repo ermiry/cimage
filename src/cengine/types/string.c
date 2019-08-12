@@ -41,8 +41,8 @@ String *str_create (const char *format, ...) {
 
         va_list argp;
         va_start (argp, format);
-        char oneChar[1];
-        int len = vsnprintf (oneChar, 1, fmt, argp);
+        char one_char[1];
+        int len = vsnprintf (one_char, 1, fmt, argp);
         va_end (argp);
 
         char *str = (char *) calloc (len + 1, sizeof (char));
@@ -79,6 +79,17 @@ void str_copy (String *to, String *from) {
 
         *to->str = '\0';
         to->len = from->len;
+    }
+
+}
+
+void str_replace (String *old, const char *str) {
+
+    if (old && str) {
+        free (old->str);
+        old->len = strlen (str);
+        old->str = (char *) calloc (old->len + 1, sizeof (char));
+        char_copy (old->str, (char *) str);
     }
 
 }
@@ -267,7 +278,7 @@ int str_contains (String *string, char *to_find) {
 /*** serialization ***/
 
 // returns a ptr to a serialized string
-void *str_selialize (String *string, SStringSize size) {
+void *str_serialize (String *string, SStringSize size) {
 
     void *retval = NULL;
 

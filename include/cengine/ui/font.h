@@ -22,30 +22,6 @@ typedef enum FilterEnum {
 
 } FilterEnum;
 
-typedef struct GlyphData {
-
-    UIRect rect;
-    int cacheLevel;
-
-} GlyphData;
-
-typedef struct FontMapNode {
-
-    u32 key;
-    GlyphData value;
-    struct FontMapNode *next;
-
-} FontMapNode;
-
-#define DEFAULT_FONT_MAP_N_BUCKETS      300
-
-typedef struct FontMap {
-
-    i32 n_buckets;
-    FontMapNode **buckets;
-
-} FontMap;
-
 typedef struct FontSource {
 
     TTF_Font *ttf_source;
@@ -95,6 +71,9 @@ extern u8 ui_font_load (Font *font, int style);
 
 // destroys a font data structure
 extern void ui_font_delete (void *font_ptr);
+
+// get a refrence to the default font --> the first one that was added
+extern Font *ui_font_get_default (void);
 
 // gets a refrence to a ui font by its name -> it should be ready to use
 extern Font *ui_font_get_by_name (const char *name);

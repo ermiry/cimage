@@ -1,25 +1,28 @@
 #ifndef _CENGINE_UI_H_
 #define _CENGINE_UI_H_
 
+#include <stdbool.h>
+
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
 
-/*** COMMON HEX COLORS ***/
+/*** Common HEX colors ***/
 
 #define HEX_NO_COLOR        0x00000000
 #define HEX_WHITE           0xFFFFFFFF
 #define HEX_BLACK           0x000000FF
 
-#define HEX_FULL_GREEN      0x00FF00FF
 #define HEX_FULL_RED        0xFF0000FF
+#define HEX_FULL_GREEN      0x00FF00FF
+#define HEX_FULL_BLUE       0x0000FFFF
 
 #define HEX_YELLOW          0xFFD32AFF
 #define HEX_SAPPHIRE        0x1E3799FF
 
 #define HEX_SILVER          0xBDC3C7FF
 
-/*** COMMON RGBA COLORS ***/
+/*** Common RGBA Colors ***/
 
 typedef SDL_Color RGBA_Color;
 
@@ -30,13 +33,17 @@ extern RGBA_Color RGBA_RED;
 extern RGBA_Color RGBA_GREEN;
 extern RGBA_Color RGBA_BLUE;
 
-/*** UI ELEMENTS ***/
+/*** UI Elements ***/
 
 typedef enum UIElementType {
 
     UI_TEXTBOX,
+    UI_IMAGE,
+    UI_PANEL,
     UI_BUTTON,
     UI_INPUT,
+    UI_CHECK,
+    UI_NOTI_CENTER
 
 } UIElementType;
 
@@ -45,6 +52,7 @@ typedef enum UIElementType {
 typedef struct UIElement {
 
     i32 id;
+    bool active;
     UIElementType type;
     void *element;
 
@@ -58,15 +66,24 @@ typedef SDL_Rect UIRect;
 
 extern UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h);
 extern UIRect ui_rect_union (UIRect a, UIRect b);
-extern UIRect ui_rect_render (SDL_Texture *srcTexture, UIRect *srcRect, u32 x, u32 y);
 
 extern RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a);
 
 /*** Public ui funcs ***/
 
+// renders all the current active ui to the screen
 extern void ui_render (void);
 
+// initializes cengine's ui capabilities
 extern u8 ui_init (void);
+
+// sets the location of cengine's default ui assets
+extern void ui_default_assets_set_path (const char *pathname);
+
+// loads cengine's default ui assets
+extern u8 ui_default_assets_load (void);
+
+// destroys any cengine ui element left and deallocates memory
 extern u8 ui_destroy (void);
 
 #endif

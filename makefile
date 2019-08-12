@@ -5,7 +5,12 @@ MATH = -lm
 PTHREAD := -l pthread
 
 # development
-DEVELOPMENT = -g -D DEV
+DEVELOPMENT = -D CENGINE_DEBUG
+
+# additional cimage info
+CIMAGE_DEBUG = -D BLACK_DEBUG
+
+DEFINES = $(CIMAGE_DEBUG) $(DEVELOPMENT)
 
 CC          := gcc
 
@@ -17,8 +22,8 @@ SRCEXT      := c
 DEPEXT      := d
 OBJEXT      := o
 
-CFLAGS      := $(DEVELOPMENT)
-LIB         := $(PTHREAD) $(SDL2) $(MATH)
+CFLAGS      := -g $(DEFINES)
+LIB         :=  $(PTHREAD) $(SQLITE3) $(SDL2) $(MATH)
 INC         := -I $(INCDIR) -I /usr/local/include
 INCDEP      := -I $(INCDIR)
 
@@ -28,7 +33,7 @@ OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJE
 all: directories $(TARGET)
 
 run: 
-	./$(TARGETDIR)/$(TARGET)
+	LD_PRELOAD=./libs/libSDL2_image-2.0.so.0.2.1 ./$(TARGETDIR)/$(TARGET)
 
 remake: clean all
 
@@ -54,7 +59,7 @@ $(TARGET): $(OBJECTS)
 # compile
 $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
+	$(CC) $(LIB) $(CFLAGS) $(INC) -c -o $@ $<
 	@$(CC) $(CFLAGS) $(INCDEP) -MM $(SRCDIR)/$*.$(SRCEXT) > $(BUILDDIR)/$*.$(DEPEXT)
 	@cp -f $(BUILDDIR)/$*.$(DEPEXT) $(BUILDDIR)/$*.$(DEPEXT).tmp
 	@sed -e 's|.*:|$(BUILDDIR)/$*.$(OBJEXT):|' < $(BUILDDIR)/$*.$(DEPEXT).tmp > $(BUILDDIR)/$*.$(DEPEXT)

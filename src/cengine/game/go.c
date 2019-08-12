@@ -57,7 +57,7 @@ static void game_object_tag_delete (void *ptr) {
     if (ptr) {
         GameObjectTag *tag = (GameObjectTag *) ptr;
         str_delete (tag->name);
-        dlist_destroy (tag->gos);
+        dlist_delete (tag->gos);
 
         free (tag);
     }
@@ -295,7 +295,7 @@ void game_object_destroy (GameObject *go) {
         animator_destroy ((Animator *) go->components[ANIMATOR_COMP]);
 
         // destroy user defined components
-        dlist_destroy (go->user_components);
+        dlist_delete (go->user_components);
     }
 
 }
@@ -313,7 +313,7 @@ static void game_object_delete (GameObject *go) {
         animator_destroy ((Animator *) go->components[ANIMATOR_COMP]);
 
         // destroy user defined components
-        dlist_destroy (go->user_components);
+        dlist_delete (go->user_components);
 
         // layer_remove_object (go->layer->name->str, go);
 
@@ -329,10 +329,10 @@ static void game_object_delete (GameObject *go) {
 void game_object_destroy_all (void) {
 
     // destroy gos tags
-    dlist_destroy (tags);
+    dlist_delete (tags);
 
     // destroy user defined components list
-    dlist_destroy (user_components);
+    dlist_delete (user_components);
 
     for (u32 i = 0; i < curr_max_objs; i++) 
         if (gameObjects[i])

@@ -1,10 +1,39 @@
-#ifndef _CERVER_HANDLER_H_
-#define _CERVER_HANDLER_H_
+#ifndef _CERVER_CLIENT_HANDLER_H_
+#define _CERVER_CLIENT_HANDLER_H_
 
-#include "cengine/types/types.h"
+#include "cengine/cerver/client.h"
+#include "cengine/cerver/connection.h"
+#include "cengine/cerver/packets.h"
 
-extern int client_poll_get_free_idx (Client *client);
+#define RECEIVE_PACKET_BUFFER_SIZE          8192
 
-extern u8 client_poll (void *data);
+struct _Client;
+struct _Connection;
+struct _Packet;
+
+typedef struct SockReceive {
+
+    struct _Packet *spare_packet;
+    size_t missing_packet;
+
+} SockReceive;
+
+extern SockReceive *sock_receive_new (void);
+
+extern void sock_receive_delete (void *sock_receive_ptr);
+
+typedef struct ClientConnection {
+
+    struct _Client *client;
+    struct _Connection *connection;
+
+} ClientConnection;
+
+extern ClientConnection *client_connection_aux_new (struct _Client *client, struct _Connection *connection);
+
+extern void client_connection_aux_delete (ClientConnection *cc);
+
+// receives incoming data from the socket
+extern void client_receive (struct _Client *client, struct _Connection *connection);
 
 #endif

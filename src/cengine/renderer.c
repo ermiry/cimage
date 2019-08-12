@@ -1,15 +1,24 @@
+#include <stdlib.h>
 #include <stdbool.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_surface.h>
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
+
 #include "cengine/renderer.h"
 #include "cengine/textures.h"
+
 #include "cengine/manager/manager.h"
+
 #include "cengine/game/go.h"
 #include "cengine/game/camera.h"
+
 #include "cengine/ui/ui.h"
+
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
@@ -278,7 +287,7 @@ static void layer_delete (void *ptr) {
     if (ptr) {
         Layer *layer = (Layer *) ptr;
         str_delete (layer->name);
-        dlist_destroy (layer->gos);
+        dlist_delete (layer->gos);
 
         free (layer);
     }
@@ -367,54 +376,38 @@ void layers_init (void) {
 
 void layers_end (void) { 
     
-    dlist_destroy (layers); 
+    dlist_delete (layers); 
     layers = NULL;
     
 }
 
 #pragma endregion
 
-// FIXME: we need to implement occlusion culling!
-void render (void) {
+#pragma region Surfaces
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, 0, 0, 0, 255);
-    SDL_RenderClear (main_renderer->renderer);
+SDL_Surface *surface_create (int width, int height) {
 
-    // render by layers
-    Layer *layer = NULL;
-    GameObject *go = NULL;
-    Transform *transform = NULL;
-    Graphics *graphics = NULL;
-    for (ListElement *layer_le = dlist_start (layers); layer_le; layer_le = layer_le->next) {
-        layer = (Layer *) layer_le->data;
+    uint32_t rmask , gmask , bmask , amask ;
 
-        for (ListElement *le = dlist_start (layer->gos); le; le = le->next) {
-            go = (GameObject *) le->data;
+    /* SDL interprets each pixel as a 32-bit number, so our masks must depend
+       on the endianness (byte order) of the machine */
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        rmask = 0xff000000;
+        gmask = 0x00ff0000;
+        bmask = 0x0000ff00;
+        amask = 0x000000ff;
+    #else
+        rmask = 0x000000ff;
+        gmask = 0x0000ff00;
+        bmask = 0x00ff0000;
+        amask = 0xff000000;
+    #endif
 
-            transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
-            graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
-            if (transform && graphics) {
-                if (graphics->multipleSprites) {
-                    texture_draw_frame (main_camera, graphics->spriteSheet, 
-                        transform->position.x, transform->position.y, 
-                        graphics->x_sprite_offset, graphics->y_sprite_offset,
-                        graphics->flip);
-                }
-                
-                else {
-                    texture_draw (main_camera, graphics->sprite, 
-                        transform->position.x, transform->position.y, 
-                        graphics->flip);
-                }
-            }
-        }
-    }
-
-    ui_render ();       // render ui elements
-
-    SDL_RenderPresent (main_renderer->renderer);
+    return SDL_CreateRGBSurface (0, width, height, 32, rmask, gmask, bmask, amask);
 
 }
+
+#pragma endregion
 
 #pragma region Basic
 
@@ -467,6 +460,73 @@ void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color) {
 
     SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
     SDL_RenderDrawLine (main_renderer->renderer, x1, y1, x2, y2);
+
+}
+
+#pragma endregion
+
+#pragma region Complex
+
+// renders a rect with transparency
+SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color) {
+
+    SDL_Texture *texture = NULL;
+
+    SDL_Surface *surface = surface_create (rect->w, rect->h);
+    if (surface) {
+        (void) SDL_FillRect (surface, NULL, 
+            convert_rgba_to_hex (color.r, color.g, color.b, color.a));
+        texture = SDL_CreateTextureFromSurface (main_renderer->renderer, surface);
+        SDL_FreeSurface (surface); 
+    }
+
+    return texture;
+
+}
+
+#pragma endregion
+
+#pragma region Render
+
+// FIXME: we need to implement occlusion culling!
+void render (void) {
+
+    SDL_SetRenderDrawColor (main_renderer->renderer, 0, 0, 0, 255);
+    SDL_RenderClear (main_renderer->renderer);
+
+    // render by layers
+    Layer *layer = NULL;
+    GameObject *go = NULL;
+    Transform *transform = NULL;
+    Graphics *graphics = NULL;
+    for (ListElement *layer_le = dlist_start (layers); layer_le; layer_le = layer_le->next) {
+        layer = (Layer *) layer_le->data;
+
+        for (ListElement *le = dlist_start (layer->gos); le; le = le->next) {
+            go = (GameObject *) le->data;
+
+            transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
+            graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
+            if (transform && graphics) {
+                if (graphics->multipleSprites) {
+                    texture_draw_frame (main_camera, graphics->spriteSheet, 
+                        transform->position.x, transform->position.y, 
+                        graphics->x_sprite_offset, graphics->y_sprite_offset,
+                        graphics->flip);
+                }
+                
+                else {
+                    texture_draw (main_camera, graphics->sprite, 
+                        transform->position.x, transform->position.y, 
+                        graphics->flip);
+                }
+            }
+        }
+    }
+
+    ui_render ();       // render ui elements
+
+    SDL_RenderPresent (main_renderer->renderer);
 
 }
 

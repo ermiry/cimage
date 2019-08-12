@@ -1,6 +1,8 @@
 #ifndef _CENGINE_UI_COMPONENT_TEXT_
 #define _CENGINE_UI_COMPONENT_TEXT_
 
+#include <stdbool.h>
+
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
@@ -8,8 +10,11 @@
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
+#include "cengine/ui/components/transform.h"
 
 typedef struct Text {
+
+    UITransform *transform;
 
     Font *font;
     FontSource *font_source;
@@ -17,7 +22,9 @@ typedef struct Text {
     RGBA_Color text_color;
     u32 size;
     String *text;
-    SDL_Rect rect;
+
+    bool wrap_text;
+    u32 wrap_length;
 
     SDL_Texture *texture;       // rendered text
 
@@ -32,6 +39,12 @@ extern void ui_text_component_init (Text *text, Font *font, unsigned int size, R
 
     // sets a new text for the component
 extern void ui_text_component_set_text (Text *text, const char *text_str);
+
+// updates the text in the component
+extern void ui_text_component_update (Text *text, const char *text_str);
+
+// sets the option to wrap text (create new lines) if to big
+extern void ui_text_component_set_wrap (Text *text, u32 wrap_lenght);
 
 // creates / updates the text texture
 extern void ui_text_component_draw (Text *text);

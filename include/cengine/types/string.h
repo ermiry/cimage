@@ -16,6 +16,8 @@ extern void str_delete (void *str_ptr);
 
 extern void str_copy (String *to, String *from);
 
+extern void str_replace (String *old, const char *str);
+
 // concatenates two strings into a new one
 extern String *str_concat (String *s1, String *s2);
 
@@ -88,5 +90,8 @@ typedef struct SStringXL {
     char string[512];
 
 } SStringXL;
+
+// returns a ptr to a serialized string
+extern void *str_serialize (String *string, SStringSize size);
 
 #endif
