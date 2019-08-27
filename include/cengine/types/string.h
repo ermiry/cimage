@@ -1,5 +1,5 @@
-#ifndef _CENGINE_STRING_H_
-#define _CENGINE_STRING_H_
+#ifndef _CENGINE_TYPES_STRING_H_
+#define _CENGINE_TYPES_STRING_H_
 
 #include "cengine/types/types.h"
 

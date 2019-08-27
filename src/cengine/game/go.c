@@ -4,9 +4,10 @@
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
-#include "cengine/game/go.h"
+
 #include "cengine/animation.h"
 
+#include "cengine/game/go.h"
 #include "cengine/game/components/graphics.h"
 #include "cengine/game/components/transform.h"
 #include "cengine/game/components/collider.h"
@@ -15,6 +16,8 @@ GameObject **gameObjects = NULL;
 u32 max_gos = 0;
 u32 curr_max_objs = 0;
 u32 new_go_id = 0;
+
+static Layer *default_layer = NULL;
 
 static DoubleList *user_components;        // user defined components
 
@@ -139,6 +142,8 @@ u8 game_objects_init_all (void) {
 
     u8 retval = 1;
 
+    default_layer = layer_get_by_name (gos_layers, "default");
+
     gameObjects = (GameObject **) calloc (DEFAULT_MAX_GOS, sizeof (GameObject *));
     if (gameObjects) {
         for (u32 i = 0; i < DEFAULT_MAX_GOS; i++) gameObjects[i] = NULL;
@@ -173,17 +178,10 @@ static void game_object_init (GameObject *go, u32 id, const char *name, const ch
 
     if (go) {
         go->id = id;
-
-        if (name) {
-            go->name = (char *) calloc (strlen (name) + 1, sizeof (char));
-            strcpy (go->name, name);
-        }
-
-        else go->name = NULL;
-
+        go->name = name ? str_new (name) : NULL;
         if (tag) {
-            go->tag = (char *) calloc (strlen (tag) + 1, sizeof (char));
-            strcpy (go->tag, tag);
+            if (!game_object_add_to_tag (go, tag))
+                go->tag = str_new (tag);
         }
 
         else go->tag = NULL;
@@ -197,7 +195,8 @@ static void game_object_init (GameObject *go, u32 id, const char *name, const ch
         go->user_components = dlist_init (user_component_delete, NULL);
 
         // all game objects are added to the dafult layer when they are initialized
-        layer_add_object ("default", go);
+        go->layer = default_layer;
+        layer_add_element (default_layer, go);
     }
 
 }
@@ -245,6 +244,10 @@ int game_object_comparator (const void *one, const void *two) {
         else return 1;
     }
 
+    if (one) return -1;
+    else if (two) return 1;
+    return 0;
+
 }
 
 void game_object_add_child (GameObject *parent, GameObject *child) {
@@ -282,12 +285,15 @@ void game_object_destroy (GameObject *go) {
         go->id = -1;
         go->update = NULL;
 
-        if (go->name) free (go->name);
-        if (go->tag) free (go->tag);
+        if (go->name) str_delete (go->name);
+        if (go->tag) {
+            game_object_remove_from_tag (go, go->tag->str);
+            str_delete (go->tag);
+        }
 
         if (go->children) free (go->children);
 
-        layer_remove_object (go->layer->name->str, go);
+        layer_remove_element (default_layer, go);
 
         // individually destroy each component
         transform_destroy ((Transform *) go->components[TRANSFORM_COMP]);
@@ -315,13 +321,60 @@ static void game_object_delete (GameObject *go) {
         // destroy user defined components
         dlist_delete (go->user_components);
 
-        // layer_remove_object (go->layer->name->str, go);
+        layer_remove_element (go->layer, go);
 
-        if (go->name) free (go->name);
-        if (go->tag) free (go->tag);
+        str_delete (go->name);
+        str_delete (go->tag);
 
         free (go);
     }
+
+}
+
+void game_object_set_name (GameObject *go, const char *name) {
+
+    if (go && name) {
+        str_delete (go->name);
+        go->name = str_new (name);
+    }
+
+}
+
+// sets the tag for the gameobject
+// removes it from the one it is now and adds it to the new one
+// returns 0 on success, 1 on error
+int game_object_set_tag (GameObject *go, const char *tag_name) {
+
+    int retval = 1;
+
+    if (go && tag_name) {
+        GameObjectTag *tag = game_object_tag_get_by_name (tag_name);
+        if (tag) {
+            game_object_remove_from_tag (go, go->tag->str);
+            retval = game_object_add_to_tag (go, tag_name);
+        }
+    }
+
+    return retval;
+
+}
+
+// sets the render layer of the game object
+// removes it from the one it is now and adds it to the new one
+// returns 0 on success, 1 on error
+int game_object_set_layer (GameObject *go, const char *layer_name) {
+
+    int retval = 1;
+
+    if (go && layer_name) {
+        Layer *layer = layer_get_by_name (ui_elements_layers, layer_name);
+        if (layer) {
+            layer_remove_element (go->layer, go);
+            retval = layer_add_element (layer, go);
+        }
+    }
+
+    return retval;
 
 }
 
@@ -514,13 +567,5 @@ void game_object_user_component_remove (GameObject *go, const char *name) {
             }
         }
     }
-
-}
-
-/*** Layers ***/
-
-int game_object_set_layer (GameObject *go, const char *layer) {
-
-    return layer_add_object (layer, go);
 
 }

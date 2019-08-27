@@ -97,7 +97,7 @@ extern void ui_button_ref_sprite (Button *button, ButtonState state, Sprite *spr
 extern void ui_button_set_action (Button *button, Action action, void *args);
 
 // creates a new button
-extern Button *ui_button_create (u32 x, u32 y, u32 w, u32 h);
+extern Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
 
 // draws a button
 extern void ui_button_draw (Button *button);

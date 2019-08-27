@@ -46,20 +46,6 @@ void sock_receive_delete (void *sock_receive_ptr) {
 
 }
 
-ClientConnection *client_connection_aux_new (Client *client, Connection *connection) {
-
-    ClientConnection *cc = (ClientConnection *) malloc (sizeof (ClientConnection));
-    if (cc) {
-        cc->client = client;
-        cc->connection = connection;
-    }
-
-    return cc;
-
-}
-
-void client_connection_aux_delete (ClientConnection *cc) { if (cc) free (cc); }
-
 #pragma endregion
 
 #pragma region handlers
@@ -78,6 +64,7 @@ static void client_auth_packet_handler (Packet *packet) {
 
                 // we have successfully authenticated with the server
                 case SUCCESS_AUTH:
+                    client_event_trigger (packet->client, EVENT_SUCCESS_AUTH);
                     break;
 
                 default: 

@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include <SDL2/SDL_rect.h>
 
 #include "cengine/types/types.h"
@@ -7,12 +9,15 @@
 #include "cengine/ui/position.h"
 #include "cengine/ui/components/transform.h"
 
-void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect) {
+void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect, bool offset) {
 
     if (transform_ptr) {
         UITransform *transform = (UITransform *) transform_ptr;
 
         SDL_Rect rect = { 0 };
+
+        i32 x_prev = transform->rect.x;
+        i32 y_prev = transform->rect.y;
 
         if (ref_rect) {
             rect.x = ref_rect->x;
@@ -26,12 +31,15 @@ void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect) {
             rect.h = main_renderer->window_size.height;
         }
 
+        i32 x_offset = (rect.x - transform->rect.x);
+        i32 y_offset = (rect.y - transform->rect.y);
+
         switch (transform->pos) {
             case UI_POS_FREE: break;
-
+            
             case UI_POS_MIDDLE_CENTER: {
-                transform->rect.x = ((rect.w / 2) - (transform->rect.w / 2)) + rect.x;
-                transform->rect.y = ((rect.h / 2) - (transform->rect.h / 2)) + rect.y;
+                transform->rect.x = (((rect.w / 2) - (transform->rect.w / 2)) + rect.x);
+                transform->rect.y = (((rect.h / 2) - (transform->rect.h / 2)) + rect.y);
             } break;
 
             case UI_POS_UPPER_CENTER: {
@@ -75,6 +83,11 @@ void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect) {
             } break;
 
             default: break;
+        }
+
+        if (transform->pos != UI_POS_FREE && offset) {
+            transform->rect.x -= x_offset;
+            transform->rect.y -= y_offset;
         }
     }
 

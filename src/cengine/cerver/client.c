@@ -292,12 +292,17 @@ int client_connection_start (Client *client, Connection *connection) {
 
     if (client && connection) {
         if (!connection_start (connection)) {
+            client_event_trigger (client, EVENT_CONNECTED);
             connection->connected = true;
             thread_create_detachable ((void *(*)(void *)) client_connection_update, 
                 client_connection_aux_new (client, connection));
             client_start (client);
             retval = 0;
         }
+
+        else {
+            client_event_trigger (client, EVENT_CONNECTION_FAILED);
+        } 
     }
 
     return retval;
@@ -483,3 +488,19 @@ u8 client_game_start_lobby (Client *client, Connection *connection,
     return retval;
 
 }
+
+/*** aux ***/
+
+ClientConnection *client_connection_aux_new (Client *client, Connection *connection) {
+
+    ClientConnection *cc = (ClientConnection *) malloc (sizeof (ClientConnection));
+    if (cc) {
+        cc->client = client;
+        cc->connection = connection;
+    }
+
+    return cc;
+
+}
+
+void client_connection_aux_delete (void *ptr) { if (ptr) free (ptr); }

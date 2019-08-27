@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
@@ -18,11 +19,13 @@ void ui_transform_component_delete (void *transform_ptr) {
 
 }
 
-void ui_transform_component_set_pos (UITransform *transform, UIRect *ref_rect, UIPosition pos) {
+void ui_transform_component_delete_dummy (void *transform_ptr) {}
+
+void ui_transform_component_set_pos (UITransform *transform, UIRect *ref_rect, UIPosition pos, bool offset) {
 
     if (transform) {
         transform->pos = pos;
-        ui_position_update (transform, ref_rect);
+        ui_position_update (transform, ref_rect, offset);
     } 
 
 }

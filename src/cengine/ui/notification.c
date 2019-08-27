@@ -539,7 +539,7 @@ NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos) {
             noti_center->max_display = max_display;
             noti_center->transform = ui_transform_component_create (0, 0, 
                 NOTI_CENTER_DEFAULT_WIDTH, NOTI_CENTER_DEFAULT_HEIGHT);
-            ui_transform_component_set_pos (noti_center->transform, NULL, pos);
+            ui_transform_component_set_pos (noti_center->transform, NULL, pos, true);
 
             // adjust noti center postion values
             ui_noti_center_update_pos (noti_center);
@@ -655,11 +655,21 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                     
                     // check for available space in the notification center UI
                     u32 new_height = noti_center->transform->rect.y + noti_center->offset;
-                    // if ((new_height + noti->transform->rect.h) < (noti_center->transform->rect.y + noti_center->transform->rect.h)) {
+                    bool ok = false;
+                    if (noti_center->bottom) {
+                        if ((new_height - noti->transform->rect.h) > (noti_center->transform->rect.y))
+                            ok = true;
+                    }
+
+                    else if ((new_height + noti->transform->rect.h) < (noti_center->transform->rect.y + noti_center->transform->rect.h))
+                        ok = true;
+
+                    if (ok) {
                         // adjust notification position values
                         // noti->transform->rect.y = noti_center->bottom ? (new_height - noti->transform->rect.h) : new_height;
                         // ui_notification_update_pos (noti);
-                        noti_center->offset -= noti->transform->rect.h;
+                        if (noti_center->bottom) noti_center->offset -= noti->transform->rect.h;
+                        else noti_center->offset += noti->transform->rect.h;
 
                         // push the notification to the active ones
                         void *noti_data = dlist_remove_element (noti_center->notifications, le);
@@ -668,7 +678,7 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                         timer_start (((Notification *) noti_data)->life);
                         
                         if (noti_center->active_notifications->size >= noti_center->max_display) break;
-                    // }
+                    }
                 }
             }
         }
@@ -683,7 +693,8 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                 u32 new_height = noti_center->transform->rect.y + offset;
                 noti->transform->rect.y = noti_center->bottom ? (new_height - noti->transform->rect.h) : new_height;
                 ui_notification_update_pos (noti);
-                offset -= noti->transform->rect.h;
+                if (noti_center->bottom) offset -= noti->transform->rect.h;
+                else offset += noti->transform->rect.h;
 
                 ui_notification_draw (noti);
 
@@ -691,7 +702,8 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                 if ((timer_get_ticks (noti->life) / 1000) >= noti->lifetime) {
                     // remove older notifications
                     Notification *old_noti = (Notification *) dlist_remove_element (noti_center->active_notifications, le);
-                    noti_center->offset += old_noti->transform->rect.h;
+                    if (noti_center->bottom) noti_center->offset += old_noti->transform->rect.h;
+                    else noti_center->offset -= old_noti->transform->rect.h;
                     ui_notification_delete (old_noti);
                     if (noti_center->active_notifications->size <= 0) break;
                 }   

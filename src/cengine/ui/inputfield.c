@@ -84,7 +84,7 @@ void ui_input_field_placeholder_text_set (InputField *input, const char *text,
     if (input) {
         if (input->placeholder) ui_text_component_delete (input->placeholder);
 
-        input->placeholder = ui_text_component_new ();
+        input->placeholder = text ? ui_text_component_new () : NULL;
         if (input->placeholder) {
             ui_text_component_init (input->placeholder,
                 font, size, text_color, text);
@@ -99,12 +99,26 @@ void ui_input_field_placeholder_text_set (InputField *input, const char *text,
 
 }
 
+// updates the input's placeholder text
+void ui_input_field_placeholder_text_update (InputField *input, const char *text) {
+
+    if (input) {
+        if (input->placeholder) {
+            ui_text_component_set_text (input->placeholder, text);
+            ui_text_component_draw (input->placeholder);
+            ui_transform_component_set_pos (input->placeholder->transform, 
+                &input->transform->rect, input->placeholder->transform->pos, true);
+        }
+    }
+
+}
+
 // sets the input placeholder text position
 void ui_input_field_placeholder_text_pos_set (InputField *input, UIPosition pos) {
 
     if (input) {
         if (input->placeholder) 
-            ui_transform_component_set_pos (input->placeholder->transform, &input->transform->rect, pos);
+            ui_transform_component_set_pos (input->placeholder->transform, &input->transform->rect, pos, true);
     }
 
 }
@@ -144,6 +158,8 @@ void ui_input_field_text_update (InputField *input, const char *update_text) {
         if (input->text) {
             ui_text_component_set_text (input->text, update_text);
             ui_text_component_draw (input->text);
+            ui_transform_component_set_pos (input->text->transform, 
+                &input->transform->rect, input->text->transform->pos, true);
         }
     }
 
@@ -154,7 +170,7 @@ void ui_input_field_text_pos_set (InputField *input, UIPosition pos) {
 
     if (input) {
         if (input->text) 
-            ui_transform_component_set_pos (input->text->transform, &input->transform->rect, pos);
+            ui_transform_component_set_pos (input->text->transform, &input->transform->rect, pos, true);
     }
 
 }
@@ -245,7 +261,7 @@ void ui_input_field_selected_set (InputField *input, RGBA_Color selected_color) 
 }
 
 // creates a new input field
-InputField *ui_input_field_create (u32 x, u32 y, u32 w, u32 h) {
+InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 
     InputField *input = NULL;
 
@@ -255,6 +271,7 @@ InputField *ui_input_field_create (u32 x, u32 y, u32 w, u32 h) {
         if (input) {
             input->ui_element = ui_element;
             input->transform = ui_transform_component_create (x, y, w, h);
+            ui_transform_component_set_pos (input->transform, NULL, pos, true);
             ui_element->element = input;
         }
 
@@ -306,7 +323,7 @@ void ui_input_field_draw (InputField *input) {
                 render_basic_outline_rect (&input->transform->rect, input->selected_color);
         }
 
-        else if (input->outline) render_basic_outline_rect (&input->transform->rect, RGBA_WHITE);
+        else if (input->outline) render_basic_outline_rect (&input->transform->rect, input->outline_colour);
         
         // draw the correct text
         if (input->empty_text) {
@@ -351,7 +368,7 @@ void ui_input_field_update (InputField *input) {
 
         ui_text_component_draw (input->text);
         ui_transform_component_set_pos (input->text->transform, 
-            &input->transform->rect, input->text->transform->pos);
+            &input->transform->rect, input->text->transform->pos, false);
     }
 
 }

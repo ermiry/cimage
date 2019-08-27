@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
+#include "cengine/types/string.h"
 
 #include "cengine/animation.h"
 #include "cengine/input.h"
@@ -46,9 +47,9 @@ int cengine_init (const char *window_title, WindowSize window_size, bool full_sc
     if (!SDL_Init (SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_VIDEO)) {
         errors = thread_hub_init_global ();
         errors = animations_init ();
+        errors = render_init ();
         errors = renderer_init_main (SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED, 
             window_title, window_size, full_screen);
-        layers_init ();
         errors = game_objects_init_all ();
         errors = ui_init ();
         input_init ();
@@ -71,11 +72,14 @@ int cengine_init (const char *window_title, WindowSize window_size, bool full_sc
 
 int cengine_end (void) {
 
+    manager->curr_state->on_exit ();
+    manager_delete (manager);
+
     input_end ();
     camera_destroy (main_camera);
     ui_destroy ();
-    layers_end ();
     renderer_delete_main ();
+    render_end ();
     game_object_destroy_all ();
     animations_end ();
     thread_hub_end_global ();

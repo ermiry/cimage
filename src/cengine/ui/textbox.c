@@ -56,12 +56,12 @@ String *ui_textbox_get_text (TextBox *textbox) {
 
 // sets the textbox's text with options
 void ui_textbox_set_text (TextBox *textbox, const char *text, 
-    Font *font, u32 size, RGBA_Color color) {
+    Font *font, u32 size, RGBA_Color color, bool adjust_to_text) {
 
     if (textbox) {
         if (textbox->text) ui_text_component_delete (textbox->text);
 
-        textbox->text = ui_text_component_new ();
+        textbox->text = text ? ui_text_component_new () : NULL;
         if (textbox->text) {
             ui_text_component_init (textbox->text,
                 font, size, color, text);
@@ -71,6 +71,12 @@ void ui_textbox_set_text (TextBox *textbox, const char *text,
             textbox->text->transform->rect.y = textbox->transform->rect.y;
 
             ui_text_component_draw (textbox->text);
+
+            if (adjust_to_text) {
+                textbox->transform->rect.w = textbox->text->transform->rect.w;
+                textbox->transform->rect.h = textbox->text->transform->rect.h;
+                ui_position_update (textbox->transform, NULL, true);
+            }
         }
     }
 
@@ -83,6 +89,8 @@ void ui_textbox_update_text (TextBox *textbox, const char *text) {
         if (textbox->text) {
             ui_text_component_update (textbox->text, text);
             ui_text_component_draw (textbox->text);
+            ui_transform_component_set_pos (textbox->text->transform, 
+                &textbox->transform->rect, textbox->text->transform->pos, true);
         }
     }
 
@@ -92,8 +100,8 @@ void ui_textbox_update_text (TextBox *textbox, const char *text) {
 void ui_textbox_set_text_pos (TextBox *textbox, UIPosition pos) {
 
     if (textbox) {
-        if (textbox->text) 
-            ui_transform_component_set_pos (textbox->text->transform, &textbox->transform->rect, pos);
+        if (textbox->text) {}
+            ui_transform_component_set_pos (textbox->text->transform, &textbox->transform->rect, pos, true);
     }
 
 }
@@ -172,7 +180,7 @@ void ui_textbox_remove_background (TextBox *textbox) {
 }
 
 // creates a new textbox
-TextBox *ui_textbox_create (u32 x, u32 y, u32 w, u32 h, UIPosition pos) {
+TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 
     TextBox *textbox = NULL;
 
@@ -182,7 +190,7 @@ TextBox *ui_textbox_create (u32 x, u32 y, u32 w, u32 h, UIPosition pos) {
         if (textbox) {
             textbox->ui_element = ui_element;
             textbox->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (textbox->transform, NULL, pos);
+            ui_transform_component_set_pos (textbox->transform, NULL, pos, true);
             ui_element->element = textbox;
         }
 

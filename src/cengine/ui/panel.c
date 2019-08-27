@@ -16,7 +16,10 @@ static Panel *ui_panel_new (void) {
         memset (panel, 0, sizeof (Panel));
         panel->ui_element = NULL;
         panel->transform = NULL;
-        panel->texture = NULL;
+
+        panel->colour = false;
+        panel->bg_texture = NULL;
+        panel->outline = false;
     }
 
     return panel;
@@ -29,7 +32,7 @@ void ui_panel_delete (void *panel_ptr) {
         Panel *panel = (Panel *) panel_ptr;
         panel->ui_element = NULL;
         ui_transform_component_delete (panel->transform);
-        if (panel->texture) SDL_DestroyTexture (panel->texture);
+        if (panel->bg_texture) SDL_DestroyTexture (panel->bg_texture);
         free (panel);
     }
 
@@ -39,19 +42,55 @@ void ui_panel_delete (void *panel_ptr) {
 void ui_panel_set_bg_colour (Panel *panel, RGBA_Color colour) {
 
     if (panel) {
-        panel->bgcolor = colour;
+        panel->colour = true;
+        panel->bg_colour = colour;
         if (colour.a < 255) {
-            panel->texture = render_complex_transparent_rect (&panel->transform->rect, colour);
-            panel->texture_rect.w = panel->transform->rect.w;
-            panel->texture_rect.h = panel->transform->rect.h;
+            panel->bg_texture = render_complex_transparent_rect (&panel->transform->rect, colour);
+            panel->bg_texture_rect.w = panel->transform->rect.w;
+            panel->bg_texture_rect.h = panel->transform->rect.h;
         }
     } 
 
 }
 
+// removes the background from the panel
+void ui_panel_remove_background (Panel *panel) {
+
+    if (panel) {
+        if (panel->bg_texture) {
+            SDL_DestroyTexture (panel->bg_texture);
+            panel->bg_texture = NULL;
+        }
+
+        memset (&panel->bg_colour, 0, sizeof (RGBA_Color));
+        panel->colour = false;
+    }
+
+}
+
+// sets the panel's outline colour
+void ui_panel_set_ouline_colour (Panel *panel, RGBA_Color colour) {
+
+    if (panel) {
+        panel->outline = true;
+        panel->outline_colour = colour;
+    }
+
+}
+
+// removes the ouline form the panel
+void ui_panel_remove_outline (Panel *panel) {
+
+    if (panel) {
+        memset (&panel->outline_colour, 0, sizeof (RGBA_Color));
+        panel->outline = false;
+    }
+
+}
+
 // creates a new panel
 // x and y for position
-Panel *panel_create (u32 x, u32 y, u32 w, u32 h, UIPosition pos) {
+Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 
     Panel *panel = NULL;
 
@@ -61,7 +100,8 @@ Panel *panel_create (u32 x, u32 y, u32 w, u32 h, UIPosition pos) {
         if (panel) {
             panel->ui_element = ui_element;
             panel->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (panel->transform, NULL, pos);
+            ui_transform_component_set_pos (panel->transform, NULL, pos, true);
+
             ui_element->element = panel;
         }
     }
@@ -73,14 +113,21 @@ Panel *panel_create (u32 x, u32 y, u32 w, u32 h, UIPosition pos) {
 // draws the panel to the screen
 void ui_panel_draw (Panel *panel) {
 
-    if (panel->texture) {
-        SDL_RenderCopyEx (main_renderer->renderer, panel->texture, 
-            &panel->texture_rect, &panel->transform->rect, 
-            0, 0, SDL_FLIP_NONE);
+    // render the background
+    if (panel->colour) {
+        if (panel->bg_texture) {
+            SDL_RenderCopyEx (main_renderer->renderer, panel->bg_texture, 
+                &panel->bg_texture_rect, &panel->transform->rect, 
+                0, 0, SDL_FLIP_NONE);
+        }
+
+        else {
+            render_basic_filled_rect (&panel->transform->rect, panel->bg_colour);
+        }
     }
 
-    else {
-        render_basic_filled_rect (&panel->transform->rect, panel->bgcolor);
-    }
+    // render the outline
+    if (panel->outline) 
+        render_basic_outline_rect (&panel->transform->rect, panel->outline_colour);
 
 }

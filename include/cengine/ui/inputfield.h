@@ -57,6 +57,9 @@ extern void ui_input_field_toggle_active (InputField *input);
 extern void ui_input_field_placeholder_text_set (InputField *input, const char *text,
     Font *font, u32 size, RGBA_Color text_color);
 
+// updates the input's placeholder text
+extern void ui_input_field_placeholder_text_update (InputField *input, const char *text);
+
 // sets the input placeholder text position
 extern void ui_input_field_placeholder_text_pos_set (InputField *input, UIPosition pos);
 
@@ -95,7 +98,7 @@ extern void ui_input_field_bg_remove (InputField *input);
 extern void ui_input_field_selected_set (InputField *input, RGBA_Color selected_color);
 
 // creates a new input field
-extern InputField *ui_input_field_create (u32 x, u32 y, u32 w, u32 h);
+extern InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
 
 // draws the input field
 extern void ui_input_field_draw (InputField *input);

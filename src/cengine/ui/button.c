@@ -120,7 +120,7 @@ void ui_button_set_text_pos (Button *button, UIPosition pos) {
 
     if (button) {
         if (button->text)
-            ui_transform_component_set_pos (button->text->transform, &button->transform->rect, pos);
+            ui_transform_component_set_pos (button->text->transform, &button->transform->rect, pos, true);
     }
 
 }
@@ -258,7 +258,7 @@ void ui_button_set_action (Button *button, Action action, void *args) {
 }
 
 // creates a new button
-Button *ui_button_create (u32 x, u32 y, u32 w, u32 h) {
+Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 
     Button *button = NULL;
 
@@ -268,6 +268,7 @@ Button *ui_button_create (u32 x, u32 y, u32 w, u32 h) {
         if (button) {
             button->ui_element = ui_element;
             button->transform = ui_transform_component_create (x, y, w, h);
+            ui_transform_component_set_pos (button->transform, NULL, pos, true);
 
             ui_element->element = button;
         }

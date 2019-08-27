@@ -11,12 +11,18 @@ struct _Client;
 
 typedef enum ClientEventType {
 
+    EVENT_CONNECTED,            // connected to cerver
+    EVENT_CONNECTION_FAILED,    // failed to connect to cerver
+    EVENT_DISCONNECTED,         // disconnected from the cerver, either by the cerver or by losing connection
+
     EVENT_CERVER_INFO,          // received cerver info from the cerver
     EVENT_CERVER_TEARDOWN,      // the cerver is going to teardown (disconnect happens automatically)
     EVENT_CERVER_STATS,         // received cerver stats
     EVENT_CERVER_GAME_STATS,    // received cerver game stats
 
     EVENT_SUCCESS_AUTH,         // auth with cerver has been successfull
+    EVENT_FAILED_AUTH,          // failed to authenticate to cerver
+    EVENT_MAX_AUTH_TRIES,       // maxed out attempts to authenticate to cerver, so try again
 
     EVENT_LOBBY_CREATE,         // a new lobby was successfully created
     EVENT_LOBBY_JOIN,           // correctly joined a new lobby

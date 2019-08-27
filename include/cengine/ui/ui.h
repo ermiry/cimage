@@ -43,7 +43,8 @@ typedef enum UIElementType {
     UI_BUTTON,
     UI_INPUT,
     UI_CHECK,
-    UI_NOTI_CENTER
+    UI_NOTI_CENTER,
+    UI_DROPDOWN
 
 } UIElementType;
 
@@ -54,13 +55,32 @@ typedef struct UIElement {
     i32 id;
     bool active;
     UIElementType type;
+    int layer_id;
     void *element;
 
 } UIElement;
 
 // ui element constructor
 extern UIElement *ui_element_new (UIElementType type);
+
+// deactivates the ui element and destroys its component (this is what the user should call)
+extern void ui_element_destroy (UIElement *ui_element);
+
+// completely deletes the UI element (only called by dengine functions)
 extern void ui_element_delete (UIElement *ui_element);
+
+extern void ui_element_delete (UIElement *ui_element);
+
+extern void ui_element_delete_dummy (void *ui_element_ptr);
+
+extern int ui_element_comparator (const void *one, const void *two);
+
+// sets the render layer of the ui element
+// removes it from the one it is now and adds it to the new one
+// returns 0 on success, 1 on error
+extern int ui_element_set_layer (UIElement *ui_element, const char *layer_name);
+
+extern void ui_element_toggle_active (UIElement *ui_element);
 
 typedef SDL_Rect UIRect;
 

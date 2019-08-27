@@ -139,6 +139,19 @@ extern u8 client_game_leave_lobby (Client *client, struct _Connection *connectio
 extern u8 client_game_start_lobby (Client *client, struct _Connection *connection,
     const char *lobby_id);
 
+/*** aux ***/
+
+typedef struct ClientConnection {
+
+    Client *client;
+    struct _Connection *connection;
+
+} ClientConnection;
+
+extern ClientConnection *client_connection_aux_new (Client *client, struct _Connection *connection);
+
+extern void client_connection_aux_delete (void *ptr);
+
 /*** Serialization ***/
 
 // session id - token

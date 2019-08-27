@@ -39,7 +39,7 @@ extern String *ui_textbox_get_text (TextBox *textbox);
 
 // sets the textbox's text
 extern void ui_textbox_set_text (TextBox *textbox, const char *text, 
-    Font *font, u32 size, RGBA_Color color);
+    Font *font, u32 size, RGBA_Color color, bool adjust_to_text);
 
 // updates the textbox's text
 extern void ui_textbox_update_text (TextBox *textbox, const char *text);
@@ -66,7 +66,7 @@ extern void ui_textbox_set_bg_color (TextBox *textbox, RGBA_Color color);
 extern void ui_textbox_remove_background (TextBox *textbox);
 
 // creates a new textbox
-extern TextBox *ui_textbox_create (u32 x, u32 y, u32 w, u32 h, UIPosition pos);
+extern TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
 
 // draws the textbox
 extern void ui_textbox_draw (TextBox *textbox);

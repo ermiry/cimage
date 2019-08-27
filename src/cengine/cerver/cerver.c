@@ -7,6 +7,7 @@
 #include "cengine/types/string.h"
 
 #include "cengine/cerver/cerver.h"
+#include "cengine/cerver/connection.h"
 #include "cengine/cerver/packets.h"
 
 #include "cengine/utils/utils.h"
@@ -116,19 +117,19 @@ static u8 cerver_check_info (Cerver *cerver, Connection *connection) {
             #ifdef CLIENT_DEBUG
             cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Cerver requires authentication.");
             #endif
-            // if (connection->auth_action) {
-            //     #ifdef CLIENT_DEBUG
-            //     cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Sending auth data to cerver...");
-            //     #endif
-            //     connection->auth_action (connection->auth_data);
-            //     retval = 0;
-            // }
+            if (connection->auth_data) {
+                #ifdef CLIENT_DEBUG
+                cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Sending auth data to cerver...");
+                #endif
 
-            // else {
-            //     cengine_log_msg (stderr, LOG_WARNING, LOG_NO_TYPE, 
-            //         "Can't authenticate with server --- no auth action neither auth data have been setup");
-            // } 
+                if (!connection->auth_packet) connection_generate_auth_packet (connection);
 
+                if (packet_send (connection->auth_packet, 0, NULL)) {
+                    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to send connection auth packet!");
+                }
+
+                retval = 0;
+            }
         }
 
         else {
@@ -168,6 +169,7 @@ void cerver_packet_handler (Packet *packet) {
                     cengine_log_msg (stdout, LOG_WARNING, LOG_NO_TYPE, "---> Server teardown! <---");
                     #endif
                     client_connection_end (packet->client, packet->connection);
+                    client_event_trigger (packet->client, EVENT_DISCONNECTED);
                     break;
 
                 case CERVER_INFO_STATS:

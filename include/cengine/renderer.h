@@ -70,29 +70,39 @@ extern void renderer_delete_main (void);
 typedef struct Layer {
 
     String *name;
-    u8 pos;
-    DoubleList *gos;
+    int pos;
+    DoubleList *elements;
 
 } Layer;
+
+extern DoubleList *gos_layers;              // render layers for the gameobjects
+extern DoubleList *ui_elements_layers;      // render layers for the ui elements
+
+extern Layer *layer_get_by_pos (DoubleList *layers, int pos);
+
+extern Layer *layer_get_by_name (DoubleList *layers, const char *name);
 
 // creates a new layer; 
 // takes the layer name and the layer pos, -1 for last layer
 // pos 0 renders first
 // returns 0 on success, 1 on error
-extern int layer_create (const char *name, int pos);
+extern int layer_create (DoubleList *layers, const char *name, int pos, bool gos);
 
-// add a game object into a layer
+// adds an element to a layer
 // returns 0 on succes, 1 on error
-extern int layer_add_object (const char *layer_name, void *ptr);
+extern int layer_add_element (Layer *layer, void *ptr);
 
-// removes a game object from a layer
+// adds an element to a layer that is gotten by its name 
 // returns 0 on succes, 1 on error
-extern int layer_remove_object (const char *layer_name, void *ptr);
+extern int layer_add_element_by_name (DoubleList *layers, const char *layer_name, void *ptr);
 
-// inits cengine render layers
-extern void layers_init (void);
+// removes an element from a layer
+// returns 0 on succes, 1 on error
+extern int layer_remove_element (Layer *layer, void *ptr);
 
-extern void layers_end (void);
+// removes an element from a layer taht is gotten by its name
+// returns 0 on succes, 1 on error
+extern int layer_remove_element_by_name (DoubleList *layers, const char *layer_name, void *ptr);
 
 /*** Surfaces ***/
 
@@ -126,5 +136,12 @@ extern SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color c
 /*** Render ***/
 
 extern void render (void);
+
+/*** Public ***/
+
+// inits cengine render capabilities
+extern u8 render_init (void);
+
+extern void render_end (void);
 
 #endif

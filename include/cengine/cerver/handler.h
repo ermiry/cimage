@@ -22,17 +22,6 @@ extern SockReceive *sock_receive_new (void);
 
 extern void sock_receive_delete (void *sock_receive_ptr);
 
-typedef struct ClientConnection {
-
-    struct _Client *client;
-    struct _Connection *connection;
-
-} ClientConnection;
-
-extern ClientConnection *client_connection_aux_new (struct _Client *client, struct _Connection *connection);
-
-extern void client_connection_aux_delete (ClientConnection *cc);
-
 // receives incoming data from the socket
 extern void client_receive (struct _Client *client, struct _Connection *connection);
 

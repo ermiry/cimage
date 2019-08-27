@@ -1,6 +1,10 @@
 #ifndef _CENGINE_UI_POSITION_H_
 #define _CENGINE_UI_POSITION_H_
 
+#include <stdbool.h>
+
+#include <SDL2/SDL_rect.h>
+
 typedef enum UIPosition {
 
     UI_POS_FREE = 0,
@@ -18,6 +22,6 @@ typedef enum UIPosition {
 
 } UIPosition;
 
-extern void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect);
+extern void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect, bool offset);
 
 #endif

@@ -7,8 +7,10 @@
 
 #include "cengine/cerver/network.h"
 #include "cengine/cerver/cerver.h"
+#include "cengine/cerver/client.h"
 #include "cengine/cerver/connection.h"
 #include "cengine/cerver/handler.h"
+#include "cengine/cerver/packets.h"
 
 #include "cengine/threads/thread.h"
 
@@ -33,12 +35,9 @@ Connection *connection_new (void) {
 
         connection->sock_receive = NULL;
 
-        connection->auth_action = NULL;
         connection->auth_data = NULL;
-        connection->destroy_auth_data = NULL;
-
-        connection->success_auth_action = NULL;
-        connection->success_auth_args = NULL;
+        connection->delete_auth_data = NULL;
+        connection->auth_packet = NULL;
     }
 
     return connection;
@@ -79,25 +78,14 @@ void connection_set_max_sleep (Connection *connection, u32 max_sleep) {
 
 }
 
-// sets the auth action to be triggered if the server asks for authentication
-// also takes a method to free the auth data when the connection is destroyed
-void connection_set_auth_action (Connection *connection,
-    Action auth_method, void *auth_data, Action destroy_auth_data) {
-
-    if (connection && auth_method) {
-        connection->auth_action = auth_method;
-        connection->auth_data = auth_data;
-        connection->destroy_auth_data = destroy_auth_data;
-    }
-
-}
-
 // sets the connection auth data and a method to destroy it once the connection has ended
-void connection_set_auth_data (Connection *connection, void *auth_data, Action destroy_auth_data) {
+void connection_set_auth_data (Connection *connection, void *auth_data, size_t auth_data_size, Action delete_auth_data) {
 
     if (connection && auth_data) {
+        connection_remove_auth_data (connection);
+
         connection->auth_data = auth_data;
-        connection->destroy_auth_data = destroy_auth_data;
+        connection->delete_auth_data = delete_auth_data;
     } 
 
 }
@@ -106,23 +94,30 @@ void connection_set_auth_data (Connection *connection, void *auth_data, Action d
 void connection_remove_auth_data (Connection *connection) {
 
     if (connection) {
-        if (connection->destroy_auth_data) 
-            connection->destroy_auth_data (connection->auth_data);
+        if (connection->delete_auth_data) 
+            connection->delete_auth_data (connection->auth_data);
         else free (connection->auth_data);
 
-        connection->destroy_auth_data = NULL;
+        connection->delete_auth_data = NULL;
         connection->auth_data = NULL;
+
+        if (connection->auth_packet) {
+            packet_delete (connection->auth_packet);
+            connection->auth_packet = NULL;
+        }
     }
 
 }
 
-// sets the connection success auth action that is executed if the authentication to a server
-// was successfull
-void connection_set_success_auth (Connection *connection, Action succes_action, void *args) {
+// generates the connection auth packet to be send to the server
+// this is also generated automatically whenever the cerver ask for authentication
+void connection_generate_auth_packet (Connection *connection) {
 
     if (connection) {
-        connection->success_auth_action = succes_action;
-        connection->success_auth_args = args;
+        if (connection->auth_data) {
+            connection->auth_packet = packet_generate_request (AUTH_PACKET, CLIENT_AUTH_DATA, 
+                connection->auth_data, connection->auth_data_size);
+        }
     }
 
 }
