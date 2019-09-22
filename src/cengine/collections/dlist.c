@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "cengine/collections/dlist.h"
 
@@ -152,10 +153,13 @@ int dlist_remove (DoubleList *dlist, void *query) {
         ListElement *ptr = dlist_start (dlist);
 
         if (dlist->compare) {
+            bool first = true;
             while (ptr != NULL) {
                 if (!dlist->compare (ptr->data, query)) {
                     // remove the list element
-                    void *data = dlist_remove_element (dlist, ptr);
+                     void *data = NULL;
+                    if (first) data = dlist_remove_element (dlist, NULL);
+                    else data = dlist_remove_element (dlist, ptr);
                     if (data) {
                         if (dlist->destroy) dlist->destroy (data);
                         else free (data);
@@ -165,6 +169,7 @@ int dlist_remove (DoubleList *dlist, void *query) {
                 }
 
                 ptr = ptr->next;
+                first = false;
             }
         }
     }

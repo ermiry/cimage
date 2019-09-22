@@ -140,18 +140,22 @@ UIElement *ui_element_new (UIElementType type) {
     // first check if we have a reusable ui element
     i32 spot = ui_element_get_free_spot ();
 
-    if (spot >= 0) {
-        if (ui_elements[spot]) new_element = ui_elements[spot];
-        else new_element = (UIElement *) malloc (sizeof (UIElement));
-        
-        new_element->id = spot;
-        new_element->active = true;
-        new_element->type = type;
-        ui_element_delete_element (new_element);
-        layer_remove_element (layer_get_by_pos (ui_elements_layers, new_element->layer_id), new_element);
-    }
+    // if (spot >= 0) {
+    //     // FIXME: are we correctly removing all past elements from the layers??
+    //     if (ui_elements[spot]) {
+    //         new_element = ui_elements[spot];
+    //         layer_remove_element (layer_get_by_pos (ui_elements_layers, new_element->layer_id), new_element);
+    //         ui_element_delete_element (new_element);
+    //     }
 
-    else {
+    //     else new_element = (UIElement *) malloc (sizeof (UIElement));
+        
+    //     new_element->id = spot;
+    //     new_element->active = true;
+    //     new_element->type = type;
+    // }
+
+    // else {
         if (new_ui_element_id >= max_ui_elements) ui_elements_realloc ();
 
         new_element = (UIElement *) malloc (sizeof (UIElement));
@@ -164,7 +168,7 @@ UIElement *ui_element_new (UIElementType type) {
             new_ui_element_id++;
             curr_max_ui_elements++;
         }
-    }
+    // }
 
     // by default, add the ui element to the middle layer
     if (new_element) {

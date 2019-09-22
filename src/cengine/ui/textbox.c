@@ -89,8 +89,8 @@ void ui_textbox_update_text (TextBox *textbox, const char *text) {
         if (textbox->text) {
             ui_text_component_update (textbox->text, text);
             ui_text_component_draw (textbox->text);
-            ui_transform_component_set_pos (textbox->text->transform, 
-                &textbox->transform->rect, textbox->text->transform->pos, true);
+            // ui_transform_component_set_pos (textbox->text->transform, 
+            //     &textbox->transform->rect, textbox->text->transform->pos, true);
         }
     }
 
