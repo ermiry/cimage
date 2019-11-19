@@ -5,8 +5,8 @@
 
 #define FPS_LIMIT               30
 
-#define DEFAULT_SCREEN_WIDTH    1280    
-#define DEFAULT_SCREEN_HEIGHT   720
+#define DEFAULT_SCREEN_WIDTH    1920    
+#define DEFAULT_SCREEN_HEIGHT   1080
 
 typedef unsigned char uchar;
 

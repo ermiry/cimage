@@ -8,9 +8,6 @@
 #include "cengine/os.h"
 #include "cengine/types/types.h"
 
-#include "utils/myUtils.h"
-#include "utils/log.h"
-
 void exif_process (unsigned char *ExifSection, unsigned int length) {
 
     /* unsigned int FirstOffset;

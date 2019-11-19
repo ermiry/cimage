@@ -63,16 +63,13 @@ int cimage_init (void) {
     cengine_set_quit (cimage_quit);
     cengine_assets_set_path ("./assets");
 
-    // FIXME: load settings
+    // TODO: load settings
 
     WindowSize window_size = { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
     retval = cengine_init ("Cimage", window_size, false);
-    // FIXME: we need better logs!!
-    // FIXME: add custom log types and add integrate c_string_create
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
     errors |= retval;
 
-    // TODO: init UI
     retval = cimage_init_ui ();
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cimage's ui!");
     errors |= retval;

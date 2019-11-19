@@ -3,6 +3,8 @@
 #include "cengine/manager/manager.h"
 #include "cengine/game/go.h"
 
+#include "app/ui/app.h"
+
 State *app_state = NULL;
 
 static void app_update (void) {
@@ -15,11 +17,14 @@ static void app_on_enter (void) {
 
     app_state->update = app_update;
 
+    app_ui_init ();
+
 
 }
 
 static void app_on_exit (void) { 
 
+    app_ui_end ();
 
 }
 

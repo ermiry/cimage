@@ -1,5 +1,5 @@
-#ifndef _APP_H_
-#define _APP_H_
+#ifndef _STATE_APP_H_
+#define _STATE_APP_H_
 
 #include "cengine/manager/state.h"
 
