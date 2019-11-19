@@ -49,6 +49,12 @@ extern int window_toggle_full_screen (Renderer *renderer);
 // returns 0 on success, 1 on error
 extern int window_resize (Renderer *renderer, u32 new_width, u32 new_height);
 
+// sets the window's icon
+extern void window_set_icon (SDL_Window *window, SDL_Surface *icon_surface);
+
+// wrapper function to destroy a sdl surface
+extern void surface_delete (SDL_Surface *surface);
+
 /*** Renderer ***/
 
 // creates a new renderer
@@ -106,7 +112,11 @@ extern int layer_remove_element_by_name (DoubleList *layers, const char *layer_n
 
 /*** Surfaces ***/
 
+// creates a new empty surface
 extern SDL_Surface *surface_create (int width, int height);
+
+// loads an image into a new surface
+extern SDL_Surface *surface_load_image (const char *filename);
 
 /*** Render Basic ***/
 

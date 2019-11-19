@@ -5,6 +5,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_image.h>
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
@@ -74,6 +75,13 @@ int window_resize (Renderer *renderer, u32 new_width, u32 new_height) {
     }
 
     return retval;
+
+}
+
+// sets the window's icon
+void window_set_icon (SDL_Window *window, SDL_Surface *icon_surface) {
+
+    if (window && icon_surface) SDL_SetWindowIcon (window, icon_surface);
 
 }
 
@@ -429,6 +437,7 @@ static void layers_end (void) {
 
 #pragma region Surfaces
 
+// creates a new empty surface
 SDL_Surface *surface_create (int width, int height) {
 
     uint32_t rmask , gmask , bmask , amask ;
@@ -450,6 +459,16 @@ SDL_Surface *surface_create (int width, int height) {
     return SDL_CreateRGBSurface (0, width, height, 32, rmask, gmask, bmask, amask);
 
 }
+
+// loads an image into a new surface
+SDL_Surface *surface_load_image (const char *filename) {
+
+    return filename ? IMG_Load (filename) : NULL;
+
+}
+
+// wrapper function to destroy a sdl surface
+void surface_delete (SDL_Surface *surface) { if (surface) SDL_FreeSurface (surface); }
 
 #pragma endregion
 

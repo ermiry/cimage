@@ -27,6 +27,8 @@ void cimage_die (const char *error) {
 
 };
 
+SDL_Surface *icon_surface = NULL;
+
 static int cimage_init_ui (void) {
 
     u8 retval = 1;
@@ -70,6 +72,10 @@ int cimage_init (void) {
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
     errors |= retval;
 
+    icon_surface = surface_load_image ("./assets/cimage-128.png");
+    if (icon_surface) window_set_icon (main_renderer->window, icon_surface);
+    else cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to load icon!");
+
     retval = cimage_init_ui ();
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cimage's ui!");
     errors |= retval;
@@ -79,6 +85,8 @@ int cimage_init (void) {
 }
 
 int cimage_end (void) {
+
+    surface_delete (icon_surface);
 
     (void) cengine_end ();
 
