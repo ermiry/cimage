@@ -12,6 +12,8 @@
 #include "cengine/types/string.h"
 #include "cengine/collections/dlist.h"
 
+#include "cengine/threads/thread.h"
+
 typedef struct WindowSize {
 
     u32 width, height;
@@ -22,6 +24,7 @@ typedef struct Renderer {
 
     String *name;
     SDL_Renderer *renderer;
+    pthread_t thread_id;
     int index;
     Uint32 flags;
 

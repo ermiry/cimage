@@ -10,12 +10,21 @@
 SDL_Texture *texture_load (const char *filename, Renderer *renderer) {
 
     if (filename && renderer) {
-        SDL_Surface *tmpSurface = IMG_Load (filename);
-        if (tmpSurface) {
-            SDL_Texture *texture = SDL_CreateTextureFromSurface (renderer->renderer, tmpSurface);
-            SDL_FreeSurface (tmpSurface);
+        SDL_Surface *temp_surface = IMG_Load (filename);
+        if (temp_surface) {
+            pthread_t thread_id = pthread_self ();
+            // printf ("Loading texture in thread: %ld\n", thread_id);
+            // if (thread_id == renderer->thread_id) {
+                // load texture as always
+                SDL_Texture *texture = SDL_CreateTextureFromSurface (renderer->renderer, temp_surface);
+                SDL_FreeSurface (temp_surface);
 
-            return texture;
+                return texture;
+            // }
+
+            // else {
+            //     // TODO: send image to renderer queue
+            // }
         }
 
         cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, c_string_create ("Failed to load asset: %s!", filename));

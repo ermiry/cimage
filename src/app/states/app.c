@@ -7,10 +7,11 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/collections/dlist.h"
+
+#include "cengine/threads/thread.h"
 #include "cengine/manager/manager.h"
 #include "cengine/game/go.h"
-
-#include "cengine/collections/dlist.h"
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
@@ -93,11 +94,7 @@ static void app_update (void) {
 
 }
 
-static void app_on_enter (void) { 
-
-    app_state->update = app_update;
-
-    app_ui_init ();
+static void *app_load_images (void *ptr) {
 
     // get images from directory
     images = images_read_from_dir ("./images");
@@ -107,6 +104,18 @@ static void app_on_enter (void) {
             app_ui_image_display (((String *) le->data)->str);
         }
     }
+
+    return NULL;
+
+}
+
+static void app_on_enter (void) { 
+
+    app_state->update = app_update;
+
+    app_ui_init ();
+
+    thread_create_detachable (app_load_images, NULL);
 
 }
 

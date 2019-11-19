@@ -12,6 +12,7 @@
 
 #include "cengine/renderer.h"
 #include "cengine/textures.h"
+#include "cengine/threads/thread.h"
 
 #include "cengine/manager/manager.h"
 
@@ -164,6 +165,9 @@ Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int d
             // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
             renderer->renderer = SDL_CreateRenderer (renderer->window, display_index, flags);
             if (renderer->renderer) {
+                renderer->thread_id = pthread_self ();
+                // printf ("Renderer created in thread: %ld\n", renderer->thread_id);
+
                 SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
                 SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "0");
                 SDL_RenderSetLogicalSize (renderer->renderer, 
