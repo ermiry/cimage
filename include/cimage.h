@@ -3,19 +3,20 @@
 
 #include <stdio.h>
 
-#define CIMAGE_VERSION      "0.1"
+#define CIMAGE_VERSION          "0.1"
 
-#define EXIT_SUCCESS        0
-#define EXIT_FAILURE        1
-
-#define FPS_LIMIT   30
+#define FPS_LIMIT               30
 
 #define DEFAULT_SCREEN_WIDTH    1280    
 #define DEFAULT_SCREEN_HEIGHT   720
 
-#define THREAD_OK   0
-
 typedef unsigned char uchar;
+
+extern void cimage_quit (void);
+extern void cimage_die (const char *error);
+
+extern int cimage_init (void);
+extern int cimage_end (void);
 
 typedef enum ReadMode {
 

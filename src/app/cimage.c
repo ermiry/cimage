@@ -34,14 +34,27 @@ void cimage_die (const char *error) {
 
 };
 
-static cimage_init_ui (void) {
+static int cimage_init_ui (void) {
 
-    u8 errors = 0;
+    u8 retval = 1;
 
     char *path = c_string_create ("%sui/default/", cengine_assets_path->str);
     if (path) {
         ui_default_assets_load ();
+        Font *main_font = ui_font_create ("roboto", "./assets/fonts/Roboto-Regular.ttf");
+        if (main_font) {
+            ui_font_set_sizes (main_font, 6, 16, 20, 24, 32, 64, 200);
+            ui_font_load (main_font, TTF_STYLE_NORMAL);
+
+            retval = 0;
+        }
+
+        else cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to load main font!");
+
+        free (path);
     }
+
+    return retval;
 
 }
 
@@ -62,12 +75,28 @@ int cimage_init (void) {
     WindowSize window_size = { 1920, 1080 };
     retval = cengine_init ("Ermiry Connect", window_size, false);
     // FIXME: we need better logs!!
+    // FIXME: add custom log types and add integrate c_string_create
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
     errors |= retval;
 
     // TODO: init UI
+    retval = cimage_init_ui ();
+    if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cimage's ui!");
+    errors |= retval;
 
     return errors;
+
+}
+
+int cimage_end (void) {
+
+    (void) cengine_end ();
+
+    #ifdef CIMAGE_DEBUG
+    cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done!");
+    #endif
+
+    return 0;
 
 }
 
@@ -385,9 +414,9 @@ void cimage_print_concise_cimage (Cimage *cimage) {}
 // do selected operations to one file a time
 void cimage_processFile (const char *filename) {
 
-    #ifdef CIMAGE_DEBUG
-        logMsg (stdout, DEBUG, NO_TYPE, "Processing file...");
-    #endif
+    // #ifdef CIMAGE_DEBUG
+    //     logMsg (stdout, DEBUG, NO_TYPE, "Processing file...");
+    // #endif
 
     bool modified = false;
 
