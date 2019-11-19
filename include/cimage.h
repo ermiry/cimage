@@ -15,14 +15,6 @@
 
 #define THREAD_OK   0
 
-#ifdef DEV
-    #define ASSETS_PATH "./assets/"
-#elif PRODUCTION
-    #define ASSETS_PATH "../assets/"
-#else 
-    #define ASSETS_PATH "./assets/"
-#endif
-
 typedef unsigned char uchar;
 
 typedef enum ReadMode {

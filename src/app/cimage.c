@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <signal.h>
+
 #include "cimage.h"
 
 #include "cengine/os.h"
@@ -10,8 +12,64 @@
 
 #include "app/jpeg.h"
 
-#include "utils/myUtils.h"
-#include "utils/log.h"
+// FIXME: remove utils
+// #include "utils/myUtils.h"
+// #include "utils/log.h"
+
+#include "cengine/cengine.h"
+#include "cengine/threads/thread.h"
+#include "cengine/manager/manager.h"
+
+#include "cengine/utils/utils.h"
+#include "cengine/utils/log.h"
+
+void cimage_quit (void) { running = false; }
+
+static void cimage_quit_signal (int dummy) { running = false; }
+
+void cimage_die (const char *error) {
+
+    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, error);
+    cimage_quit ();
+
+};
+
+static cimage_init_ui (void) {
+
+    u8 errors = 0;
+
+    char *path = c_string_create ("%sui/default/", cengine_assets_path->str);
+    if (path) {
+        ui_default_assets_load ();
+    }
+
+}
+
+int cimage_init (void) {
+
+    int errors = 0;
+    int retval = 0;
+
+    // register to some signals
+    signal (SIGINT, cimage_quit_signal);
+    signal (SIGSEGV, cimage_quit_signal);
+
+    cengine_set_quit (cimage_quit);
+    cengine_assets_set_path ("./assets");
+
+    // FIXME: load settings
+
+    WindowSize window_size = { 1920, 1080 };
+    retval = cengine_init ("Ermiry Connect", window_size, false);
+    // FIXME: we need better logs!!
+    if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
+    errors |= retval;
+
+    // TODO: init UI
+
+    return errors;
+
+}
 
 // create a new cimage data
 Cimage *cimage_new (ReadMode readmode) {
@@ -339,7 +397,8 @@ void cimage_processFile (const char *filename) {
     // start with an empty image data
     Cimage *cimage = cimage_new (readmode);
     if (!cimage || !cimage->imgData) {
-        logMsg (stderr, ERROR, NO_TYPE, "Unable to allocate a new cimage structure!");
+        // FIXME:
+        // logMsg (stderr, ERROR, NO_TYPE, "Unable to allocate a new cimage structure!");
         return;
     }
     

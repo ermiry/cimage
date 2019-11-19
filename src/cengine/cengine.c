@@ -37,6 +37,7 @@ void cengine_assets_set_path (const char *pathname) {
 
 /*** cengine ***/
 
+// FIXME: better error detection!!
 // TODO: create a similar function to sdl init to pass what we want to init
 int cengine_init (const char *window_title, WindowSize window_size, bool full_screen) {
 
