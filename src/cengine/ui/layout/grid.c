@@ -85,42 +85,52 @@ u8 ui_layout_grid_add_element (GridLayout *grid, UIElement *ui_element) {
     u8 retval = 1;
 
     if (grid && ui_element) {
-        if (grid->ui_elements) {
-            // TODO: check for max elements
+        if (grid->ui_elements && (grid->curr_n_ui_elements < grid->max_n_ui_elements)) {
             // add element in next available idx -> at the end for now
             grid->ui_elements[grid->next_x][grid->next_y] = ui_element;
 
-            // modify the element's absolutue posistion in the screen -> transform -> position
-            // first get the position
-            u32 x = grid->transform->rect.x;        // starting x
-            u32 y = grid->transform->rect.y;        // starting y
-            x += (grid->cell_width * grid->next_x);
-            y += (grid->cell_height * grid->next_y);
-
-            // get the middle of the cell
-            // x += grid->cell_width / 2;
-            // y += grid->cell_height / 2;
-
-            // printf ("%d - %d\n", x, y);
-
             Image *image = (Image *) ui_element->element;
-            // image->transform->rect.w = grid->cell_width;
-            // image->transform->rect.h = grid->cell_height;
+
+            u32 max_width = grid->cell_width - 40;      // Max width for the image
+            u32 max_height = grid->cell_height - 40;    // Max height for the image
+            float ratio = 0;                            // Used for aspect ratio
+            u32 width = image->transform->rect.w;       // Current image width
+            u32 height = image->transform->rect.h;      // Current image height
+
+            // Check if the current width is larger than the max
+            if (width > max_width){
+                ratio = (float) max_width / width;      // get ratio for scaling image
+                image->transform->rect.w = max_width;   // Set new width
+                image->transform->rect.h *= ratio;      // Scale height based on ratio
+                height = height * ratio;                // Reset height to match scaled image
+                width = width * ratio;                  // Reset width to match scaled image
+            }
+
+            // Check if current height is larger than max
+            if (height > max_height){
+                ratio = (float) max_height / height;    // get ratio for scaling image
+                image->transform->rect.h = max_height;  // Set new height
+                image->transform->rect.w *= ratio;      // Scale width based on ratio
+                width = width * ratio;                  // Reset width to match scaled image
+                height = height * ratio;                // Reset height to match scaled image
+            }
 
             UIRect cell = { .x = (grid->transform->rect.x + (grid->cell_width * grid->next_x)), 
                 .y = (grid->transform->rect.y + (grid->cell_height * grid->next_y)),
                 .w = grid->cell_width, .h = grid->cell_height };
-            printf ("x: %d - y: %d - w: %d - h: %d\n", cell.x, cell.y, cell.w, cell.h);
+            // printf ("x: %d - y: %d - w: %d - h: %d\n", cell.x, cell.y, cell.w, cell.h);
             ui_transform_component_set_pos (image->transform, &cell, UI_POS_MIDDLE_CENTER, false);
 
-            // TODO:
-            // modify elemenst size based on grid constraints -> transform -> dimensions
+            grid->curr_n_ui_elements += 1;
 
             if (grid->next_x < (grid->cols - 1)) grid->next_x += 1;
             else {
                 grid->next_x = 0;
-                grid->next_y += 1;
+                if (grid->curr_n_ui_elements >= grid->max_n_ui_elements) grid->next_y = 0;
+                else grid->next_y += 1;
             } 
+
+            retval = 0;
         }
     }
 
