@@ -62,6 +62,16 @@ void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos) {
 
 }
 
+// sets the image's render dimensions
+void ui_image_set_dimensions (Image *image, unsigned int width, unsigned int height) {
+
+    if (image) {
+        image->transform->rect.w = width;
+        image->transform->rect.h = height;
+    }
+
+}
+
 // sets the image's scale factor
 void ui_image_set_scale (Image *image, int x_scale, int y_scale) {
 
@@ -143,6 +153,26 @@ void ui_image_set_sprite_sheet_offset (Image *image, u32 x_offset, u32 y_offset)
     if (image) {
         image->x_sprite_offset = x_offset;
         image->y_sprite_offset = y_offset;
+    }
+
+}
+
+// sets the image's outline colour
+void ui_image_set_ouline_colour (Image *image, RGBA_Color colour) {
+
+    if (image) {
+        image->outline = true;
+        image->outline_colour = colour;
+    }
+
+}
+
+// removes the ouline form the image
+void ui_image_remove_outline (Image *image) {
+
+    if (image) {
+        memset (&image->outline_colour, 0, sizeof (RGBA_Color));
+        image->outline = false;
     }
 
 }
@@ -267,6 +297,10 @@ void ui_image_draw (Image *image) {
                     0, 0, image->flip);
             }
         }
+
+        // render the outline border
+        if (image->outline) 
+            render_basic_outline_rect (&image->transform->rect, image->outline_colour);
     }
 
 }

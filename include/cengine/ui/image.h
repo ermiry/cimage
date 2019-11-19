@@ -25,15 +25,21 @@ typedef struct Image {
     bool ref_sprite;
     Flip flip;
 
+    bool outline;
+    RGBA_Color outline_colour;
+
 } Image;
 
 extern void ui_image_delete (void *image_ptr);
 
-// sets the image's scale factor
-extern void ui_image_set_scale (Image *image, int x_scale, int y_scale);
-
 // sets the image's UI position
 extern void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos);
+
+// sets the image's render dimensions
+extern void ui_image_set_dimensions (Image *image, unsigned int width, unsigned int height);
+
+// sets the image's scale factor
+extern void ui_image_set_scale (Image *image, int x_scale, int y_scale);
 
 // sets the image's sprite to be rendered and loads its
 // returns 0 on success loading sprite, 1 on error
@@ -51,6 +57,12 @@ extern void ui_image_ref_sprite_sheet (Image *image, SpriteSheet *sprite_sheet);
 
 // sets the image's sprite sheet offset
 extern void ui_image_set_sprite_sheet_offset (Image *image, u32 x_offset, u32 y_offset);
+
+// sets the image's outline colour
+extern void ui_image_set_ouline_colour (Image *image, RGBA_Color colour);
+
+// removes the ouline form the image
+extern void ui_image_remove_outline (Image *image);
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position

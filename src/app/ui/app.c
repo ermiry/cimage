@@ -81,6 +81,8 @@ void app_ui_image_display (const char *filename) {
         Image *image = ui_image_create_static (0, 0);
         ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER);
         ui_image_set_sprite (image, filename);
+        ui_image_set_dimensions (image, 180, 320);
+        ui_image_set_ouline_colour (image, RGBA_WHITE);
     }
 
 }
