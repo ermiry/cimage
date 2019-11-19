@@ -102,11 +102,10 @@ static void app_on_enter (void) {
     // get images from directory
     images = images_read_from_dir ("./images");
     if (images) {
-        for (ListElement *le = dlist_start (images); le; le = le->next) 
+        for (ListElement *le = dlist_start (images); le; le = le->next) {
             printf ("%s\n", ((String *) le->data)->str);
-
-        // TODO: display images in UI
-        app_ui_image_display (((String *) dlist_start (images)->data)->str);
+            app_ui_image_display (((String *) le->data)->str);
+        }
     }
 
 }

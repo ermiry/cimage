@@ -10,6 +10,8 @@
 #include "cengine/ui/image.h"
 #include "cengine/ui/panel.h"
 
+#include "cengine/ui/layout/grid.h"
+
 static Panel *background_panel = NULL;
 
 static Panel *sidebar = NULL;
@@ -49,6 +51,9 @@ static void sidebar_end (void) {
 
 }
 
+// FIXME:
+GridLayout *grid = NULL;
+
 void app_ui_init (void) {
 
     Font *font = ui_font_get_default ();
@@ -63,6 +68,9 @@ void app_ui_init (void) {
 
     sidebar_init (screen_height);
 
+    grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
+    ui_layout_grid_set_grid (grid, 5, 4);
+
 }
 
 void app_ui_end (void) {
@@ -75,14 +83,17 @@ void app_ui_end (void) {
 
 #pragma region images
 
+// TODO: first reduce the image and then render what we want
 void app_ui_image_display (const char *filename) {
 
     if (filename) {
         Image *image = ui_image_create_static (0, 0);
         ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER);
         ui_image_set_sprite (image, filename);
-        ui_image_set_dimensions (image, 180, 320);
+        ui_image_set_dimensions (image, 200, 200);
         ui_image_set_ouline_colour (image, RGBA_WHITE);
+
+        ui_layout_grid_add_element (grid, image->ui_element);
     }
 
 }
