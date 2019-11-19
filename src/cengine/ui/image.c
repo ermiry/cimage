@@ -55,6 +55,13 @@ void ui_image_delete (void *image_ptr) {
 
 }
 
+// sets the image's UI position
+void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos) {
+
+    if (image) ui_transform_component_set_pos (image->transform, ref_rect, pos, false);
+
+}
+
 // sets the image's scale factor
 void ui_image_set_scale (Image *image, int x_scale, int y_scale) {
 

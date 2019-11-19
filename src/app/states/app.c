@@ -106,6 +106,7 @@ static void app_on_enter (void) {
             printf ("%s\n", ((String *) le->data)->str);
 
         // TODO: display images in UI
+        app_ui_image_display (((String *) dlist_start (images)->data)->str);
     }
 
 }

@@ -72,3 +72,17 @@ void app_ui_end (void) {
     ui_element_destroy (background_panel->ui_element);
 
 }
+
+#pragma region images
+
+void app_ui_image_display (const char *filename) {
+
+    if (filename) {
+        Image *image = ui_image_create_static (0, 0);
+        ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER);
+        ui_image_set_sprite (image, filename);
+    }
+
+}
+
+#pragma endregion

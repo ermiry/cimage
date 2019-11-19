@@ -5,4 +5,8 @@ extern void app_ui_init (void);
 
 extern void app_ui_end (void);
 
+/*** images ***/
+
+extern void app_ui_image_display (const char *filename);
+
 #endif

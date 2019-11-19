@@ -32,6 +32,9 @@ extern void ui_image_delete (void *image_ptr);
 // sets the image's scale factor
 extern void ui_image_set_scale (Image *image, int x_scale, int y_scale);
 
+// sets the image's UI position
+extern void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos);
+
 // sets the image's sprite to be rendered and loads its
 // returns 0 on success loading sprite, 1 on error
 extern u8 ui_image_set_sprite (Image *image, const char *filename);

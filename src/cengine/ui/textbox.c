@@ -100,7 +100,7 @@ void ui_textbox_update_text (TextBox *textbox, const char *text) {
 void ui_textbox_set_text_pos (TextBox *textbox, UIPosition pos) {
 
     if (textbox) {
-        if (textbox->text) {}
+        if (textbox->text)
             ui_transform_component_set_pos (textbox->text->transform, &textbox->transform->rect, pos, true);
     }
 
