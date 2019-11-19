@@ -29,7 +29,7 @@ static void sidebar_init (u32 screen_height) {
     photos_button = ui_button_create (18, 18, 64, 64, UI_POS_LEFT_UPPER_CORNER);
     // ui_button_set_action (photos_button, NULL, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
-    ui_button_set_sprite (photos_button, BUTTON_STATE_MOUSE_OUT, "./assets/icons/photos.png");
+    ui_button_set_sprite (photos_button, BUTTON_STATE_MOUSE_OUT, "./assets/icons/gallery.png");
     ui_element_set_layer (photos_button->ui_element, "top");
 
     settings_button = ui_button_create (18, -18, 64, 64, UI_POS_LEFT_BOTTOM_CORNER);

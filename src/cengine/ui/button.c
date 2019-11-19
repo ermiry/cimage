@@ -338,7 +338,7 @@ void ui_button_draw (Button *button) {
 
             SDL_RenderCopyEx (main_renderer->renderer, selected_sprite->texture, 
                 &selected_sprite->src_rect, 
-                &selected_sprite->dest_rect, 
+                &button->transform->rect, 
                 0, 0, NO_FLIP);
         } 
 
