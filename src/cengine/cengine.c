@@ -37,26 +37,45 @@ void cengine_assets_set_path (const char *pathname) {
 
 /*** cengine ***/
 
-// FIXME: better error detection!!
-// TODO: create a similar function to sdl init to pass what we want to init
 int cengine_init (const char *window_title, WindowSize window_size, bool full_screen) {
 
     int errors = 0;
+    int retval = 0;
 
     srand ((unsigned) time (NULL));
 
     if (!SDL_Init (SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_VIDEO)) {
-        errors = thread_hub_init_global ();
-        errors = animations_init ();
-        errors = render_init ();
-        errors = renderer_init_main (SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED, 
+        retval = thread_hub_init_global ();
+        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's threads!");
+        errors |= retval;
+
+        retval = animations_init ();
+        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's animations!");
+        errors |= retval;
+
+        retval = render_init ();
+        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's renderer!");
+        errors |= retval;
+
+        retval = renderer_init_main (SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED, 
             window_title, window_size, full_screen);
-        errors = game_objects_init_all ();
-        errors = ui_init ();
+        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's renderer!");
+        errors |= retval;
+
+        retval = game_objects_init_all ();
+        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's game objects!");
+        errors |= retval;
+
+        retval = ui_init ();
+        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's ui!");
+        errors |= retval;
+
         input_init ();
 
         main_camera = camera_new (main_renderer->window_size.width, main_renderer->window_size.height);
-        errors = main_camera ? 0 : 1;
+        retval = main_camera ? 0 : 1;
+
+        errors |= retval;
     }
 
     else {
