@@ -58,6 +58,15 @@ typedef struct Button {
 
 extern void ui_button_delete (void *button_ptr);
 
+// sets the buttons's UI position
+extern void ui_button_set_pos (Button *button, UIRect *ref_rect, UIPosition pos);
+
+// sets the button's render dimensions
+extern void ui_button_set_dimensions (Button *button, unsigned int width, unsigned int height);
+
+// sets the button's scale factor
+extern void ui_button_set_scale (Button *button, int x_scale, int y_scale);
+
 // sets the button to be active depending on values
 extern void ui_button_set_active (Button *button, bool active);
 

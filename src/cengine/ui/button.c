@@ -79,6 +79,36 @@ void ui_button_delete (void *button_ptr) {
 
 }
 
+// sets the buttons's UI position
+void ui_button_set_pos (Button *button, UIRect *ref_rect, UIPosition pos) {
+
+    if (button) ui_transform_component_set_pos (button->transform, ref_rect, pos, false);
+
+}
+
+// sets the button's render dimensions
+void ui_button_set_dimensions (Button *button, unsigned int width, unsigned int height) {
+
+    if (button) {
+        button->transform->rect.w = width;
+        button->transform->rect.h = height;
+    }
+
+}
+
+// sets the button's scale factor
+void ui_button_set_scale (Button *button, int x_scale, int y_scale) {
+
+    if (button) {
+        button->transform->x_scale = x_scale;
+        button->transform->y_scale = y_scale;
+
+        button->transform->rect.w *= button->transform->x_scale;
+        button->transform->rect.h *= button->transform->y_scale;
+    }
+
+}
+
 // sets the button to be active depending on values
 void ui_button_set_active (Button *button, bool active) {
 
