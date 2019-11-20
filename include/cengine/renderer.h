@@ -10,9 +10,27 @@
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
+
 #include "cengine/collections/dlist.h"
+#include "cengine/collections/queue.h"
 
 #include "cengine/threads/thread.h"
+
+struct _Renderer;
+
+// auxiliary structure to map the source surface to a texture
+typedef struct SurfaceTexture {
+
+    SDL_Surface *surface;
+    SDL_Texture **texture;
+
+} SurfaceTexture;
+
+extern SurfaceTexture *surface_texture_new (SDL_Surface *surface, SDL_Texture **texture);
+
+extern void surface_texture_delete (void *st_ptr);
+
+/*** Window ***/
 
 typedef struct WindowSize {
 
@@ -20,13 +38,35 @@ typedef struct WindowSize {
 
 } WindowSize;
 
-typedef struct Renderer {
+// gets window size into renderer data struct
+// returns 0 on success, 1 on error
+extern int window_get_size (SDL_Window *window, WindowSize *window_size);
+
+// toggle full screen on and off
+// returns 0 on success, 1 on error
+extern int window_toggle_full_screen (struct _Renderer *renderer);
+
+// resizes the window asscoaited with a renderer
+// returns 0 on success, 1 on error
+extern int window_resize (struct _Renderer *renderer, u32 new_width, u32 new_height);
+
+// sets the window's icon
+extern void window_set_icon (SDL_Window *window, SDL_Surface *icon_surface);
+
+// wrapper function to destroy a sdl surface
+extern void surface_delete (SDL_Surface *surface);
+
+/*** Renderer ***/
+
+struct _Renderer {
 
     String *name;
     SDL_Renderer *renderer;
     pthread_t thread_id;
     int index;
     Uint32 flags;
+
+    queue_t *textures_queue;
 
     int display_index;
     SDL_DisplayMode display_mode;
@@ -36,29 +76,9 @@ typedef struct Renderer {
     WindowSize window_size;
     bool full_screen;
 
-} Renderer;
+};
 
-/*** Window ***/
-
-// gets window size into renderer data struct
-// returns 0 on success, 1 on error
-extern int window_get_size (SDL_Window *window, WindowSize *window_size);
-
-// toggle full screen on and off
-// returns 0 on success, 1 on error
-extern int window_toggle_full_screen (Renderer *renderer);
-
-// resizes the window asscoaited with a renderer
-// returns 0 on success, 1 on error
-extern int window_resize (Renderer *renderer, u32 new_width, u32 new_height);
-
-// sets the window's icon
-extern void window_set_icon (SDL_Window *window, SDL_Surface *icon_surface);
-
-// wrapper function to destroy a sdl surface
-extern void surface_delete (SDL_Surface *surface);
-
-/*** Renderer ***/
+typedef struct _Renderer Renderer;
 
 // creates a new renderer
 // returns a new renderer on success, NULL on error
@@ -73,6 +93,8 @@ extern int renderer_init_main (Uint32 flags,
     const char *window_title, WindowSize window_size, bool full_screen);
 
 extern void renderer_delete_main (void);
+
+extern void renderer_queue_push (Renderer *renderer, SurfaceTexture *st);
 
 /*** Layers ***/
 

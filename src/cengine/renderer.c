@@ -10,6 +10,9 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/collections/dlist.h"
+#include "cengine/collections/queue.h"
+
 #include "cengine/renderer.h"
 #include "cengine/textures.h"
 #include "cengine/threads/thread.h"
@@ -23,6 +26,30 @@
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
+
+SurfaceTexture *surface_texture_new (SDL_Surface *surface, SDL_Texture **texture) {
+
+    SurfaceTexture *st = (SurfaceTexture *) malloc (sizeof (SurfaceTexture));
+    if (st) {
+        st->surface = surface;
+        st->texture = texture;
+    }
+
+    return st;
+
+}
+
+void surface_texture_delete (void *st_ptr) {
+
+    if (st_ptr) {
+        SurfaceTexture *st = (SurfaceTexture *) st_ptr;
+        if (st->surface) SDL_FreeSurface (st->surface);
+        st->texture = NULL;
+
+        free (st);
+    }
+
+}
 
 #pragma region Window
 
@@ -117,6 +144,7 @@ static Renderer *renderer_new (void) {
         renderer->window_title = NULL;
         renderer->window = NULL;
         renderer->renderer = NULL;
+        renderer->textures_queue = NULL;
     }
 
     return renderer;
@@ -133,6 +161,9 @@ static void *renderer_delete (void *ptr) {
         if (renderer->window) SDL_DestroyWindow (renderer->window);
         if (renderer->renderer) SDL_DestroyRenderer (renderer->renderer);
 
+        if (renderer->textures_queue) 
+            queue_destroy_complete (renderer->textures_queue, surface_texture_delete);
+
         free (renderer);
     }
 
@@ -145,62 +176,65 @@ Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int d
     const char *window_title, WindowSize window_size, bool full_screen) {
 
     Renderer *renderer = renderer_new ();
+    if (renderer) {
+        renderer->textures_queue = queue_create ();
 
-    renderer->display_index = display_index;
-    if (!SDL_GetCurrentDisplayMode (display_index, &renderer->display_mode)) {
-        #ifdef CENGINE_DEBUG
-        cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE,
-            c_string_create ("Display with idx %i mode is %dx%dpx @ %dhz.",
-            renderer->display_index, 
-            renderer->display_mode.w, renderer->display_mode.h, 
-            renderer->display_mode.refresh_rate));
-        #endif
+        renderer->display_index = display_index;
+        if (!SDL_GetCurrentDisplayMode (display_index, &renderer->display_mode)) {
+            #ifdef CENGINE_DEBUG
+            cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE,
+                c_string_create ("Display with idx %i mode is %dx%dpx @ %dhz.",
+                renderer->display_index, 
+                renderer->display_mode.w, renderer->display_mode.h, 
+                renderer->display_mode.refresh_rate));
+            #endif
 
-        // first init the window
-        renderer->window = window_create (window_title, window_size, full_screen);
-        if (renderer->window) {
-            window_get_size (renderer->window, &renderer->window_size);
+            // first init the window
+            renderer->window = window_create (window_title, window_size, full_screen);
+            if (renderer->window) {
+                window_get_size (renderer->window, &renderer->window_size);
 
-            // init the sdl renderer
-            // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
-            renderer->renderer = SDL_CreateRenderer (renderer->window, display_index, flags);
-            if (renderer->renderer) {
-                renderer->thread_id = pthread_self ();
-                // printf ("Renderer created in thread: %ld\n", renderer->thread_id);
+                // init the sdl renderer
+                // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
+                renderer->renderer = SDL_CreateRenderer (renderer->window, display_index, flags);
+                if (renderer->renderer) {
+                    renderer->thread_id = pthread_self ();
+                    // printf ("Renderer created in thread: %ld\n", renderer->thread_id);
 
-                SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
-                SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "0");
-                SDL_RenderSetLogicalSize (renderer->renderer, 
-                    renderer->window_size.width, renderer->window_size.height);
+                    SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
+                    SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "0");
+                    SDL_RenderSetLogicalSize (renderer->renderer, 
+                        renderer->window_size.width, renderer->window_size.height);
 
-                renderer->name = str_new (renderer_name);
-                renderer->flags = flags;
-                renderer->window_title = str_new (window_title);
-                renderer->full_screen = full_screen;
+                    renderer->name = str_new (renderer_name);
+                    renderer->flags = flags;
+                    renderer->window_title = str_new (window_title);
+                    renderer->full_screen = full_screen;
+                }
+
+                else {
+                    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create renderer!"); 
+                    renderer_delete (renderer);
+                    renderer = NULL;
+                }
             }
 
             else {
-                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create renderer!"); 
+                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
                 renderer_delete (renderer);
                 renderer = NULL;
             }
         }
 
         else {
-            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
+            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
+                c_string_create ("Failed to get display mode for display with idx %i", display_index));
+            #ifdef CENGINE_DEBUG
+            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, SDL_GetError ());
+            #endif
             renderer_delete (renderer);
             renderer = NULL;
         }
-    }
-
-    else {
-        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
-            c_string_create ("Failed to get display mode for display with idx %i", display_index));
-        #ifdef CENGINE_DEBUG
-        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, SDL_GetError ());
-        #endif
-        renderer_delete (renderer);
-        renderer = NULL;
     }
 
     return renderer;
@@ -216,6 +250,16 @@ int renderer_init_main (Uint32 flags,
 }
 
 void renderer_delete_main (void) { renderer_delete (main_renderer); }
+
+void renderer_queue_push (Renderer *renderer, SurfaceTexture *st) {
+
+    if (renderer) {
+        if (renderer->textures_queue) {
+            queue_put (renderer->textures_queue, st);
+        }
+    }
+
+}
 
 #pragma endregion
 
@@ -558,6 +602,17 @@ SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color) {
 // FIXME: we need to implement occlusion culling!
 // renders the game objects to the screen
 void render (void) {
+
+    // TODO: ability to choose how many textures to load at a time
+    // load any texturex in queue
+    if (main_renderer->textures_queue->num_els > 0) {
+        SurfaceTexture *st = NULL;
+        queue_get (main_renderer->textures_queue, (void **) &st);
+        if (st) {
+            *st->texture = SDL_CreateTextureFromSurface (main_renderer->renderer, st->surface);
+            surface_texture_delete (st);
+        } 
+    }
 
     SDL_SetRenderDrawColor (main_renderer->renderer, 0, 0, 0, 255);
     SDL_RenderClear (main_renderer->renderer);

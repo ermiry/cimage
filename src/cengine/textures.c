@@ -40,13 +40,13 @@ ImageData *texture_load (Renderer *renderer, const char *filename, SDL_Texture *
             if (thread_id == renderer->thread_id) {
                 // load texture as always
                 *texture = SDL_CreateTextureFromSurface (renderer->renderer, temp_surface);
+                SDL_FreeSurface (temp_surface);
             }
 
             else {
-                // TODO: send image to renderer queue
+                // send image to renderer queue
+                renderer_queue_push (renderer, surface_texture_new (temp_surface, texture));
             }
-
-            SDL_FreeSurface (temp_surface);
         }
 
         else {
