@@ -5,24 +5,24 @@
 #include "cengine/sprites.h"
 #include "cengine/textures.h"
 
-/*** SPRITES ***/
+/*** Sprites ***/
 
 Sprite *sprite_load (const char *filename, Renderer *renderer) {
 
     if (filename && renderer) {
         Sprite *new_sprite = (Sprite *) malloc (sizeof (Sprite));
         if (new_sprite) {
-            new_sprite->texture = texture_load (filename, renderer);
-            if (new_sprite->texture) {
-                texture_get_dimensions (new_sprite->texture, &new_sprite->w, &new_sprite->h) ;
-
+            ImageData *img_data = texture_load (renderer, filename, &new_sprite->texture);
+            if (img_data) {
                 // dimensions
-                new_sprite->src_rect.w = new_sprite->dest_rect.w = new_sprite->w;
-                new_sprite->src_rect.h = new_sprite->dest_rect.h = new_sprite->h;
+                new_sprite->src_rect.w = new_sprite->dest_rect.w = new_sprite->w = img_data->w;
+                new_sprite->src_rect.h = new_sprite->dest_rect.h = new_sprite->h = img_data->h;
 
                 // positions
                 new_sprite->src_rect.x = new_sprite->dest_rect.x = 0;
                 new_sprite->src_rect.y = new_sprite->dest_rect.y = 0;
+
+                image_data_delete (img_data);
 
                 return new_sprite;
             }
@@ -44,7 +44,7 @@ void sprite_destroy (Sprite *sprite) {
 
 }
 
-/*** SPRITES SHEET ***/
+/*** Sprites Sheets ***/
 
 SpriteSheet *sprite_sheet_new (void) {
 
@@ -86,10 +86,10 @@ SpriteSheet *sprite_sheet_load (const char *filename, Renderer *renderer) {
     if (filename && renderer) {
         SpriteSheet *new_sprite_sheet = sprite_sheet_new ();
         if (new_sprite_sheet) {
-            new_sprite_sheet->texture = texture_load (filename, renderer);
-            if (new_sprite_sheet->texture) {
-                texture_get_dimensions (new_sprite_sheet->texture, &new_sprite_sheet->w,
-                    &new_sprite_sheet->h);
+            ImageData *img_data = texture_load (renderer, filename, &new_sprite_sheet->texture);
+            if (img_data) {
+                new_sprite_sheet->w = img_data->w;
+                new_sprite_sheet->h = img_data->h;
 
                 // dimensions
                 new_sprite_sheet->src_rect.w = new_sprite_sheet->dest_rect.w = 0;
@@ -98,6 +98,8 @@ SpriteSheet *sprite_sheet_load (const char *filename, Renderer *renderer) {
                 // positions
                 new_sprite_sheet->src_rect.x = new_sprite_sheet->dest_rect.x = 0;
                 new_sprite_sheet->src_rect.y = new_sprite_sheet->dest_rect.y = 0;
+
+                image_data_delete (img_data);
 
                 return new_sprite_sheet;
             }

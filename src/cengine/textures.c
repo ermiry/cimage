@@ -1,36 +1,61 @@
+#include <stdlib.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
 #include "cengine/renderer.h"
 #include "cengine/sprites.h"
+#include "cengine/textures.h"
+
 #include "cengine/game/camera.h"
+
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
-SDL_Texture *texture_load (const char *filename, Renderer *renderer) {
+ImageData *image_data_new (u32 w, u32 h) {
 
-    if (filename && renderer) {
-        SDL_Surface *temp_surface = IMG_Load (filename);
-        if (temp_surface) {
-            pthread_t thread_id = pthread_self ();
-            // printf ("Loading texture in thread: %ld\n", thread_id);
-            // if (thread_id == renderer->thread_id) {
-                // load texture as always
-                SDL_Texture *texture = SDL_CreateTextureFromSurface (renderer->renderer, temp_surface);
-                SDL_FreeSurface (temp_surface);
-
-                return texture;
-            // }
-
-            // else {
-            //     // TODO: send image to renderer queue
-            // }
-        }
-
-        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, c_string_create ("Failed to load asset: %s!", filename));
+    ImageData *img_data = (ImageData *) malloc (sizeof (ImageData));
+    if (img_data) {
+        img_data->w = w;
+        img_data->h = h;
     }
 
-    return NULL;
+    return img_data;
+
+}
+
+void image_data_delete (void *img_data_ptr) { if (img_data_ptr) free (img_data_ptr); }
+
+ImageData *texture_load (Renderer *renderer, const char *filename, SDL_Texture **texture) {
+
+    ImageData *image_data = NULL;
+
+    if (filename && renderer && texture) {
+        SDL_Surface *temp_surface = IMG_Load (filename);
+        if (temp_surface) {
+            image_data = image_data_new (temp_surface->w, temp_surface->h);
+
+            pthread_t thread_id = pthread_self ();
+            // printf ("Loading texture in thread: %ld\n", thread_id);
+            if (thread_id == renderer->thread_id) {
+                // load texture as always
+                *texture = SDL_CreateTextureFromSurface (renderer->renderer, temp_surface);
+            }
+
+            else {
+                // TODO: send image to renderer queue
+            }
+
+            SDL_FreeSurface (temp_surface);
+        }
+
+        else {
+            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
+                c_string_create ("Failed to load asset: %s!", filename));
+        } 
+    }
+
+    return image_data;
 
 }
 
