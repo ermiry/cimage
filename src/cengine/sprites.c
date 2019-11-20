@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include <SDL2/SDL.h>
 
@@ -7,10 +8,31 @@
 
 /*** Sprites ***/
 
+Sprite *sprite_new (void) {
+
+    Sprite *sprite = (Sprite *) malloc (sizeof (Sprite));
+    if (sprite) {
+        memset (sprite, 0, sizeof (Sprite));
+        sprite->texture = NULL;
+    }
+
+    return sprite;
+
+}
+
+void sprite_destroy (Sprite *sprite) {
+
+    if (sprite) {
+        if (sprite->texture) SDL_DestroyTexture (sprite->texture);
+        free (sprite);
+    }
+
+}
+
 Sprite *sprite_load (const char *filename, Renderer *renderer) {
 
     if (filename && renderer) {
-        Sprite *new_sprite = (Sprite *) malloc (sizeof (Sprite));
+        Sprite *new_sprite = sprite_new ();
         if (new_sprite) {
             ImageData *img_data = texture_load (renderer, filename, &new_sprite->texture);
             if (img_data) {
@@ -32,15 +54,6 @@ Sprite *sprite_load (const char *filename, Renderer *renderer) {
     }
 
     return NULL;
-
-}
-
-void sprite_destroy (Sprite *sprite) {
-
-    if (sprite) {
-        if (sprite->texture) SDL_DestroyTexture (sprite->texture);
-        free (sprite);
-    }
 
 }
 
