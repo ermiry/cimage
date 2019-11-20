@@ -61,24 +61,30 @@ extern void surface_delete (SDL_Surface *surface);
 struct _Renderer {
 
     String *name;
-    SDL_Renderer *renderer;
     pthread_t thread_id;
-    int index;
-    Uint32 flags;
+
+    SDL_Renderer *renderer;
+    Uint32 render_flags;
 
     queue_t *textures_queue;
 
     int display_index;
     SDL_DisplayMode display_mode;
 
-    String *window_title;
     SDL_Window *window;
+    Uint32 window_flags;
+    String *window_title;
     WindowSize window_size;
-    bool full_screen;
+    bool fullscreen;
 
 };
 
 typedef struct _Renderer Renderer;
+
+// FIXME:
+// TODO: as of 03/06/2019 we only have support for one renderer, the main one
+// the plan is to have as many as you want in order to support multiple windows 
+extern Renderer *main_renderer;
 
 extern void renderer_delete (void *ptr);
 
@@ -88,14 +94,16 @@ extern Renderer *renderer_create_empty (const char *name, int display_idx);
 // creates a new renderer with a window attached to it
 extern Renderer *renderer_create_with_window (const char *name, int display_idx,
     Uint32 render_flags,
-    const char *window_title, WindowSize window_size, bool full_screen);
+    const char *window_title, WindowSize window_size, Uint32 window_flags);
 
-// TODO: as of 03/06/2019 we only have support for one renderer, the main one
-// the plan is to have as many as you want in order to support multiple windows 
-extern Renderer *main_renderer;
+// attaches a new window to a renderer
+// creates a new window and then a new render (SDL_Renderer) for it
+// retunrs 0 on success, 1 on error
+extern int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
+    const char *window_title, WindowSize window_size, Uint32 window_flags);
 
 extern int renderer_init_main (Uint32 flags,
-    const char *window_title, WindowSize window_size, bool full_screen);
+    const char *window_title, WindowSize window_size, Uint32 window_flags);
 
 extern void renderer_delete_main (void);
 

@@ -77,9 +77,9 @@ int window_toggle_full_screen (Renderer *renderer) {
     int retval = 1;
 
     if (renderer) {
-        renderer->full_screen = SDL_GetWindowFlags (renderer->window) & SDL_WINDOW_FULLSCREEN;
-        retval = SDL_SetWindowFullscreen (renderer->window, renderer->full_screen ? 0 : SDL_WINDOW_FULLSCREEN);
-        renderer->full_screen = SDL_GetWindowFlags (renderer->window) & SDL_WINDOW_FULLSCREEN;
+        renderer->fullscreen = SDL_GetWindowFlags (renderer->window) & SDL_WINDOW_FULLSCREEN;
+        retval = SDL_SetWindowFullscreen (renderer->window, renderer->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+        renderer->fullscreen = SDL_GetWindowFlags (renderer->window) & SDL_WINDOW_FULLSCREEN;
     }
 
     return retval;
@@ -113,15 +113,14 @@ void window_set_icon (SDL_Window *window, SDL_Surface *icon_surface) {
 
 }
 
-static SDL_Window *window_create (const char *title, WindowSize window_size, bool full_screen) {
+static SDL_Window *window_create (const char *title, WindowSize window_size, Uint32 window_flags) {
 
     SDL_Window *window = NULL;
 
     // creates a window of the size of the screen
     window = SDL_CreateWindow (title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-        window_size.width, window_size.height,
-        full_screen ? SDL_WINDOW_FULLSCREEN : 0);
+        window_size.width, window_size.height, window_flags);
 
     return window;
 
@@ -134,6 +133,9 @@ static SDL_Window *window_create (const char *title, WindowSize window_size, boo
 // TODO: as of 03/06/2019 we only have support for one renderer, the main one
 // the plan is to have as many as you want in order to support multiple windows 
 Renderer *main_renderer = NULL;
+
+int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
+    const char *window_title, WindowSize window_size, Uint32 window_flags);
 
 static Renderer *renderer_new (void) {
 
@@ -208,16 +210,32 @@ Renderer *renderer_create_empty (const char *name, int display_idx) {
 // creates a new renderer with a window attached to it
 Renderer *renderer_create_with_window (const char *name, int display_idx,
     Uint32 render_flags,
-    const char *window_title, WindowSize window_size, bool full_screen) {
+    const char *window_title, WindowSize window_size, Uint32 window_flags) {
 
     Renderer *renderer = renderer_create_empty (name, display_idx);
     if (renderer) {
-        // first init the window
-        renderer->window = window_create (window_title, window_size, full_screen);
+        renderer->render_flags = render_flags;
+        renderer_window_attach (renderer, render_flags, 
+            window_title, window_size, window_flags);
+    }
+
+    return renderer;
+
+}
+
+// attaches a new window to a renderer
+// creates a new window and then a new render (SDL_Renderer) for it
+// retunrs 0 on success, 1 on error
+int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
+    const char *window_title, WindowSize window_size, Uint32 window_flags) {
+
+    int retval = 0;
+
+    if (renderer) {
+        renderer->window = window_create (window_title, window_size, window_flags);
         if (renderer->window) {
             window_get_size (renderer->window, &renderer->window_size);
 
-            // init the sdl renderer
             // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
             renderer->renderer = SDL_CreateRenderer (renderer->window, renderer->display_index, render_flags);
             if (renderer->renderer) {
@@ -229,35 +247,32 @@ Renderer *renderer_create_with_window (const char *name, int display_idx,
                 SDL_RenderSetLogicalSize (renderer->renderer, 
                     renderer->window_size.width, renderer->window_size.height);
 
-                // renderer->name = str_new (renderer_name);
-                renderer->flags = render_flags;
-                renderer->window_title = str_new (window_title);
-                renderer->full_screen = full_screen;
+                renderer->window_title = window_title ? str_new (window_title) : NULL;
+                renderer->window_flags = window_flags;
+                renderer->fullscreen = window_flags & SDL_WINDOW_FULLSCREEN;
+
+                retval = 0;
             }
 
             else {
                 cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create renderer!"); 
-                renderer_delete (renderer);
-                renderer = NULL;
+                if (renderer->window) SDL_DestroyWindow (renderer->window);
+                renderer->window = NULL;
             }
         }
 
-        else {
-            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
-            renderer_delete (renderer);
-            renderer = NULL;
-        }
+        else cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
     }
 
-    return renderer;
+    return retval;
 
 }
 
 int renderer_init_main (Uint32 flags,
-    const char *window_title, WindowSize window_size, bool full_screen) {
+    const char *window_title, WindowSize window_size, Uint32 window_flags) {
 
     return ((main_renderer = renderer_create_with_window ("main", 0, flags, 
-        window_title, window_size, full_screen)) ? 0 : 1);
+        window_title, window_size, window_flags)) ? 0 : 1);
 
 }
 
