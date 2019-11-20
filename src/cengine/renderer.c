@@ -141,17 +141,19 @@ static Renderer *renderer_new (void) {
     if (renderer) {
         memset (renderer, 0, sizeof (Renderer));
         renderer->name = NULL;
+        renderer->textures_queue = NULL;
+
+        renderer->renderer = NULL;
+
         renderer->window_title = NULL;
         renderer->window = NULL;
-        renderer->renderer = NULL;
-        renderer->textures_queue = NULL;
     }
 
     return renderer;
 
 }
 
-static void *renderer_delete (void *ptr) {
+void renderer_delete (void *ptr) {
 
     if (ptr) {
         Renderer *renderer = (Renderer *) ptr;
@@ -169,18 +171,16 @@ static void *renderer_delete (void *ptr) {
 
 }
 
-// FIXME: players with higher resolution have an advantage -> they see more of the world
-// TODO: check SDL_GetCurrentDisplayMode
-// TODO: get refresh rate -> do we need vsync?
-Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int display_index,
-    const char *window_title, WindowSize window_size, bool full_screen) {
+// creates a new empty renderer without a window attached to it
+Renderer *renderer_create_empty (const char *name, int display_idx) {
 
     Renderer *renderer = renderer_new ();
     if (renderer) {
+        renderer->name = name ? str_new (name) : NULL;
+        renderer->display_index = display_idx;
         renderer->textures_queue = queue_create ();
 
-        renderer->display_index = display_index;
-        if (!SDL_GetCurrentDisplayMode (display_index, &renderer->display_mode)) {
+        if (!SDL_GetCurrentDisplayMode (renderer->display_index, &renderer->display_mode)) {
             #ifdef CENGINE_DEBUG
             cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE,
                 c_string_create ("Display with idx %i mode is %dx%dpx @ %dhz.",
@@ -188,47 +188,11 @@ Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int d
                 renderer->display_mode.w, renderer->display_mode.h, 
                 renderer->display_mode.refresh_rate));
             #endif
-
-            // first init the window
-            renderer->window = window_create (window_title, window_size, full_screen);
-            if (renderer->window) {
-                window_get_size (renderer->window, &renderer->window_size);
-
-                // init the sdl renderer
-                // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
-                renderer->renderer = SDL_CreateRenderer (renderer->window, display_index, flags);
-                if (renderer->renderer) {
-                    renderer->thread_id = pthread_self ();
-                    // printf ("Renderer created in thread: %ld\n", renderer->thread_id);
-
-                    SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
-                    SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "0");
-                    SDL_RenderSetLogicalSize (renderer->renderer, 
-                        renderer->window_size.width, renderer->window_size.height);
-
-                    renderer->name = str_new (renderer_name);
-                    renderer->flags = flags;
-                    renderer->window_title = str_new (window_title);
-                    renderer->full_screen = full_screen;
-                }
-
-                else {
-                    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create renderer!"); 
-                    renderer_delete (renderer);
-                    renderer = NULL;
-                }
-            }
-
-            else {
-                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
-                renderer_delete (renderer);
-                renderer = NULL;
-            }
         }
 
         else {
             cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
-                c_string_create ("Failed to get display mode for display with idx %i", display_index));
+                c_string_create ("Failed to get display mode for display with idx %i", renderer->display_index));
             #ifdef CENGINE_DEBUG
             cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, SDL_GetError ());
             #endif
@@ -241,10 +205,58 @@ Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int d
 
 }
 
+// creates a new renderer with a window attached to it
+Renderer *renderer_create_with_window (const char *name, int display_idx,
+    Uint32 render_flags,
+    const char *window_title, WindowSize window_size, bool full_screen) {
+
+    Renderer *renderer = renderer_create_empty (name, display_idx);
+    if (renderer) {
+        // first init the window
+        renderer->window = window_create (window_title, window_size, full_screen);
+        if (renderer->window) {
+            window_get_size (renderer->window, &renderer->window_size);
+
+            // init the sdl renderer
+            // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
+            renderer->renderer = SDL_CreateRenderer (renderer->window, renderer->display_index, render_flags);
+            if (renderer->renderer) {
+                renderer->thread_id = pthread_self ();
+                // printf ("Renderer created in thread: %ld\n", renderer->thread_id);
+
+                SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
+                SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "0");
+                SDL_RenderSetLogicalSize (renderer->renderer, 
+                    renderer->window_size.width, renderer->window_size.height);
+
+                // renderer->name = str_new (renderer_name);
+                renderer->flags = render_flags;
+                renderer->window_title = str_new (window_title);
+                renderer->full_screen = full_screen;
+            }
+
+            else {
+                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create renderer!"); 
+                renderer_delete (renderer);
+                renderer = NULL;
+            }
+        }
+
+        else {
+            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create window!"); 
+            renderer_delete (renderer);
+            renderer = NULL;
+        }
+    }
+
+    return renderer;
+
+}
+
 int renderer_init_main (Uint32 flags,
     const char *window_title, WindowSize window_size, bool full_screen) {
 
-    return ((main_renderer = render_create_renderer ("main", flags, 0, 
+    return ((main_renderer = renderer_create_with_window ("main", 0, flags, 
         window_title, window_size, full_screen)) ? 0 : 1);
 
 }

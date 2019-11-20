@@ -80,9 +80,14 @@ struct _Renderer {
 
 typedef struct _Renderer Renderer;
 
-// creates a new renderer
-// returns a new renderer on success, NULL on error
-extern Renderer *render_create_renderer (const char *renderer_name, Uint32 flags, int display_index,
+extern void renderer_delete (void *ptr);
+
+// creates a new empty renderer without a window attached to it
+extern Renderer *renderer_create_empty (const char *name, int display_idx);
+
+// creates a new renderer with a window attached to it
+extern Renderer *renderer_create_with_window (const char *name, int display_idx,
+    Uint32 render_flags,
     const char *window_title, WindowSize window_size, bool full_screen);
 
 // TODO: as of 03/06/2019 we only have support for one renderer, the main one
