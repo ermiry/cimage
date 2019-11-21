@@ -119,6 +119,9 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
         // ui_image_set_action (image, app_ui_image_display_in_window, image);
+
+        // TODO: 21/11/2019 - it seems overlay uses a lot of memory
+        // maybe create only one overlay and add a ref and only display the size of the image
         RGBA_Color overlay_colour = { 255, 255, 255, 70 };
         ui_image_set_overlay (image, main_renderer, overlay_colour);
 

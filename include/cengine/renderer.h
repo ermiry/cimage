@@ -16,8 +16,6 @@
 
 #include "cengine/threads/thread.h"
 
-struct _Renderer;
-
 // auxiliary structure to map the source surface to a texture
 typedef struct SurfaceTexture {
 
@@ -29,32 +27,6 @@ typedef struct SurfaceTexture {
 extern SurfaceTexture *surface_texture_new (SDL_Surface *surface, SDL_Texture **texture);
 
 extern void surface_texture_delete (void *st_ptr);
-
-/*** Window ***/
-
-typedef struct WindowSize {
-
-    u32 width, height;
-
-} WindowSize;
-
-// gets window size into renderer data struct
-// returns 0 on success, 1 on error
-extern int window_get_size (SDL_Window *window, WindowSize *window_size);
-
-// toggle full screen on and off
-// returns 0 on success, 1 on error
-extern int window_toggle_full_screen (struct _Renderer *renderer);
-
-// resizes the window asscoaited with a renderer
-// returns 0 on success, 1 on error
-extern int window_resize (struct _Renderer *renderer, u32 new_width, u32 new_height);
-
-// sets the window's icon
-extern void window_set_icon (SDL_Window *window, SDL_Surface *icon_surface);
-
-// wrapper function to destroy a sdl surface
-extern void surface_delete (SDL_Surface *surface);
 
 /*** Renderer ***/
 
@@ -155,6 +127,9 @@ extern SDL_Surface *surface_create (int width, int height);
 
 // loads an image into a new surface
 extern SDL_Surface *surface_load_image (const char *filename);
+
+// wrapper function to destroy a sdl surface
+extern void surface_delete (SDL_Surface *surface);
 
 /*** Render Basic ***/
 
