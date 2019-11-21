@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
@@ -168,6 +169,26 @@ void renderer_delete (void *ptr) {
 
         free (renderer);
     }
+
+}
+
+// gets the renderer by its name
+Renderer *renderer_get_by_name (const char *name) {
+
+    Renderer *retval = NULL;
+
+    if (name) {
+        Renderer *renderer = NULL;
+        for (ListElement *le = dlist_start (renderers); le; le = le->next) {
+            renderer = (Renderer *) le->data;
+            if (!strcmp (renderer->name->str, name)) {
+                retval = renderer;
+                break;
+            }
+        }
+    }
+
+    return retval;
 
 }
 
@@ -538,54 +559,54 @@ void surface_delete (SDL_Surface *surface) { if (surface) SDL_FreeSurface (surfa
 #pragma region Basic
 
 // renders a dot
-void render_basic_dot (int x, int y, SDL_Color color) {
+void render_basic_dot (Renderer *renderer, int x, int y, SDL_Color color) {
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawPoint (main_renderer->renderer, x ,y);
+    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawPoint (renderer->renderer, x ,y);
 
 }
 
 // renders a horizontal line of dots
-void render_basic_dot_line_horizontal (int start, int y, int length, int offset, SDL_Color color) {
+void render_basic_dot_line_horizontal (Renderer *renderer, int start, int y, int length, int offset, SDL_Color color) {
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
     for (unsigned int i = start; i < length; i += offset)
-        SDL_RenderDrawPoint (main_renderer->renderer, i, y);
+        SDL_RenderDrawPoint (renderer->renderer, i, y);
 
 }
 
 // renders a vertical line of dots
-void render_basic_dot_line_vertical (int x, int start, int length, int offset, SDL_Color color) {
+void render_basic_dot_line_vertical (Renderer *renderer, int x, int start, int length, int offset, SDL_Color color) {
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
     for (unsigned int i = start; i < length; i += offset)
-        SDL_RenderDrawPoint (main_renderer->renderer, x, i);
+        SDL_RenderDrawPoint (renderer->renderer, x, i);
 
 }
 
 // renders a filled rect
-void render_basic_filled_rect (SDL_Rect *rect, SDL_Color color) {
+void render_basic_filled_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color) {
 
     if (rect) {
-        SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
-        SDL_RenderFillRect (main_renderer->renderer, rect);
+        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
+        SDL_RenderFillRect (renderer->renderer, rect);
     }
 
 }
 
 // renders an outline rect
-void render_basic_outline_rect (SDL_Rect *rect, SDL_Color color) {
+void render_basic_outline_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color) {
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
-    SDL_RenderDrawRect (main_renderer->renderer, rect);
+    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
+    SDL_RenderDrawRect (renderer->renderer, rect);
 
 }
 
 // renders a line
-void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color) {
+void render_basic_line (Renderer *renderer, int x1, int x2, int y1, int y2, SDL_Color color) {
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, color.r, color.g, color.b, color.a);        
-    SDL_RenderDrawLine (main_renderer->renderer, x1, y1, x2, y2);
+    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
+    SDL_RenderDrawLine (renderer->renderer, x1, y1, x2, y2);
 
 }
 
@@ -594,7 +615,7 @@ void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color) {
 #pragma region Complex
 
 // renders a rect with transparency
-SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color) {
+SDL_Texture *render_complex_transparent_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color) {
 
     SDL_Texture *texture = NULL;
 
@@ -602,7 +623,7 @@ SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color) {
     if (surface) {
         (void) SDL_FillRect (surface, NULL, 
             convert_rgba_to_hex (color.r, color.g, color.b, color.a));
-        texture = SDL_CreateTextureFromSurface (main_renderer->renderer, surface);
+        texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
         SDL_FreeSurface (surface); 
     }
 

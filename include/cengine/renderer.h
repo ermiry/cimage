@@ -85,6 +85,9 @@ extern DoubleList *renderers;
 
 extern void renderer_delete (void *ptr);
 
+// gets the renderer by its name
+extern Renderer *renderer_get_by_name (const char *name);
+
 // creates a new empty renderer without a window attached to it
 extern Renderer *renderer_create_empty (const char *name, int display_idx);
 
@@ -156,27 +159,27 @@ extern SDL_Surface *surface_load_image (const char *filename);
 /*** Render Basic ***/
 
 // renders a dot
-extern void render_basic_dot (int x, int y, SDL_Color color);
+extern void render_basic_dot (Renderer *renderer,int x, int y, SDL_Color color);
 
 // renders a horizontal line of dots
-extern void render_basic_dot_line_horizontal (int start, int y, int length, int offset, SDL_Color color);
+extern void render_basic_dot_line_horizontal (Renderer *renderer,int start, int y, int length, int offset, SDL_Color color);
 
 // renders a vertical line of dots
-extern void render_basic_dot_line_vertical (int x, int start, int length, int offset, SDL_Color color);
+extern void render_basic_dot_line_vertical (Renderer *renderer,int x, int start, int length, int offset, SDL_Color color);
 
 // renders a filled rect
-extern void render_basic_filled_rect (SDL_Rect *rect, SDL_Color color);
+extern void render_basic_filled_rect (Renderer *renderer,SDL_Rect *rect, SDL_Color color);
 
 // renders an outline rect
-extern void render_basic_outline_rect (SDL_Rect *rect, SDL_Color color);
+extern void render_basic_outline_rect (Renderer *renderer,SDL_Rect *rect, SDL_Color color);
 
 // renders a line
-extern void render_basic_line (int x1, int x2, int y1, int y2, SDL_Color color);
+extern void render_basic_line (Renderer *renderer,int x1, int x2, int y1, int y2, SDL_Color color);
 
 /*** Render Complex ***/
 
 // renders a rect with transparency
-extern SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color);
+extern SDL_Texture *render_complex_transparent_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color);
 
 /*** Render ***/
 
