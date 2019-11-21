@@ -171,7 +171,8 @@ extern void render_basic_dot_line_vertical (Renderer *renderer,int x, int start,
 extern void render_basic_filled_rect (Renderer *renderer,SDL_Rect *rect, SDL_Color color);
 
 // renders an outline rect
-extern void render_basic_outline_rect (Renderer *renderer,SDL_Rect *rect, SDL_Color color);
+// scale works better with even numbers
+extern void render_basic_outline_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color, float scale_x, float scale_y);
 
 // renders a line
 extern void render_basic_line (Renderer *renderer,int x1, int x2, int y1, int y2, SDL_Color color);

@@ -29,6 +29,8 @@ typedef struct Image {
 
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
 
 } Image;
 
@@ -62,6 +64,9 @@ extern void ui_image_set_sprite_sheet_offset (Image *image, u32 x_offset, u32 y_
 
 // sets the image's outline colour
 extern void ui_image_set_ouline_colour (Image *image, RGBA_Color colour);
+
+// sets the image's outline scale
+extern void ui_image_set_outline_scale (Image *image, float x_scale, float y_scale);
 
 // removes the ouline form the image
 extern void ui_image_remove_outline (Image *image);

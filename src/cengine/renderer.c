@@ -597,10 +597,23 @@ void render_basic_filled_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color col
 }
 
 // renders an outline rect
-void render_basic_outline_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color) {
+// scale works better with even numbers
+void render_basic_outline_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color, float scale_x, float scale_y) {
 
-    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
-    SDL_RenderDrawRect (renderer->renderer, rect);
+    if (renderer && rect) {
+        float original_scale_x = 0;
+        float original_scale_y = 0;
+
+        SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
+
+        SDL_RenderSetScale (renderer->renderer, scale_x, scale_y);
+        SDL_Rect temp_rect = { .x = rect->x / scale_x, .y = rect->y / scale_y, .w = rect->w / scale_x, .h = rect->h / scale_y };
+
+        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);      
+        SDL_RenderDrawRect (renderer->renderer, &temp_rect);
+        
+        SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
+    }
 
 }
 

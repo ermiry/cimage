@@ -167,6 +167,16 @@ void ui_image_set_ouline_colour (Image *image, RGBA_Color colour) {
 
 }
 
+// sets the image's outline scale
+void ui_image_set_outline_scale (Image *image, float x_scale, float y_scale) {
+
+    if (image) {
+        image->outline_scale_x = x_scale;
+        image->outline_scale_y = y_scale;
+    }
+
+}
+
 // removes the ouline form the image
 void ui_image_remove_outline (Image *image) {
 
@@ -187,6 +197,8 @@ static Image *ui_image_create_common (void) {
         if (image) {
             image->ui_element = ui_element;
             ui_element->element = image;
+
+            image->outline_scale_x = image->outline_scale_y = 1;
         }
     }
 
@@ -300,7 +312,8 @@ void ui_image_draw (Image *image, Renderer *renderer) {
 
         // render the outline border
         if (image->outline) 
-            render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour);
+            render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour, 
+                image->outline_scale_x, image->outline_scale_y);
     }
 
 }
