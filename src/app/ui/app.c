@@ -102,6 +102,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER, main_renderer);
         ui_image_set_sprite (image, main_renderer, filename);
         ui_image_set_ouline_colour (image, RGBA_WHITE);
+        ui_image_set_outline_scale (image, 2, 2);
 
         ui_layout_grid_add_element (grid, image->ui_element);
     }

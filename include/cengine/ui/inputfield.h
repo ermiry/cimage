@@ -28,6 +28,9 @@ typedef struct InputField {
     // outline
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
+
     bool draw_selected;
     RGBA_Color selected_color;
 
@@ -84,6 +87,9 @@ extern String *ui_input_field_password_get (InputField *input);
 
 // sets the input field's outline colour
 extern void ui_input_field_ouline_set_colour (InputField *input, RGBA_Color colour);
+
+// sets the input field's outline scale
+extern void ui_input_field_ouline_set_scale (InputField *input, float x_scale, float y_scale);
 
 // removes the ouline form the input field
 extern void ui_input_field_outline_remove (InputField *input);

@@ -25,6 +25,8 @@ typedef struct Panel {
     // outline
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
 
 } Panel;
 
@@ -38,6 +40,9 @@ extern void ui_panel_remove_background (Panel *panel);
 
 // sets the panel's outline colour
 extern void ui_panel_set_ouline_colour (Panel *panel, RGBA_Color colour);
+
+// sets the panel's outline scale
+extern void ui_panel_set_ouline_scale (Panel *panel, float x_scale, float y_scale);
 
 // removes the ouline form the panel
 extern void ui_panel_remove_outline (Panel *panel);

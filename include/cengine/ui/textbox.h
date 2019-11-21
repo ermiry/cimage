@@ -22,6 +22,8 @@ typedef struct TextBox {
 
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
 
     bool colour;
     RGBA_Color bg_colour;
@@ -55,6 +57,9 @@ extern void ui_textbox_set_text_color (TextBox *textbox, Renderer *renderer, RGB
 
 // sets the textbox's outline colour
 extern void ui_textbox_set_ouline_colour (TextBox *textbox, RGBA_Color colour);
+
+// sets the textbox's outline scale
+extern void ui_textbox_set_ouline_scale (TextBox *textbox, float x_scale, float y_scale);
 
 // removes the ouline form the textbox
 extern void ui_textbox_remove_outline (TextBox *textbox);

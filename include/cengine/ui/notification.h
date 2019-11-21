@@ -136,6 +136,8 @@ struct _NotiCenter {
 
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
 
     bool colour;
     RGBA_Color bg_colour;
@@ -168,6 +170,9 @@ extern void ui_noti_center_set_dimensions (NotiCenter *noti_center, u32 width, u
 
 // sets the noti center's outline colour
 extern void ui_noti_center_set_ouline_colour (NotiCenter *noti_center, RGBA_Color colour);
+
+// sets the noti center's outline scale
+extern void ui_noti_center_set_ouline_scale (NotiCenter *noti_center, float x_scale, float y_scale);
 
 // removes the ouline form the noti center
 extern void ui_noti_center_remove_outline (NotiCenter *noti_center);

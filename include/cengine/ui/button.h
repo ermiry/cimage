@@ -43,6 +43,8 @@ typedef struct Button {
 
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
 
     Text *text;
 
@@ -85,6 +87,9 @@ extern void ui_button_set_text_color (Button *button, Renderer *renderer, RGBA_C
 
 // sets the button's outline colour
 extern void ui_button_set_ouline_colour (Button *button, RGBA_Color colour);
+
+// sets the button's outline scale
+extern void ui_button_set_ouline_scale (Button *button, float x_scale, float y_scale);
 
 // removes the ouline form the button
 extern void ui_button_remove_outline (Button *button);

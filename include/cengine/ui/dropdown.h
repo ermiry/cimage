@@ -37,6 +37,9 @@ typedef struct DropdownOption {
     // outline
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
+
     bool draw_selected;
     RGBA_Color selected_color;
 
@@ -58,6 +61,9 @@ extern void ui_dropdown_option_set_text (DropdownOption *option, Renderer *rende
 
 // sets the option's outline colour
 extern void ui_dropdown_option_set_ouline_colour (DropdownOption *option, RGBA_Color colour);
+
+// sets the option's outline scale
+extern void ui_dropdown_option_set_outline_scale (DropdownOption *option, float x_scale, float y_scale);
 
 // removes the ouline form the option
 extern void ui_dropdown_option_remove_outline (DropdownOption *option);
@@ -85,6 +91,9 @@ typedef struct Dropdown {
     // outline
     bool outline;
     RGBA_Color outline_colour;
+    float outline_scale_x;
+    float outline_scale_y;
+
     bool draw_selected;
     RGBA_Color selected_color;
 
@@ -123,6 +132,9 @@ extern void ui_dropdown_toggle_active (Dropdown *dropdown);
 
 // sets the dropdown's outline colour
 extern void ui_dropdown_set_ouline_colour (Dropdown *dropdown, RGBA_Color colour);
+
+// sets the dropdown's outline scale
+extern void ui_dropdown_set_outline_scale (Dropdown *dropdown, float x_scale, float y_scale);
 
 // removes the ouline form the dropdown
 extern void ui_dropdown_remove_outline (Dropdown *dropdown);

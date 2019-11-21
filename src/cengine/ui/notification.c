@@ -547,6 +547,9 @@ NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos, Renderer *ren
             noti_center->offset = noti_center->bottom ? noti_center->transform->rect.h : 0;
 
             ui_element->element = noti_center;
+
+            noti_center->outline_scale_x = 1;
+            noti_center->outline_scale_y = 1;
         }
 
         else ui_element_delete (ui_element);
@@ -584,6 +587,16 @@ void ui_noti_center_set_ouline_colour (NotiCenter *noti_center, RGBA_Color colou
     if (noti_center) {
         noti_center->outline = true;
         noti_center->outline_colour = colour;
+    }
+
+}
+
+// sets the noti center's outline scale
+void ui_noti_center_set_ouline_scale (NotiCenter *noti_center, float x_scale, float y_scale) {
+
+    if (noti_center) {
+        noti_center->outline_scale_x = x_scale;
+        noti_center->outline_scale_y = y_scale;
     }
 
 }
@@ -645,7 +658,8 @@ void ui_noti_center_draw (NotiCenter *noti_center, Renderer *renderer) {
 
         // render the outline border
         if (noti_center->outline) 
-            render_basic_outline_rect (renderer, &noti_center->transform->rect, noti_center->outline_colour);
+            render_basic_outline_rect (renderer, &noti_center->transform->rect, noti_center->outline_colour, 
+                noti_center->outline_scale_x, noti_center->outline_scale_y);
 
         if (noti_center->active_notifications->size < noti_center->max_display) {
             if (noti_center->notifications->size > 0) {

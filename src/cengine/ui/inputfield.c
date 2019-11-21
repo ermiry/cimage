@@ -209,6 +209,16 @@ void ui_input_field_ouline_set_colour (InputField *input, RGBA_Color colour) {
 
 }
 
+// sets the input field's outline scale
+void ui_input_field_ouline_set_scale (InputField *input, float x_scale, float y_scale) {
+
+    if (input) {
+        input->outline_scale_x = x_scale;
+        input->outline_scale_y = y_scale;
+    }
+
+}
+
 // removes the ouline form the input field
 void ui_input_field_outline_remove (InputField *input) {
 
@@ -273,6 +283,9 @@ InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, R
             input->transform = ui_transform_component_create (x, y, w, h);
             ui_transform_component_set_pos (input->transform, renderer, NULL, pos, true);
             ui_element->element = input;
+
+            input->outline_scale_x = 1;
+            input->outline_scale_y = 1;
         }
 
         else ui_element_delete (ui_element);
@@ -320,10 +333,12 @@ void ui_input_field_draw (InputField *input, Renderer *renderer) {
 
         if (input->pressed) {
             if (input->draw_selected) 
-                render_basic_outline_rect (renderer, &input->transform->rect, input->selected_color);
+                render_basic_outline_rect (renderer, &input->transform->rect, input->selected_color,
+                    input->outline_scale_x, input->outline_scale_y);
         }
 
-        else if (input->outline) render_basic_outline_rect (renderer, &input->transform->rect, input->outline_colour);
+        else if (input->outline) render_basic_outline_rect (renderer, &input->transform->rect, input->outline_colour, 
+            input->outline_scale_x, input->outline_scale_y);
         
         // draw the correct text
         if (input->empty_text) {

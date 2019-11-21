@@ -78,6 +78,16 @@ void ui_panel_set_ouline_colour (Panel *panel, RGBA_Color colour) {
 
 }
 
+// sets the panel's outline scale
+void ui_panel_set_ouline_scale (Panel *panel, float x_scale, float y_scale) {
+
+    if (panel) {
+        panel->outline_scale_x = x_scale;
+        panel->outline_scale_y = y_scale;
+    }
+
+}
+
 // removes the ouline form the panel
 void ui_panel_remove_outline (Panel *panel) {
 
@@ -103,6 +113,9 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *re
             ui_transform_component_set_pos (panel->transform, renderer, NULL, pos, true);
 
             ui_element->element = panel;
+
+            panel->outline_scale_x = 1;
+            panel->outline_scale_y = 1;
         }
     }
 
@@ -129,7 +142,8 @@ void ui_panel_draw (Panel *panel, Renderer *renderer) {
 
         // render the outline
         if (panel->outline) 
-            render_basic_outline_rect (renderer, &panel->transform->rect, panel->outline_colour);
+            render_basic_outline_rect (renderer, &panel->transform->rect, panel->outline_colour,
+                panel->outline_scale_x, panel->outline_scale_y);
     }
 
 }

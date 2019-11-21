@@ -138,6 +138,16 @@ void ui_textbox_set_ouline_colour (TextBox *textbox, RGBA_Color colour) {
 
 }
 
+// sets the textbox's outline scale
+void ui_textbox_set_ouline_scale (TextBox *textbox, float x_scale, float y_scale) {
+
+    if (textbox) {
+        textbox->outline_scale_x = x_scale;
+        textbox->outline_scale_y = y_scale;
+    }
+
+}
+
 // removes the ouline form the textbox
 void ui_textbox_remove_outline (TextBox *textbox) {
 
@@ -192,6 +202,9 @@ TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer
             textbox->transform = ui_transform_component_create (x, y, w, h);
             ui_transform_component_set_pos (textbox->transform, renderer, NULL, pos, true);
             ui_element->element = textbox;
+
+            textbox->outline_scale_x = 1;
+            textbox->outline_scale_y = 1;
         }
 
         else ui_element_delete (ui_element);
@@ -217,7 +230,8 @@ void ui_textbox_draw (TextBox *textbox, Renderer *renderer) {
 
         // render the outline border
         if (textbox->outline) 
-            render_basic_outline_rect (renderer, &textbox->transform->rect, textbox->outline_colour);
+            render_basic_outline_rect (renderer, &textbox->transform->rect, textbox->outline_colour,
+                textbox->outline_scale_x, textbox->outline_scale_y);
 
         // render the text
         ui_text_component_render (textbox->text, renderer);

@@ -611,17 +611,29 @@ void render_basic_outline_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color co
 
         SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);      
         SDL_RenderDrawRect (renderer->renderer, &temp_rect);
-        
+
         SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
     }
 
 }
 
 // renders a line
-void render_basic_line (Renderer *renderer, int x1, int x2, int y1, int y2, SDL_Color color) {
+// scale works better with even numbers
+void render_basic_line (Renderer *renderer, int x1, int x2, int y1, int y2, SDL_Color color, float scale_x, float scale_y) {
 
-    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
-    SDL_RenderDrawLine (renderer->renderer, x1, y1, x2, y2);
+    if (renderer) {
+        float original_scale_x = 0;
+        float original_scale_y = 0;
+
+        SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
+
+        SDL_RenderSetScale (renderer->renderer, scale_x, scale_y);
+
+        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
+        SDL_RenderDrawLine (renderer->renderer, x1, y1, x2, y2);
+
+        SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
+    }
 
 }
 

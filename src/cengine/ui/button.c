@@ -175,6 +175,16 @@ void ui_button_set_ouline_colour (Button *button, RGBA_Color colour) {
 
 }
 
+// sets the button's outline scale
+void ui_button_set_ouline_scale (Button *button, float x_scale, float y_scale) {
+
+    if (button) {
+        button->outline_scale_x = x_scale;
+        button->outline_scale_y = y_scale;
+    }
+
+}
+
 // removes the ouline form the button
 void ui_button_remove_outline (Button *button) {
 
@@ -301,6 +311,9 @@ Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *
             ui_transform_component_set_pos (button->transform, renderer, NULL, pos, true);
 
             ui_element->element = button;
+
+            button->outline_scale_x = 1;
+            button->outline_scale_y = 1;
         }
 
         else ui_element_delete (ui_element);
@@ -326,7 +339,8 @@ void ui_button_draw (Button *button, Renderer *renderer) {
 
         // render the outline border
         if (button->outline) 
-            render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour);
+            render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour,
+                button->outline_scale_x, button->outline_scale_y);
 
         Sprite *selected_sprite = NULL;
 

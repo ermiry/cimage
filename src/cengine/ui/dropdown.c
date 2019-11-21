@@ -78,6 +78,9 @@ DropdownOption *ui_dropdown_option_create (Renderer *renderer, const char *optio
     if (option) {
         option->transform = ui_transform_component_create (0, 0, 0, 0);
         ui_dropdown_option_set_text (option, renderer, option_text, font, size, color);
+
+        option->outline_scale_x = 1;
+        option->outline_scale_y = 1;
     }
 
     return option;
@@ -111,6 +114,16 @@ void ui_dropdown_option_set_ouline_colour (DropdownOption *option, RGBA_Color co
     if (option) {
         option->outline = true;
         option->outline_colour = colour;
+    }
+
+}
+
+// sets the option's outline scale
+void ui_dropdown_option_set_outline_scale (DropdownOption *option, float x_scale, float y_scale) {
+
+    if (option) {
+        option->outline_scale_x = x_scale;
+        option->outline_scale_y = y_scale;
     }
 
 }
@@ -180,7 +193,8 @@ static void ui_dropdown_option_render (DropdownOption *option, Renderer *rendere
 
         // render the outline rect
         if (option->outline) 
-            render_basic_outline_rect (renderer, &option->transform->rect, option->outline_colour);
+            render_basic_outline_rect (renderer, &option->transform->rect, option->outline_colour, 
+                option->outline_scale_x, option->outline_scale_y);
 
         // render the option's text
         ui_text_component_render (option->option, renderer);
@@ -256,6 +270,9 @@ Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Render
             ui_transform_component_set_pos (dropdown->transform, renderer, NULL, pos, true);
 
             ui_element->element = dropdown;
+
+            dropdown->outline_scale_x = 1;
+            dropdown->outline_scale_y = 1;
         }
 
         else ui_element_delete (ui_element);
@@ -319,6 +336,16 @@ void ui_dropdown_set_ouline_colour (Dropdown *dropdown, RGBA_Color colour) {
     if (dropdown) {
         dropdown->outline = true;
         dropdown->outline_colour = colour;
+    }
+
+}
+
+// sets the dropdown's outline scale
+void ui_dropdown_set_outline_scale (Dropdown *dropdown, float x_scale, float y_scale) {
+
+    if (dropdown) {
+        dropdown->outline_scale_x = x_scale;
+        dropdown->outline_scale_y = y_scale;
     }
 
 }
@@ -505,7 +532,8 @@ void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer) {
 
         // render the outline rect
         if (dropdown->outline) 
-            render_basic_outline_rect (renderer, &dropdown->transform->rect, dropdown->outline_colour);
+            render_basic_outline_rect (renderer, &dropdown->transform->rect, dropdown->outline_colour, 
+                dropdown->outline_scale_x, dropdown->outline_scale_y);
 
         // render the placeholder text (also the selected option text)
         ui_text_component_render (dropdown->placeholder, renderer);
