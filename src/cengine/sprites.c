@@ -14,6 +14,7 @@ Sprite *sprite_new (void) {
     if (sprite) {
         memset (sprite, 0, sizeof (Sprite));
         sprite->texture = NULL;
+        sprite->img_data = NULL;
     }
 
     return sprite;
@@ -24,6 +25,8 @@ void sprite_destroy (Sprite *sprite) {
 
     if (sprite) {
         if (sprite->texture) SDL_DestroyTexture (sprite->texture);
+        image_data_delete (sprite->img_data);
+
         free (sprite);
     }
 
@@ -34,22 +37,20 @@ Sprite *sprite_load (const char *filename, Renderer *renderer) {
     if (filename && renderer) {
         Sprite *new_sprite = sprite_new ();
         if (new_sprite) {
-            ImageData *img_data = texture_load (renderer, filename, &new_sprite->texture);
-            if (img_data) {
+            new_sprite->img_data = texture_load (renderer, filename, &new_sprite->texture);
+            if (new_sprite->img_data) {
                 // dimensions
-                new_sprite->src_rect.w = new_sprite->dest_rect.w = new_sprite->w = img_data->w;
-                new_sprite->src_rect.h = new_sprite->dest_rect.h = new_sprite->h = img_data->h;
+                new_sprite->src_rect.w = new_sprite->dest_rect.w = new_sprite->w = new_sprite->img_data->w;
+                new_sprite->src_rect.h = new_sprite->dest_rect.h = new_sprite->h = new_sprite->img_data->h;
 
                 // positions
                 new_sprite->src_rect.x = new_sprite->dest_rect.x = 0;
                 new_sprite->src_rect.y = new_sprite->dest_rect.y = 0;
 
-                image_data_delete (img_data);
-
                 return new_sprite;
             }
 
-            free (new_sprite);
+            sprite_destroy (new_sprite);
         }
     }
 
@@ -99,10 +100,10 @@ SpriteSheet *sprite_sheet_load (const char *filename, Renderer *renderer) {
     if (filename && renderer) {
         SpriteSheet *new_sprite_sheet = sprite_sheet_new ();
         if (new_sprite_sheet) {
-            ImageData *img_data = texture_load (renderer, filename, &new_sprite_sheet->texture);
-            if (img_data) {
-                new_sprite_sheet->w = img_data->w;
-                new_sprite_sheet->h = img_data->h;
+            new_sprite_sheet->img_data = texture_load (renderer, filename, &new_sprite_sheet->texture);
+            if (new_sprite_sheet->img_data) {
+                new_sprite_sheet->w = new_sprite_sheet->img_data->w;
+                new_sprite_sheet->h = new_sprite_sheet->img_data->h;
 
                 // dimensions
                 new_sprite_sheet->src_rect.w = new_sprite_sheet->dest_rect.w = 0;
@@ -112,10 +113,10 @@ SpriteSheet *sprite_sheet_load (const char *filename, Renderer *renderer) {
                 new_sprite_sheet->src_rect.x = new_sprite_sheet->dest_rect.x = 0;
                 new_sprite_sheet->src_rect.y = new_sprite_sheet->dest_rect.y = 0;
 
-                image_data_delete (img_data);
-
                 return new_sprite_sheet;
             }
+
+            sprite_sheet_destroy (new_sprite_sheet);
         }
     }
 

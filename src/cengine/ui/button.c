@@ -9,6 +9,7 @@
 #include "cengine/types/string.h"
 #include "cengine/types/vector2d.h"
 
+#include "cengine/graphics.h"
 #include "cengine/renderer.h"
 #include "cengine/textures.h"
 #include "cengine/sprites.h"

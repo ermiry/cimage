@@ -4,24 +4,24 @@
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
+
+#include "cengine/textures.h"
 #include "cengine/renderer.h"
 
-typedef enum Flip {
+struct _ImageData;
 
-    NO_FLIP             = 0x00000000,
-    FLIP_HORIZONTAL     = 0x00000001,
-    FLIP_VERTICAL       = 0x00000002
+struct _Sprite {
 
-} Flip;
-
-typedef struct Sprite {
+    struct _ImageData *img_data;
 
     u32 w, h;
     SDL_Texture *texture;
     i32 scale_factor;
     SDL_Rect src_rect, dest_rect;
 
-} Sprite;
+};
+
+typedef struct _Sprite Sprite;
 
 extern Sprite *sprite_new (void);
 
@@ -35,7 +35,9 @@ typedef struct IndividualSprite {
 
 } IndividualSprite;
 
-typedef struct SpriteSheet {
+struct _SpriteSheet {
+
+    struct _ImageData *img_data;
 
     u32 w, h;
     SDL_Texture *texture;
@@ -48,7 +50,9 @@ typedef struct SpriteSheet {
 
     IndividualSprite ***individual_sprites;
 
-} SpriteSheet;
+};
+
+typedef struct _SpriteSheet SpriteSheet;
 
 extern void sprite_sheet_destroy (SpriteSheet *sprite_sheet);
 

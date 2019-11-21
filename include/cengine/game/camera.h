@@ -5,11 +5,13 @@
 
 #include <SDL2/SDL.h>
 
+#include "cengine/types/types.h"
 #include "cengine/types/vector2d.h"
 
 #include "cengine/renderer.h"
 
 #include "cengine/game/go.h"
+#include "cengine/game/components/transform.h"
 
 #define DEFAULT_CAM_ACCEL           1
 #define DEFAULT_CAM_MAX_VEL         2

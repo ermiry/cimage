@@ -4,17 +4,25 @@
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
+#include "cengine/types/string.h"
 
+#include "cengine/renderer.h"
 #include "cengine/sprites.h"
 
+struct _Sprite;
+struct _SpriteSheet;
+
 // if we can't return a texture, we can at least return some image data
-typedef struct ImageData {
+struct _ImageData {
 
     u32 w, h;
+    String *filename;
 
-} ImageData;
+};
 
-extern ImageData *image_data_new (u32 w, u32 h);
+typedef struct _ImageData ImageData;
+
+extern ImageData *image_data_new (u32 w, u32 h, String *filename);
 
 extern void image_data_delete (void *img_data_ptr);
 
@@ -31,9 +39,11 @@ extern void texture_get_dimensions (SDL_Texture *texture, u32 *w, u32 *h);
 
 #include "cengine/game/camera.h"
 
-extern void texture_draw (Camera *cam, Renderer *renderer, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip);
+struct _Camera;
 
-extern void texture_draw_frame (Camera *cam, Renderer *renderer, SpriteSheet *spriteSheet, 
+extern void texture_draw (struct _Camera *cam, Renderer *renderer, struct _Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip);
+
+extern void texture_draw_frame (struct _Camera *cam, Renderer *renderer, struct _SpriteSheet *spriteSheet, 
     i32 x, i32 y, u32 col, u32 row, SDL_RendererFlip flip);
 
 #endif
