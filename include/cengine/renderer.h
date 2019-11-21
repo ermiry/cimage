@@ -18,6 +18,8 @@
 
 #include "cengine/window.h"
 
+#define DEFAULT_BG_LOADING_FACTOR               1
+
 struct _Window;
 
 // auxiliary structure to map the source surface to a texture
@@ -43,6 +45,7 @@ struct _Renderer {
     Uint32 render_flags;
 
     queue_t *textures_queue;
+    u32 bg_loading_factor;
 
     struct _Window *window;
 
@@ -77,6 +80,11 @@ extern int renderer_init_main (Uint32 flags,
 extern void renderer_delete_main (void);
 
 extern void renderer_queue_push (Renderer *renderer, SurfaceTexture *st);
+
+// sets how many textures the renderer can create in the background every loop
+// example: if you have a frame rate of 30, the default loading factor is 1,
+// so you will load 30 textures in a second, 1 for each frame
+extern void renderer_set_background_texture_loading_factor (Renderer *renderer, u32 bg_loading_factor);
 
 /*** Layers ***/
 

@@ -15,6 +15,7 @@
 #include "cengine/collections/queue.h"
 
 #include "cengine/renderer.h"
+#include "cengine/window.h"
 #include "cengine/textures.h"
 #include "cengine/threads/thread.h"
 
@@ -118,6 +119,7 @@ Renderer *renderer_create_empty (const char *name, int display_idx) {
         renderer->name = name ? str_new (name) : NULL;
         // renderer->display_index = display_idx;
         renderer->textures_queue = queue_create ();
+        renderer->bg_loading_factor = DEFAULT_BG_LOADING_FACTOR;
 
         dlist_insert_after (renderers, dlist_end (renderers), renderer);
     }
@@ -153,6 +155,8 @@ int renderer_window_attach (Renderer *renderer, Uint32 render_flags, int display
     if (renderer) {
         renderer->window = window_create (window_title, window_size, window_flags, display_idx);
         if (renderer->window) {
+            renderer->window->renderer = renderer;
+
             // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
             renderer->renderer = SDL_CreateRenderer (renderer->window->window, renderer->window->display_index, render_flags);
             if (renderer->renderer) {
@@ -188,6 +192,15 @@ void renderer_queue_push (Renderer *renderer, SurfaceTexture *st) {
             queue_put (renderer->textures_queue, st);
         }
     }
+
+}
+
+// sets how many textures the renderer can create in the background every loop
+// example: if you have a frame rate of 30, the default loading factor is 1,
+// so you will load 30 textures in a second, 1 for each frame
+void renderer_set_background_texture_loading_factor (Renderer *renderer, u32 bg_loading_factor) {
+
+    if (renderer) renderer->bg_loading_factor = bg_loading_factor;
 
 }
 
@@ -604,15 +617,19 @@ void render_complex_transparent_rect (Renderer *renderer, SDL_Texture **texture,
 void render (Renderer *renderer) {
 
     if (renderer) {
-        // TODO: ability to choose how many textures to load at a time
-        // load any texturex in queue
+        // load any texture in background queue
         if (renderer->textures_queue->num_els > 0) {
-            SurfaceTexture *st = NULL;
-            queue_get (renderer->textures_queue, (void **) &st);
-            if (st) {
-                *st->texture = SDL_CreateTextureFromSurface (renderer->renderer, st->surface);
-                surface_texture_delete (st);
-            } 
+            u32 count = 0;
+            while (count < renderer->bg_loading_factor) {
+                SurfaceTexture *st = NULL;
+                queue_get (renderer->textures_queue, (void **) &st);
+                if (st) {
+                    *st->texture = SDL_CreateTextureFromSurface (renderer->renderer, st->surface);
+                    surface_texture_delete (st);
+                } 
+
+                count++;
+            }
         }
 
         SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
@@ -676,6 +693,9 @@ u8 render_init (void) {
 
     errors |= retval;
 
+    windows = dlist_init (window_delete, NULL);
+    retval = windows ? 0 : 1;
+
     return errors;
 
 }
@@ -685,6 +705,8 @@ void render_end (void) {
     layers_end ();
 
     dlist_delete (renderers);
+
+    dlist_delete (windows);
 
 }
 

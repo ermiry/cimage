@@ -9,6 +9,8 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/collections/dlist.h"
+
 #include "cengine/renderer.h"
 
 struct _Renderer;
@@ -39,6 +41,8 @@ struct _Window {
 };
 
 typedef struct _Window Window;
+
+extern DoubleList *windows;
 
 extern void window_delete (void *window_ptr);
 

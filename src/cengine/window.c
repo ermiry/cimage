@@ -8,6 +8,8 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/collections/dlist.h"
+
 #include "cengine/renderer.h"
 #include "cengine/window.h"
 #include "cengine/video.h"
@@ -16,6 +18,8 @@
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 #endif
+
+DoubleList *windows = NULL;
 
 int window_get_size (Window *window, WindowSize *window_size);
 
@@ -56,33 +60,36 @@ Window *window_create (const char *title, WindowSize window_size, Uint32 window_
 
     if (title) {
         window = window_new ();
+        if (window) {
+             window->display_index = display_idx;
 
-        window->display_index = display_idx;
+            if (!video_get_display_mode (window->display_index, &window->display_mode)) {
+                u32 width = window_size.width;
+                u32 height = window_size.height;
 
-        if (!video_get_display_mode (window->display_index, &window->display_mode)) {
-            u32 width = window_size.width;
-            u32 height = window_size.height;
+                // cap to maximum display size
+                if (width > window->display_mode.w) width = window->display_mode.w;
+                if (height > window->display_mode.h) height = window->display_mode.h;
 
-            // cap to maximum display size
-            if (width > window->display_mode.w) width = window->display_mode.w;
-            if (height > window->display_mode.h) height = window->display_mode.h;
+                // creates a window of the size of the screen
+                window->window = SDL_CreateWindow (title,
+                    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+                    width, height, window_flags);
 
-            // creates a window of the size of the screen
-            window->window = SDL_CreateWindow (title,
-                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                width, height, window_flags);
+                // sets the actual window size in the correct places
+                window_get_size (window, &window->window_size);
 
-            // sets the actual window size in the correct places
-            window_get_size (window, &window->window_size);
+                window->window_title = title ? str_new (title) : NULL;
+                window->window_flags = window_flags;
+                window->fullscreen = window_flags & SDL_WINDOW_FULLSCREEN;
 
-            window->window_title = title ? str_new (title) : NULL;
-            window->window_flags = window_flags;
-            window->fullscreen = window_flags & SDL_WINDOW_FULLSCREEN;
-        }
+                dlist_insert_after (windows, dlist_end (windows), window);
+            }
 
-        else {
-            window_delete (window);
-            window = NULL;
+            else {
+                window_delete (window);
+                window = NULL;
+            }
         }
     }
 

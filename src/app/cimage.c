@@ -91,7 +91,7 @@ int cimage_init (void) {
 
 int cimage_end (void) {
 
-    surface_delete (icon_surface);
+    // surface_delete (icon_surface);
 
     (void) cengine_end ();
 
