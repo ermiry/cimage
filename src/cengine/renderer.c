@@ -84,7 +84,6 @@ void renderer_delete (void *ptr) {
 
         str_delete (renderer->name);
         str_delete (renderer->window_title);
-        if (renderer->window) SDL_DestroyWindow (renderer->window);
         if (renderer->renderer) SDL_DestroyRenderer (renderer->renderer);
 
         if (renderer->textures_queue) 

@@ -16,6 +16,8 @@
 
 #include "cengine/threads/thread.h"
 
+#include "cengine/window.h"
+
 // auxiliary structure to map the source surface to a texture
 typedef struct SurfaceTexture {
 
