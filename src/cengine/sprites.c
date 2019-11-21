@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "cengine/graphics.h"
 #include "cengine/sprites.h"
 #include "cengine/textures.h"
 

@@ -6,25 +6,12 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/graphics.h"
 #include "cengine/renderer.h"
 #include "cengine/sprites.h"
 
 struct _Sprite;
 struct _SpriteSheet;
-
-// if we can't return a texture, we can at least return some image data
-struct _ImageData {
-
-    u32 w, h;
-    String *filename;
-
-};
-
-typedef struct _ImageData ImageData;
-
-extern ImageData *image_data_new (u32 w, u32 h, String *filename);
-
-extern void image_data_delete (void *img_data_ptr);
 
 // loads an image file into a texture
 // NOTE: uses the renderer to create a new texture from a surface

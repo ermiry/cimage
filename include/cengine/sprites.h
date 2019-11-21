@@ -5,14 +5,13 @@
 
 #include "cengine/types/types.h"
 
-#include "cengine/textures.h"
 #include "cengine/renderer.h"
-
-struct _ImageData;
+#include "cengine/graphics.h"
+#include "cengine/textures.h"
 
 struct _Sprite {
 
-    struct _ImageData *img_data;
+    ImageData *img_data;
 
     u32 w, h;
     SDL_Texture *texture;
