@@ -35,12 +35,12 @@ void ui_layout_group_delete (void *layout_group_ptr) {
 }
 
 // creates a new layout group
-LayoutGroup *ui_layout_group_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
+LayoutGroup *ui_layout_group_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer) {
 
     LayoutGroup *layout_group = ui_layout_group_new ();
     if (layout_group) {
         layout_group->transform = ui_transform_component_create (x, y, w, h);
-        ui_transform_component_set_pos (layout_group->transform, NULL, pos, false);
+        ui_transform_component_set_pos (layout_group->transform, renderer, NULL, pos, false);
         layout_group->elements = dlist_init (ui_transform_component_delete_dummy, NULL);
     }
 

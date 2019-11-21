@@ -80,9 +80,9 @@ void ui_button_delete (void *button_ptr) {
 }
 
 // sets the buttons's UI position
-void ui_button_set_pos (Button *button, UIRect *ref_rect, UIPosition pos) {
+void ui_button_set_pos (Button *button, UIRect *ref_rect, UIPosition pos, Renderer *renderer) {
 
-    if (button) ui_transform_component_set_pos (button->transform, ref_rect, pos, false);
+    if (button) ui_transform_component_set_pos (button->transform, renderer, ref_rect, pos, false);
 
 }
 
@@ -124,7 +124,7 @@ void ui_button_toggle_active (Button *button) {
 }
 
 // sets the button text
-void ui_button_set_text (Button *button, const char *text, 
+void ui_button_set_text (Button *button, Renderer *renderer, const char *text, 
     Font *font, u32 size, RGBA_Color text_color) {
 
     if (button) {
@@ -139,7 +139,7 @@ void ui_button_set_text (Button *button, const char *text,
             button->text->transform->rect.x = button->transform->rect.x;
             button->text->transform->rect.y = button->transform->rect.y;
 
-            ui_text_component_draw (button->text);
+            ui_text_component_draw (button->text, renderer);
         }
     }
 
@@ -150,17 +150,17 @@ void ui_button_set_text_pos (Button *button, UIPosition pos) {
 
     if (button) {
         if (button->text)
-            ui_transform_component_set_pos (button->text->transform, &button->transform->rect, pos, true);
+            ui_transform_component_set_pos (button->text->transform, NULL, &button->transform->rect, pos, true);
     }
 
 }
 
 // sets the button's text color
-void ui_button_set_text_color (Button *button, RGBA_Color color) {
+void ui_button_set_text_color (Button *button, Renderer *renderer, RGBA_Color color) {
 
     if (button) {
         button->text->text_color = color;
-        ui_text_component_draw (button->text);
+        ui_text_component_draw (button->text, renderer);
     }
 
 }
@@ -186,12 +186,12 @@ void ui_button_remove_outline (Button *button) {
 }
 
 // sets the background color of the button
-void ui_button_set_bg_color (Button *button, RGBA_Color color) {
+void ui_button_set_bg_color (Button *button, Renderer *renderer, RGBA_Color color) {
 
     if (button) {
         button->bg_colour = color;
         if (color.a < 255) {
-            button->bg_texture = render_complex_transparent_rect (&button->transform->rect, color);
+            button->bg_texture = render_complex_transparent_rect (renderer, &button->transform->rect, color);
             button->bg_texture_rect.w = button->transform->rect.w;
             button->bg_texture_rect.h = button->transform->rect.h;
         }
@@ -218,10 +218,10 @@ void ui_button_remove_background (Button *button) {
 
 // sets an sprite for each button state
 // the sprite is loaded and deleted when the button gets deleted
-void ui_button_set_sprite (Button *button, ButtonState state, const char *filename) {
+void ui_button_set_sprite (Button *button, Renderer *renderer, ButtonState state, const char *filename) {
 
     if (button && filename) {
-        Sprite *sprite = sprite_load (filename, main_renderer);
+        Sprite *sprite = sprite_load (filename, renderer);
 
         if (sprite) {
             switch (state) {
@@ -288,7 +288,7 @@ void ui_button_set_action (Button *button, Action action, void *args) {
 }
 
 // creates a new button
-Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
+Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer) {
 
     Button *button = NULL;
 
@@ -298,7 +298,7 @@ Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
         if (button) {
             button->ui_element = ui_element;
             button->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (button->transform, NULL, pos, true);
+            ui_transform_component_set_pos (button->transform, renderer, NULL, pos, true);
 
             ui_element->element = button;
         }
@@ -311,22 +311,22 @@ Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 }
 
 // draws a button
-void ui_button_draw (Button *button) {
+void ui_button_draw (Button *button, Renderer *renderer) {
 
-    if (button) {
+    if (button && renderer) {
         // draw the background
          if (button->bg_texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, button->bg_texture, 
+            SDL_RenderCopyEx (renderer->renderer, button->bg_texture, 
                 &button->bg_texture_rect, &button->transform->rect, 
                 0, 0, SDL_FLIP_NONE);
         }
 
         else if (button->colour) 
-            render_basic_filled_rect (&button->transform->rect, button->bg_colour);
+            render_basic_filled_rect (renderer, &button->transform->rect, button->bg_colour);
 
         // render the outline border
         if (button->outline) 
-            render_basic_outline_rect (&button->transform->rect, button->outline_colour);
+            render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour);
 
         Sprite *selected_sprite = NULL;
 
@@ -366,14 +366,14 @@ void ui_button_draw (Button *button) {
             selected_sprite->dest_rect.x = button->transform->rect.x;
             selected_sprite->dest_rect.y = button->transform->rect.y;
 
-            SDL_RenderCopyEx (main_renderer->renderer, selected_sprite->texture, 
+            SDL_RenderCopyEx (renderer->renderer, selected_sprite->texture, 
                 &selected_sprite->src_rect, 
                 &button->transform->rect, 
                 0, 0, NO_FLIP);
         } 
 
         // draw button text
-        ui_text_component_render (button->text);
+        ui_text_component_render (button->text, renderer);
     }
 
 }

@@ -5,6 +5,8 @@
 
 #include <SDL2/SDL_rect.h>
 
+#include "cengine/renderer.h"
+
 typedef enum UIPosition {
 
     UI_POS_FREE = 0,
@@ -22,6 +24,6 @@ typedef enum UIPosition {
 
 } UIPosition;
 
-extern void ui_position_update (void *transform_ptr, SDL_Rect *ref_rect, bool offset);
+extern void ui_position_update (Renderer *renderer, void *transform_ptr, SDL_Rect *ref_rect, bool offset);
 
 #endif

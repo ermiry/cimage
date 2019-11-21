@@ -7,6 +7,8 @@
 
 #include "cengine/types/types.h"
 
+#include "cengine/renderer.h"
+
 /*** Common HEX colors ***/
 
 #define HEX_NO_COLOR        0x00000000
@@ -92,7 +94,7 @@ extern RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a);
 /*** Public ui funcs ***/
 
 // renders all the current active ui to the screen
-extern void ui_render (void);
+extern void ui_render (Renderer *renderer);
 
 // initializes cengine's ui capabilities
 extern u8 ui_init (void);

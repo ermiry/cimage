@@ -56,9 +56,9 @@ void ui_image_delete (void *image_ptr) {
 }
 
 // sets the image's UI position
-void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos) {
+void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos, Renderer *renderer) {
 
-    if (image) ui_transform_component_set_pos (image->transform, ref_rect, pos, false);
+    if (image) ui_transform_component_set_pos (image->transform, renderer, ref_rect, pos, false);
 
 }
 
@@ -87,14 +87,14 @@ void ui_image_set_scale (Image *image, int x_scale, int y_scale) {
 
 // sets the image's sprite to be rendered and loads its
 // returns 0 on success loading sprite, 1 on error
-u8 ui_image_set_sprite (Image *image, const char *filename) {
+u8 ui_image_set_sprite (Image *image, Renderer *renderer, const char *filename) {
 
     u8 retval = 1;
 
-    if (image && filename) {
+    if (image && renderer && filename) {
         if (!image->ref_sprite) sprite_destroy (image->sprite);
 
-        image->sprite = sprite_load (filename, main_renderer);
+        image->sprite = sprite_load (filename, renderer);
         if (image->sprite) {
             image->transform->rect.w = image->sprite->w;
             image->transform->rect.h = image->sprite->h;
@@ -108,14 +108,14 @@ u8 ui_image_set_sprite (Image *image, const char *filename) {
 
 // sets the image's sprite sheet to be rendered and loads it
 // returns 0 on success loading sprite sheet, 1 on error
-u8 ui_image_set_sprite_sheet (Image *image, const char *filename) {
+u8 ui_image_set_sprite_sheet (Image *image, Renderer *renderer, const char *filename) {
 
     u8 retval = 1;
 
-    if (image && filename) {
+    if (image && renderer && filename) {
         if (!image->ref_sprite) sprite_sheet_destroy (image->sprite_sheet);
 
-        image->sprite_sheet = sprite_sheet_load (filename, main_renderer);
+        image->sprite_sheet = sprite_sheet_load (filename, renderer);
         if (image->sprite_sheet) retval = 0;
     }
 
@@ -208,12 +208,12 @@ Image *ui_image_create_static (u32 x, u32 y) {
 }
 
 // manually creates a streaming access texture, usefull for constant updates
-u8 ui_image_create_streaming_texture (Image *image, Uint32 sdl_pixel_format) {
+u8 ui_image_create_streaming_texture (Image *image, Renderer *renderer, Uint32 sdl_pixel_format) {
 
     u8 retval = 1;
 
-    if (image) {
-        image->texture = SDL_CreateTexture (main_renderer->renderer, sdl_pixel_format,
+    if (image && renderer) {
+        image->texture = SDL_CreateTexture (renderer->renderer, sdl_pixel_format,
             SDL_TEXTUREACCESS_STREAMING, image->transform->rect.w, image->transform->rect.h);
         if (image->texture) retval = 0;
     }
@@ -272,18 +272,18 @@ Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h) {
 }
 
 // draws the image to the screen
-void ui_image_draw (Image *image) {
+void ui_image_draw (Image *image, Renderer *renderer) {
 
-    if (image) {
+    if (image && renderer) {
         if (image->texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, image->texture, 
+            SDL_RenderCopyEx (renderer->renderer, image->texture, 
                 NULL, &image->transform->rect, 
                 0, 0, image->flip);
         }
 
         else {
             if (image->sprite) {
-                SDL_RenderCopyEx (main_renderer->renderer, image->sprite->texture, 
+                SDL_RenderCopyEx (renderer->renderer, image->sprite->texture, 
                     &image->sprite->src_rect, &image->transform->rect, 
                     0, 0, image->flip);
             }
@@ -292,7 +292,7 @@ void ui_image_draw (Image *image) {
                 image->sprite_sheet->src_rect.x = image->sprite_sheet->sprite_w * image->x_sprite_offset;
                 image->sprite_sheet->src_rect.y = image->sprite_sheet->sprite_h * image->y_sprite_offset;
 
-                SDL_RenderCopyEx (main_renderer->renderer, image->sprite_sheet->texture, 
+                SDL_RenderCopyEx (renderer->renderer, image->sprite_sheet->texture, 
                     &image->sprite_sheet->src_rect, &image->transform->rect, 
                     0, 0, image->flip);
             }
@@ -300,7 +300,7 @@ void ui_image_draw (Image *image) {
 
         // render the outline border
         if (image->outline) 
-            render_basic_outline_rect (&image->transform->rect, image->outline_colour);
+            render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour);
     }
 
 }

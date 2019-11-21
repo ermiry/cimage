@@ -94,7 +94,7 @@ void ui_text_component_set_wrap (Text *text, u32 wrap_lenght) {
 }
 
 // creates / updates the text texture
-void ui_text_component_draw (Text *text) {
+void ui_text_component_draw (Text *text, Renderer *renderer) {
 
     if (text) {
         if (text->texture) {
@@ -117,7 +117,7 @@ void ui_text_component_draw (Text *text) {
 
             text->transform->rect.w = surface->w;
             text->transform->rect.h = surface->h;
-            text->texture = SDL_CreateTextureFromSurface (main_renderer->renderer, surface);
+            text->texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
 
             SDL_FreeSurface (surface);
         }
@@ -126,11 +126,11 @@ void ui_text_component_draw (Text *text) {
 }
 
 // renders the text component to the screen
-void ui_text_component_render (Text *text) {
+void ui_text_component_render (Text *text, Renderer *renderer) {
 
     if (text) {
         if (text->texture) {
-            SDL_RenderCopy (main_renderer->renderer, text->texture, 
+            SDL_RenderCopy (renderer->renderer, text->texture, 
                 NULL, &text->transform->rect);
         }
     }

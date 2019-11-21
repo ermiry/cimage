@@ -209,13 +209,15 @@ static void cengine_run (void) {
             if (main_fps_text) {
                 char *text = c_string_create ("main: %d", main_fps);
                 if (text) {
-                    ui_textbox_update_text (main_fps_text, text);
+                    // FIXME:
+                    // ui_textbox_update_text (main_fps_text, text);
                     free (text);
                 }   
             }
 
             if (update_fps_text) {
-                ui_textbox_update_text (update_fps_text, update_text);
+                // FIXME:
+                // ui_textbox_update_text (update_fps_text, renderer, update_text);
             } 
             
             delta_ticks = 0;

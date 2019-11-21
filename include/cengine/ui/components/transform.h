@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "cengine/renderer.h"
+
 #include "cengine/ui/ui.h"
 #include "cengine/ui/position.h"
 
@@ -22,7 +24,7 @@ extern void ui_transform_component_delete (void *transform_ptr);
 
 extern void ui_transform_component_delete_dummy (void *transform_ptr);
 
-extern void ui_transform_component_set_pos (UITransform *transform, UIRect *ref_rect, UIPosition pos, bool offset);
+extern void ui_transform_component_set_pos (UITransform *transform, Renderer *renderer, UIRect *ref_rect, UIPosition pos, bool offset);
 
 extern void ui_transform_component_set_values (UITransform *transform,
     int x, int y, int w, int h);

@@ -65,7 +65,7 @@ void texture_get_dimensions (SDL_Texture *texture, u32 *w, u32 *h) {
 
 }
 
-void texture_draw (Camera *cam, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip) {
+void texture_draw (Camera *cam, Renderer *renderer, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip) {
 
     if (cam && sprite) {
         sprite->dest_rect.x = x;
@@ -73,13 +73,13 @@ void texture_draw (Camera *cam, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip f
 
         CamRect screenRect = camera_world_to_screen (cam, sprite->dest_rect);
 
-        SDL_RenderCopyEx (main_renderer->renderer, sprite->texture, &sprite->src_rect, &screenRect, 
+        SDL_RenderCopyEx (renderer->renderer, sprite->texture, &sprite->src_rect, &screenRect, 
             0, 0, flip);    
     }
 
 }
 
-void texture_draw_frame (Camera *cam, SpriteSheet *spriteSheet, 
+void texture_draw_frame (Camera *cam, Renderer *renderer, SpriteSheet *spriteSheet, 
     i32 x, i32 y, u32 col, u32 row, SDL_RendererFlip flip) {
 
     if (cam && spriteSheet) {
@@ -91,7 +91,7 @@ void texture_draw_frame (Camera *cam, SpriteSheet *spriteSheet,
 
         CamRect screenRect = camera_world_to_screen (cam, spriteSheet->dest_rect);
 
-        SDL_RenderCopyEx (main_renderer->renderer, spriteSheet->texture, 
+        SDL_RenderCopyEx (renderer->renderer, spriteSheet->texture, 
             &spriteSheet->src_rect, &screenRect,
             0, 0, flip);
     }

@@ -39,13 +39,13 @@ void ui_panel_delete (void *panel_ptr) {
 }
 
 // sets the background colour of the panel
-void ui_panel_set_bg_colour (Panel *panel, RGBA_Color colour) {
+void ui_panel_set_bg_colour (Panel *panel, Renderer *renderer, RGBA_Color colour) {
 
     if (panel) {
         panel->colour = true;
         panel->bg_colour = colour;
         if (colour.a < 255) {
-            panel->bg_texture = render_complex_transparent_rect (&panel->transform->rect, colour);
+            panel->bg_texture = render_complex_transparent_rect (renderer, &panel->transform->rect, colour);
             panel->bg_texture_rect.w = panel->transform->rect.w;
             panel->bg_texture_rect.h = panel->transform->rect.h;
         }
@@ -90,7 +90,7 @@ void ui_panel_remove_outline (Panel *panel) {
 
 // creates a new panel
 // x and y for position
-Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
+Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer) {
 
     Panel *panel = NULL;
 
@@ -100,7 +100,7 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
         if (panel) {
             panel->ui_element = ui_element;
             panel->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (panel->transform, NULL, pos, true);
+            ui_transform_component_set_pos (panel->transform, renderer, NULL, pos, true);
 
             ui_element->element = panel;
         }
@@ -111,23 +111,25 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 }
 
 // draws the panel to the screen
-void ui_panel_draw (Panel *panel) {
+void ui_panel_draw (Panel *panel, Renderer *renderer) {
 
-    // render the background
-    if (panel->colour) {
-        if (panel->bg_texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, panel->bg_texture, 
-                &panel->bg_texture_rect, &panel->transform->rect, 
-                0, 0, SDL_FLIP_NONE);
+    if (panel && renderer) {
+        // render the background
+        if (panel->colour) {
+            if (panel->bg_texture) {
+                SDL_RenderCopyEx (renderer->renderer, panel->bg_texture, 
+                    &panel->bg_texture_rect, &panel->transform->rect, 
+                    0, 0, SDL_FLIP_NONE);
+            }
+
+            else {
+                render_basic_filled_rect (renderer, &panel->transform->rect, panel->bg_colour);
+            }
         }
 
-        else {
-            render_basic_filled_rect (&panel->transform->rect, panel->bg_colour);
-        }
+        // render the outline
+        if (panel->outline) 
+            render_basic_outline_rect (renderer, &panel->transform->rect, panel->outline_colour);
     }
-
-    // render the outline
-    if (panel->outline) 
-        render_basic_outline_rect (&panel->transform->rect, panel->outline_colour);
 
 }

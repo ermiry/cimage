@@ -193,7 +193,8 @@ static void input_key_down (SDL_Event event) {
             else
                 str_remove_last_char (active_text->text->text);
 
-            ui_input_field_update (active_text);
+            // FIXME:
+            // ui_input_field_update (active_text);
         }
     }
 
@@ -213,7 +214,8 @@ static void input_key_down (SDL_Event event) {
             else
                 str_append_c_string (active_text->text->text, SDL_GetClipboardText ());
             
-            ui_input_field_update (active_text);
+            // FIXME:
+            // ui_input_field_update (active_text);
         }
     }
 
@@ -295,7 +297,8 @@ static void input_handle_text_input (SDL_Event event) {
                 else 
                     str_append_c_string (active_text->text->text, event.text.text);
 
-                ui_input_field_update (active_text);
+                // FIXME:
+                // ui_input_field_update (active_text);
 
                 // printf ("%s\n", active_text->text->str);
             }
@@ -304,6 +307,7 @@ static void input_handle_text_input (SDL_Event event) {
 
 }
 
+// FIXME: how do we handle input and render in diffrent windows?
 void input_handle (SDL_Event event) {
 
     while (SDL_PollEvent (&event)) {

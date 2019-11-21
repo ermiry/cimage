@@ -119,7 +119,7 @@ u8 ui_layout_grid_add_element (GridLayout *grid, UIElement *ui_element) {
                 .y = (grid->transform->rect.y + (grid->cell_height * grid->next_y)),
                 .w = grid->cell_width, .h = grid->cell_height };
             // printf ("x: %d - y: %d - w: %d - h: %d\n", cell.x, cell.y, cell.w, cell.h);
-            ui_transform_component_set_pos (image->transform, &cell, UI_POS_MIDDLE_CENTER, false);
+            ui_transform_component_set_pos (image->transform, NULL, &cell, UI_POS_MIDDLE_CENTER, false);
 
             grid->curr_n_ui_elements += 1;
 

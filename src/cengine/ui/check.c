@@ -53,9 +53,9 @@ Check *ui_check_create (u32 x, u32 y) {
 }
 
 // draws the check to the screen
-void ui_check_draw (Check *check) {
+void ui_check_draw (Check *check, Renderer *renderer) {
 
-    if (check) {
+    if (check && renderer) {
         
     }
 

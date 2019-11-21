@@ -322,7 +322,7 @@ u8 ui_default_assets_load (void) {
 #pragma region render
 
 // render the ui elements to the screen
-void ui_render (void) {
+void ui_render (Renderer *renderer) {
 
     Layer *layer = NULL;
     UIElement *ui_element = NULL;
@@ -334,14 +334,14 @@ void ui_render (void) {
 
             if (ui_element->active) {
                 switch (ui_element->type) {
-                    case UI_TEXTBOX: ui_textbox_draw ((TextBox *) ui_element->element); break;
-                    case UI_IMAGE: ui_image_draw ((Image *) ui_element->element); break;
-                    case UI_PANEL: ui_panel_draw ((Panel *) ui_element->element); break;
-                    case UI_BUTTON: ui_button_draw ((Button *) ui_element->element); break;
-                    case UI_INPUT: ui_input_field_draw ((InputField *) ui_element->element); break;
-                    case UI_CHECK: ui_check_draw ((Check *) ui_element->element); break;
-                    case UI_NOTI_CENTER: ui_noti_center_draw ((NotiCenter *) ui_element->element); break;
-                    case UI_DROPDOWN: ui_dropdown_render ((Dropdown *) ui_element->element); break;
+                    case UI_TEXTBOX: ui_textbox_draw ((TextBox *) ui_element->element, renderer); break;
+                    case UI_IMAGE: ui_image_draw ((Image *) ui_element->element, renderer); break;
+                    case UI_PANEL: ui_panel_draw ((Panel *) ui_element->element, renderer); break;
+                    case UI_BUTTON: ui_button_draw ((Button *) ui_element->element, renderer); break;
+                    case UI_INPUT: ui_input_field_draw ((InputField *) ui_element->element, renderer); break;
+                    case UI_CHECK: ui_check_draw ((Check *) ui_element->element, renderer); break;
+                    case UI_NOTI_CENTER: ui_noti_center_draw ((NotiCenter *) ui_element->element, renderer); break;
+                    case UI_DROPDOWN: ui_dropdown_render ((Dropdown *) ui_element->element, renderer); break;
 
                     default: break;
                 }
@@ -350,7 +350,7 @@ void ui_render (void) {
     }
 
     // render the cursor on top of everything
-    ui_cursor_draw (main_cursor);
+    ui_cursor_draw (main_cursor, renderer);
 
 }
 

@@ -115,11 +115,11 @@ extern Notification *ui_notification_create (NotificationType type, float lifeti
 
 // adds the notification to the notification center where you want to display it
 // and displays the notification for x seconds (lifetime)
-extern void ui_notification_display (struct _NotiCenter *noti_center, Notification *notification);
+extern void ui_notification_display (struct _NotiCenter *noti_center, Notification *notification, Renderer *renderer);
 
 // creates the notification with the passed values and default options by notification type
 // and then displays it in the notification center
-extern void ui_notification_create_and_display (struct _NotiCenter *noti_center, NotificationType type, 
+extern void ui_notification_create_and_display (struct _NotiCenter *noti_center, Renderer *renderer, NotificationType type, 
     float lifetime, bool display_timestamp,
     const char *title, const char *msg);
 
@@ -158,7 +158,7 @@ extern void ui_noti_center_delete (void *noti_center_ptr);
 // creates a new notification center
 // max_display: max number of notifications to display at once
 // position: where do you want the notification center to be
-extern NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos);
+extern NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos, Renderer *renderer);
 
 // sets the notification center position in the screen
 extern void ui_noti_center_set_position (NotiCenter *noti_center, UIPosition pos);
@@ -173,12 +173,12 @@ extern void ui_noti_center_set_ouline_colour (NotiCenter *noti_center, RGBA_Colo
 extern void ui_noti_center_remove_outline (NotiCenter *noti_center);
 
 // sets the notification center background color
-extern void ui_noti_center_set_bg_color (NotiCenter *noti_center, RGBA_Color color);
+extern void ui_noti_center_set_bg_color (NotiCenter *noti_center, Renderer *renderer, RGBA_Color color);
 
 // removes the background from the noticenter
 extern void ui_noti_center_remove_background (NotiCenter *noti_center);
 
  // draws the notification center
-extern void ui_noti_center_draw (NotiCenter *noti_center);
+extern void ui_noti_center_draw (NotiCenter *noti_center, Renderer *renderer);
 
 #endif

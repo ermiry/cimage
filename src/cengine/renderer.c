@@ -220,6 +220,8 @@ Renderer *renderer_create_empty (const char *name, int display_idx) {
             renderer_delete (renderer);
             renderer = NULL;
         }
+
+        dlist_insert_after (renderers, dlist_end (renderers), renderer);
     }
 
     return renderer;
@@ -669,14 +671,18 @@ void render (Renderer *renderer) {
                 graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
                 if (transform && graphics) {
                     if (graphics->multipleSprites) {
-                        texture_draw_frame (main_camera, graphics->spriteSheet, 
+                        texture_draw_frame (main_camera, 
+                            renderer,
+                            graphics->spriteSheet, 
                             transform->position.x, transform->position.y, 
                             graphics->x_sprite_offset, graphics->y_sprite_offset,
                             graphics->flip);
                     }
                     
                     else {
-                        texture_draw (main_camera, graphics->sprite, 
+                        texture_draw (main_camera, 
+                            renderer,
+                            graphics->sprite, 
                             transform->position.x, transform->position.y, 
                             graphics->flip);
                     }
@@ -684,7 +690,7 @@ void render (Renderer *renderer) {
             }
         }
 
-        ui_render ();       // render ui elements
+        ui_render (renderer);       // render ui elements
 
         SDL_RenderPresent (renderer->renderer);
     }

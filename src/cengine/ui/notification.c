@@ -335,7 +335,7 @@ static void ui_notification_update_pos (Notification *noti) {
 }
 
 // prepare the notification to be displayed in an upper notification center
-static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification *noti) {
+static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification *noti, Renderer *renderer) {
 
     if (noti) {
         // prepare notification layout
@@ -345,7 +345,7 @@ static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification
 
         if (noti->timestamp_text) {
             ui_text_component_set_wrap (noti->timestamp_text, noti->transform->rect.w);
-            ui_text_component_draw (noti->timestamp_text);
+            ui_text_component_draw (noti->timestamp_text, renderer);
 
             noti->timestamp_text->transform->rect.x = noti->transform->rect.x;
             noti->timestamp_text->transform->rect.y = noti->transform->rect.y;
@@ -355,7 +355,7 @@ static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification
 
         if (noti->title) {
             ui_text_component_set_wrap (noti->title, noti->transform->rect.w);
-            ui_text_component_draw (noti->title);
+            ui_text_component_draw (noti->title, renderer);
 
             noti->title->transform->rect.x = noti->transform->rect.x;
             noti->title->transform->rect.y = noti->timestamp_text ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
@@ -365,7 +365,7 @@ static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification
 
         if (noti->msg) {
             ui_text_component_set_wrap (noti->msg, noti->transform->rect.w);
-            ui_text_component_draw (noti->msg);
+            ui_text_component_draw (noti->msg, renderer);
 
             noti->msg->transform->rect.x = noti->transform->rect.x;
             noti->msg->transform->rect.y = noti->title ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
@@ -377,7 +377,7 @@ static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification
 }
 
 // prepare the notification to be displayed in a bottom notification center
-static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notification *noti) {
+static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notification *noti, Renderer *renderer) {
 
     if (noti) {
         // prepare notification layout
@@ -388,7 +388,7 @@ static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notificatio
 
         if (noti->timestamp_text) {
             ui_text_component_set_wrap (noti->timestamp_text, noti->transform->rect.w);
-            ui_text_component_draw (noti->timestamp_text);
+            ui_text_component_draw (noti->timestamp_text, renderer);
 
             noti->timestamp_text->transform->rect.x = noti->transform->rect.x;
             noti->timestamp_text->transform->rect.y = noti->transform->rect.y + 5;
@@ -398,7 +398,7 @@ static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notificatio
 
         if (noti->title) {
             ui_text_component_set_wrap (noti->title, noti->transform->rect.w);
-            ui_text_component_draw (noti->title);
+            ui_text_component_draw (noti->title, renderer);
 
             noti->title->transform->rect.x = noti->transform->rect.x;
             noti->title->transform->rect.y = noti->timestamp_text ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
@@ -408,7 +408,7 @@ static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notificatio
 
         if (noti->msg) {
             ui_text_component_set_wrap (noti->msg, noti->transform->rect.w);
-            ui_text_component_draw (noti->msg);
+            ui_text_component_draw (noti->msg, renderer);
 
             noti->msg->transform->rect.x = noti->transform->rect.x;
             noti->msg->transform->rect.y = noti->title ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
@@ -421,11 +421,11 @@ static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notificatio
 
 // adds the notification to the notification center where you want to display it
 // and displays the notification for x seconds (lifetime)
-void ui_notification_display (NotiCenter *noti_center, Notification *notification) {
+void ui_notification_display (NotiCenter *noti_center, Notification *notification, Renderer *renderer) {
 
     if (noti_center && notification) {
         // prepare the notification to be displayed in the notification center
-        noti_center->bottom ? ui_notification_prepare_bottom (noti_center, notification) : ui_notification_prepare_upper (noti_center, notification);
+        noti_center->bottom ? ui_notification_prepare_bottom (noti_center, notification, renderer) : ui_notification_prepare_upper (noti_center, notification, renderer);
 
         // add the notification to the notification center for display
         dlist_insert_after (noti_center->notifications, dlist_end (noti_center->notifications), notification);
@@ -435,27 +435,27 @@ void ui_notification_display (NotiCenter *noti_center, Notification *notificatio
 
 // creates the notification with the passed values and default options by notification type
 // and then displays it in the notification center
-void ui_notification_create_and_display (NotiCenter *noti_center, NotificationType type, 
+void ui_notification_create_and_display (NotiCenter *noti_center, Renderer *renderer, NotificationType type, 
     float lifetime, bool display_timestamp,
     const char *title, const char *msg) {
 
     if (noti_center) {
         // create the notification
         Notification *noti = ui_notification_create (type, lifetime, display_timestamp, title, msg);
-        if (noti) ui_notification_display (noti_center, noti);
+        if (noti) ui_notification_display (noti_center, noti, renderer);
     }
 
 }
 
 // draws the notification to the screen
-static void ui_notification_draw (Notification *noti) {
+static void ui_notification_draw (Notification *noti, Renderer *renderer) {
 
     if (noti) {
-        render_basic_filled_rect (&noti->transform->rect, noti->bgcolor);
+        render_basic_filled_rect (renderer, &noti->transform->rect, noti->bgcolor);
 
-        if (noti->timestamp) ui_text_component_render (noti->timestamp_text);
-        if (noti->title) ui_text_component_render (noti->title);
-        if (noti->msg) ui_text_component_render (noti->msg);
+        if (noti->timestamp) ui_text_component_render (noti->timestamp_text, renderer);
+        if (noti->title) ui_text_component_render (noti->title, renderer);
+        if (noti->msg) ui_text_component_render (noti->msg, renderer);
     }
 
 }
@@ -526,7 +526,7 @@ static void ui_noti_center_update_pos (NotiCenter *noti_center) {
 // creates a new notification center
 // max_display: max number of notifications to display at once
 // position: where do you want the notification center to be
-NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos) {
+NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos, Renderer *renderer) {
 
     NotiCenter *noti_center = NULL;
 
@@ -539,7 +539,7 @@ NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos) {
             noti_center->max_display = max_display;
             noti_center->transform = ui_transform_component_create (0, 0, 
                 NOTI_CENTER_DEFAULT_WIDTH, NOTI_CENTER_DEFAULT_HEIGHT);
-            ui_transform_component_set_pos (noti_center->transform, NULL, pos, true);
+            ui_transform_component_set_pos (noti_center->transform, renderer, NULL, pos, true);
 
             // adjust noti center postion values
             ui_noti_center_update_pos (noti_center);
@@ -599,12 +599,12 @@ void ui_noti_center_remove_outline (NotiCenter *noti_center) {
 }
 
 // sets the notification center background color
-void ui_noti_center_set_bg_color (NotiCenter *noti_center, RGBA_Color color) {
+void ui_noti_center_set_bg_color (NotiCenter *noti_center, Renderer *renderer, RGBA_Color color) {
 
     if (noti_center) {
         noti_center->bg_colour = color;
         if (color.a < 255) {
-            noti_center->bg_texture = render_complex_transparent_rect (&noti_center->transform->rect, color);
+            noti_center->bg_texture = render_complex_transparent_rect (renderer, &noti_center->transform->rect, color);
             noti_center->bg_texture_rect.w = noti_center->transform->rect.w;
             noti_center->bg_texture_rect.h = noti_center->transform->rect.h;
         }
@@ -630,22 +630,22 @@ void ui_noti_center_remove_background (NotiCenter *noti_center) {
 }
 
 // draws the notification center
-void ui_noti_center_draw (NotiCenter *noti_center) {
+void ui_noti_center_draw (NotiCenter *noti_center, Renderer *renderer) {
 
-    if (noti_center) {
+    if (noti_center && renderer) {
         // render the background
         if (noti_center->bg_texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, noti_center->bg_texture, 
+            SDL_RenderCopyEx (renderer->renderer, noti_center->bg_texture, 
                 &noti_center->bg_texture_rect, &noti_center->transform->rect, 
                 0, 0, SDL_FLIP_NONE);
         }
 
         else if (noti_center->colour) 
-            render_basic_filled_rect (&noti_center->transform->rect, noti_center->bg_colour);
+            render_basic_filled_rect (renderer, &noti_center->transform->rect, noti_center->bg_colour);
 
         // render the outline border
         if (noti_center->outline) 
-            render_basic_outline_rect (&noti_center->transform->rect, noti_center->outline_colour);
+            render_basic_outline_rect (renderer, &noti_center->transform->rect, noti_center->outline_colour);
 
         if (noti_center->active_notifications->size < noti_center->max_display) {
             if (noti_center->notifications->size > 0) {
@@ -696,7 +696,7 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                 if (noti_center->bottom) offset -= noti->transform->rect.h;
                 else offset += noti->transform->rect.h;
 
-                ui_notification_draw (noti);
+                ui_notification_draw (noti, renderer);
 
                 // check for lifetime
                 if ((timer_get_ticks (noti->life) / 1000) >= noti->lifetime) {

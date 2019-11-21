@@ -8,7 +8,10 @@
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
+
 #include "cengine/collections/dlist.h"
+
+#include "cengine/renderer.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
@@ -46,11 +49,11 @@ extern int ui_dropdown_option_comparator (const void *one, const void *two);
 
 // creates a new dropdown option to be added to a dropdown
 // options to pass text modifiers
-extern DropdownOption *ui_dropdown_option_create (const char *option_text,
+extern DropdownOption *ui_dropdown_option_create (Renderer *renderer, const char *option_text,
     Font *font, u32 size, RGBA_Color color);
 
 // sets the option's text for the dropdown option element
-extern void ui_dropdown_option_set_text (DropdownOption *option, const char *option_text,
+extern void ui_dropdown_option_set_text (DropdownOption *option, Renderer *renderer, const char *option_text,
     Font *font, u32 size, RGBA_Color color);
 
 // sets the option's outline colour
@@ -60,7 +63,7 @@ extern void ui_dropdown_option_set_ouline_colour (DropdownOption *option, RGBA_C
 extern void ui_dropdown_option_remove_outline (DropdownOption *option);
 
 // sets the option's background color
-extern void ui_dropdown_option_set_bg_color (DropdownOption *option, RGBA_Color color);
+extern void ui_dropdown_option_set_bg_color (DropdownOption *option, Renderer *renderer, RGBA_Color color);
 
 // removes the background from the option
 extern void ui_dropdown_option_remove_background (DropdownOption *option);
@@ -104,7 +107,7 @@ typedef struct Dropdown {
 extern void ui_dropdown_delete (void *dropdown_ptr);
 
 // creates a new dropdown menu
-extern Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
+extern Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
 // sets the main options for the dropdown (this is required to correctly create the dropdown)
 // x, y: set the position of the dropdown's extended panel
@@ -125,23 +128,23 @@ extern void ui_dropdown_set_ouline_colour (Dropdown *dropdown, RGBA_Color colour
 extern void ui_dropdown_remove_outline (Dropdown *dropdown);
 
 // sets the dropdown's background color
-extern void ui_dropdown_set_bg_color (Dropdown *dropdown, RGBA_Color color);
+extern void ui_dropdown_set_bg_color (Dropdown *dropdown, Renderer *renderer, RGBA_Color color);
 
 // removes the background from the dropdown
 extern void ui_dropdown_remove_background (Dropdown *dropdown);
 
 // sets the dropdown's placeholder text
-extern void ui_dropdown_set_placeholder (Dropdown *dropdown,
+extern void ui_dropdown_set_placeholder (Dropdown *dropdown, Renderer *renderer,
     const char *text, Font *font, u32 size, RGBA_Color colour);
 
 // sets the dropdown's placeholder position
-extern void ui_dropdown_set_placeholder_pos (Dropdown *dropdown, UIPosition pos);
+extern void ui_dropdown_set_placeholder_pos (Dropdown *dropdown, Renderer *renderer, UIPosition pos);
 
 // sets the dropdown's extened panel colour
-extern void ui_dropdown_extened_set_bg_colour (Dropdown *dropdown, RGBA_Color colour);
+extern void ui_dropdown_extened_set_bg_colour (Dropdown *dropdown, Renderer *renderer, RGBA_Color colour);
 
 // adds a new dropdown option to the dropdown
-extern void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option);
+extern void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option, Renderer *renderer);
 
 // removes a dropdown option from the dropdown
 extern void ui_dropdown_option_remove (Dropdown *dropdown, DropdownOption *option);
@@ -151,9 +154,9 @@ extern String *ui_dropdown_option_selected (Dropdown *dropdown);
 
 // sets the hovering colour for the dropdown options
 // IMPORTANT: set the colour after you have added all the options to the dropdwon!
-extern void ui_dropdown_option_set_hover_color (Dropdown *dropdown, RGBA_Color color);
+extern void ui_dropdown_option_set_hover_color (Dropdown *dropdown, Renderer *renderer, RGBA_Color color);
 
 // render the dropdown to the screen
-extern void ui_dropdown_render (Dropdown *dropdown);
+extern void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer);
 
 #endif

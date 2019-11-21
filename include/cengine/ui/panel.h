@@ -6,6 +6,8 @@
 
 #include "cengine/types/types.h"
 
+#include "cengine/renderer.h"
+
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
 
@@ -29,7 +31,7 @@ typedef struct Panel {
 extern void ui_panel_delete (void *panel_ptr);
 
 // sets the background colour of the panel
-extern void ui_panel_set_bg_colour (Panel *panel, RGBA_Color colour);
+extern void ui_panel_set_bg_colour (Panel *panel, Renderer *renderer, RGBA_Color colour);
 
 // removes the background from the panel
 extern void ui_panel_remove_background (Panel *panel);
@@ -42,9 +44,9 @@ extern void ui_panel_remove_outline (Panel *panel);
 
 // creates a new panel
 // x and y for position
-extern Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
+extern Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
 // draws the panel to the screen
-extern void ui_panel_draw (Panel *panel);
+extern void ui_panel_draw (Panel *panel, Renderer *renderer);
 
 #endif

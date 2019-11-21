@@ -38,20 +38,20 @@ extern void ui_textbox_delete (void *textbox_ptr);
 extern String *ui_textbox_get_text (TextBox *textbox);
 
 // sets the textbox's text
-extern void ui_textbox_set_text (TextBox *textbox, const char *text, 
+extern void ui_textbox_set_text (TextBox *textbox, Renderer *renderer, const char *text, 
     Font *font, u32 size, RGBA_Color color, bool adjust_to_text);
 
 // updates the textbox's text
-extern void ui_textbox_update_text (TextBox *textbox, const char *text);
+extern void ui_textbox_update_text (TextBox *textbox, Renderer *renderer, const char *text);
 
 // sets the textbox's text position
 extern void ui_textbox_set_text_pos (TextBox *textbox, UIPosition pos);
 
 // sets the textbox font
-extern void ui_textbox_set_font (TextBox *textbox, Font *font);
+extern void ui_textbox_set_font (TextBox *textbox, Renderer *renderer, Font *font);
 
 // sets the textbox's text color
-extern void ui_textbox_set_text_color (TextBox *textbox, RGBA_Color color);
+extern void ui_textbox_set_text_color (TextBox *textbox, Renderer *renderer, RGBA_Color color);
 
 // sets the textbox's outline colour
 extern void ui_textbox_set_ouline_colour (TextBox *textbox, RGBA_Color colour);
@@ -60,15 +60,15 @@ extern void ui_textbox_set_ouline_colour (TextBox *textbox, RGBA_Color colour);
 extern void ui_textbox_remove_outline (TextBox *textbox);
 
 // sets the textbox's background color
-extern void ui_textbox_set_bg_color (TextBox *textbox, RGBA_Color color);
+extern void ui_textbox_set_bg_color (TextBox *textbox, Renderer *renderer, RGBA_Color color);
 
 // removes the background from the textbox
 extern void ui_textbox_remove_background (TextBox *textbox);
 
 // creates a new textbox
-extern TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
+extern TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
 // draws the textbox
-extern void ui_textbox_draw (TextBox *textbox);
+extern void ui_textbox_draw (TextBox *textbox, Renderer *renderer);
 
 #endif

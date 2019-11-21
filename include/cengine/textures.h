@@ -31,8 +31,9 @@ extern void texture_get_dimensions (SDL_Texture *texture, u32 *w, u32 *h);
 
 #include "cengine/game/camera.h"
 
-extern void texture_draw (Camera *cam, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip);
-extern void texture_draw_frame (Camera *cam, SpriteSheet *spriteSheet, 
+extern void texture_draw (Camera *cam, Renderer *renderer, Sprite *sprite, i32 x, i32 y, SDL_RendererFlip flip);
+
+extern void texture_draw_frame (Camera *cam, Renderer *renderer, SpriteSheet *spriteSheet, 
     i32 x, i32 y, u32 col, u32 row, SDL_RendererFlip flip);
 
 #endif

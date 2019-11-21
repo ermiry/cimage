@@ -21,7 +21,7 @@
 #include "cengine/ui/components/text.h"
 #include "cengine/ui/components/layout.h"
 
-void ui_dropdown_option_set_text (DropdownOption *option, const char *option_text,
+void ui_dropdown_option_set_text (DropdownOption *option, Renderer *renderer, const char *option_text,
     Font *font, u32 size, RGBA_Color color);
 
 #pragma region Dropdown Option
@@ -71,13 +71,13 @@ int ui_dropdown_option_comparator (const void *one, const void *two) {
 
 // creates a new dropdown option to be added to a dropdown
 // options to pass text modifiers
-DropdownOption *ui_dropdown_option_create (const char *option_text,
+DropdownOption *ui_dropdown_option_create (Renderer *renderer, const char *option_text,
     Font *font, u32 size, RGBA_Color color) {
 
     DropdownOption *option = ui_dropdown_option_new ();
     if (option) {
         option->transform = ui_transform_component_create (0, 0, 0, 0);
-        ui_dropdown_option_set_text (option, option_text, font, size, color);
+        ui_dropdown_option_set_text (option, renderer, option_text, font, size, color);
     }
 
     return option;
@@ -85,7 +85,7 @@ DropdownOption *ui_dropdown_option_create (const char *option_text,
 }
 
 // sets the option's text for the dropdown option element
-void ui_dropdown_option_set_text (DropdownOption *option, const char *option_text,
+void ui_dropdown_option_set_text (DropdownOption *option, Renderer *renderer, const char *option_text,
     Font *font, u32 size, RGBA_Color color) {
 
     if (option) {
@@ -99,7 +99,7 @@ void ui_dropdown_option_set_text (DropdownOption *option, const char *option_tex
             option->option->transform->rect.x = option->transform->rect.x;
             option->option->transform->rect.y = option->transform->rect.y;
 
-            ui_text_component_draw (option->option);
+            ui_text_component_draw (option->option, renderer);
         }
     }
 
@@ -126,12 +126,12 @@ void ui_dropdown_option_remove_outline (DropdownOption *option) {
 }
 
 // sets the option's background color
-void ui_dropdown_option_set_bg_color (DropdownOption *option, RGBA_Color color) {
+void ui_dropdown_option_set_bg_color (DropdownOption *option, Renderer *renderer, RGBA_Color color) {
 
     if (option) {
         option->bg_colour = color;
         if (color.a < 255) {
-            option->bg_texture = render_complex_transparent_rect (&option->transform->rect, color);
+            option->bg_texture = render_complex_transparent_rect (renderer, &option->transform->rect, color);
             option->bg_texture_rect.w = option->transform->rect.w;
             option->bg_texture_rect.h = option->transform->rect.h;
         }
@@ -156,34 +156,34 @@ void ui_dropdown_option_remove_background (DropdownOption *option) {
 
 }
 
-static void ui_dropdown_option_render (DropdownOption *option, 
+static void ui_dropdown_option_render (DropdownOption *option, Renderer *renderer,
     RGBA_Color *colour, SDL_Texture *texture) {
 
     if (option) {
         // render hover background
         if (texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, texture, 
+            SDL_RenderCopyEx (renderer->renderer, texture, 
                 &option->bg_texture_rect, &option->transform->rect, 
                 0, 0, SDL_FLIP_NONE);
         }
 
-        else if (colour) render_basic_filled_rect (&option->transform->rect, *colour);
+        else if (colour) render_basic_filled_rect (renderer, &option->transform->rect, *colour);
 
         // render the normal background
         else if (option->bg_texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, option->bg_texture, 
+            SDL_RenderCopyEx (renderer->renderer, option->bg_texture, 
                 &option->bg_texture_rect, &option->transform->rect, 
                 0, 0, SDL_FLIP_NONE);
         }
 
-        else if (option->colour) render_basic_filled_rect (&option->transform->rect, option->bg_colour);
+        else if (option->colour) render_basic_filled_rect (renderer, &option->transform->rect, option->bg_colour);
 
         // render the outline rect
         if (option->outline) 
-            render_basic_outline_rect (&option->transform->rect, option->outline_colour);
+            render_basic_outline_rect (renderer, &option->transform->rect, option->outline_colour);
 
         // render the option's text
-        ui_text_component_render (option->option);
+        ui_text_component_render (option->option, renderer);
     }
 
 }
@@ -243,7 +243,7 @@ void ui_dropdown_delete (void *dropdown_ptr) {
 }
 
 // creates a new dropdown menu
-Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
+Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer) {
 
     Dropdown *dropdown = NULL;
 
@@ -253,7 +253,7 @@ Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
         if (dropdown) {
             dropdown->ui_element = ui_element;
             dropdown->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (dropdown->transform, NULL, pos, true);
+            ui_transform_component_set_pos (dropdown->transform, renderer, NULL, pos, true);
 
             ui_element->element = dropdown;
         }
@@ -276,17 +276,18 @@ void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
         dropdown->options = dlist_init (ui_dropdown_option_delete, ui_dropdown_option_comparator);
 
         // create the extened panel 
-        dropdown->extended_panel = ui_panel_create (x, y, options_width, options_max_height, UI_POS_FREE);
-        ui_transform_component_set_pos (dropdown->extended_panel->transform, &dropdown->transform->rect, pos, false);
+        dropdown->extended_panel = ui_panel_create (x, y, options_width, options_max_height, UI_POS_FREE, NULL);
+        ui_transform_component_set_pos (dropdown->extended_panel->transform, NULL, &dropdown->transform->rect, pos, false);
         dropdown->extended_panel->transform->rect.y += options_max_height;
         dropdown->extended_panel->transform->rect.x += x;
         dropdown->extended_panel->transform->rect.y += y;
         dropdown->extended_panel->ui_element->active = false;
 
         // the layout group contains the transforms of the options that render on top of the extended panel
-        dropdown->layout = ui_layout_group_create (x, y, 
-            options_width, options_max_height, UI_POS_FREE);
-        ui_transform_component_set_pos (dropdown->layout->transform, &dropdown->transform->rect, pos, false);
+        dropdown->layout = ui_layout_group_create (x, y,
+            options_width, options_max_height, UI_POS_FREE, 
+            NULL);
+        ui_transform_component_set_pos (dropdown->layout->transform, NULL, &dropdown->transform->rect, pos, false);
         dropdown->layout->transform->rect.y += options_max_height;
     }
 
@@ -333,12 +334,12 @@ void ui_dropdown_remove_outline (Dropdown *dropdown) {
 }
 
 // sets the dropdown's background color
-void ui_dropdown_set_bg_color (Dropdown *dropdown, RGBA_Color color) {
+void ui_dropdown_set_bg_color (Dropdown *dropdown, Renderer *renderer, RGBA_Color color) {
 
     if (dropdown) {
         dropdown->bg_colour = color;
         if (color.a < 255) {
-            dropdown->bg_texture = render_complex_transparent_rect (&dropdown->transform->rect, color);
+            dropdown->bg_texture = render_complex_transparent_rect (renderer, &dropdown->transform->rect, color);
             dropdown->bg_texture_rect.w = dropdown->transform->rect.w;
             dropdown->bg_texture_rect.h = dropdown->transform->rect.h;
         }
@@ -364,7 +365,7 @@ void ui_dropdown_remove_background (Dropdown *dropdown) {
 }
 
 // sets the dropdown's placeholder text
-void ui_dropdown_set_placeholder (Dropdown *dropdown,
+void ui_dropdown_set_placeholder (Dropdown *dropdown, Renderer *renderer,
     const char *text, Font *font, u32 size, RGBA_Color colour) {
 
     if (dropdown) {
@@ -379,36 +380,36 @@ void ui_dropdown_set_placeholder (Dropdown *dropdown,
             dropdown->placeholder->transform->rect.x = dropdown->transform->rect.x;
             dropdown->placeholder->transform->rect.y = dropdown->transform->rect.y;
 
-            ui_text_component_draw (dropdown->placeholder);
+            ui_text_component_draw (dropdown->placeholder, renderer);
         }
     }
 
 }
 
 // sets the dropdown's placeholder position
-void ui_dropdown_set_placeholder_pos (Dropdown *dropdown, UIPosition pos) {
+void ui_dropdown_set_placeholder_pos (Dropdown *dropdown, Renderer *renderer, UIPosition pos) {
 
     if (dropdown) {
         if (dropdown->placeholder) 
-            ui_transform_component_set_pos (dropdown->placeholder->transform, &dropdown->transform->rect, pos, true);
+            ui_transform_component_set_pos (dropdown->placeholder->transform, renderer, &dropdown->transform->rect, pos, true);
     }
 
 }
 
 // sets the dropdown's extened panel colour
-void ui_dropdown_extened_set_bg_colour (Dropdown *dropdown, RGBA_Color colour) {
+void ui_dropdown_extened_set_bg_colour (Dropdown *dropdown, Renderer *renderer, RGBA_Color colour) {
 
-    if (dropdown) ui_panel_set_bg_colour (dropdown->extended_panel, colour);
+    if (dropdown) ui_panel_set_bg_colour (dropdown->extended_panel, renderer, colour);
 
 }
 
 // adds a new dropdown option to the dropdown
-void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option) {
+void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option, Renderer *renderer) {
 
     if (dropdown && option) {
         option->transform->pos = UI_POS_BOTTOM_CENTER;
         option->option->transform->pos = UI_POS_MIDDLE_CENTER;
-        ui_position_update (option->transform, &dropdown->transform->rect, false);
+        ui_position_update (renderer, option->transform, &dropdown->transform->rect, false);
         dlist_insert_after (dropdown->options, dlist_end (dropdown->options), option);
 
         ui_layout_group_add (dropdown->layout, option->transform);
@@ -416,7 +417,7 @@ void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option) {
         DropdownOption *op = NULL;
         for (ListElement *le = dlist_start (dropdown->options); le; le = le->next) {
             op = (DropdownOption *) le->data;
-            ui_position_update (op->option->transform, &op->transform->rect, false);
+            ui_position_update (renderer, op->option->transform, &op->transform->rect, false);
         }
     }
 
@@ -448,13 +449,13 @@ String *ui_dropdown_option_selected (Dropdown *dropdown) {
 
 // sets the hovering colour for the dropdown options
 // IMPORTANT: set the colour after you have added all the options to the dropdwon!
-void ui_dropdown_option_set_hover_color (Dropdown *dropdown, RGBA_Color color) {
+void ui_dropdown_option_set_hover_color (Dropdown *dropdown, Renderer *renderer, RGBA_Color color) {
 
     if (dropdown) {
         dropdown->option_hover_colour = color;
         if (color.a < 255) {
             DropdownOption *option = ((DropdownOption *) dlist_start (dropdown->options)->data);
-            dropdown->option_hover_texture = render_complex_transparent_rect (&option->transform->rect, color);
+            dropdown->option_hover_texture = render_complex_transparent_rect (renderer, &option->transform->rect, color);
             dropdown->bg_texture_rect.w = option->transform->rect.w;
             dropdown->bg_texture_rect.h = option->transform->rect.h;
         }
@@ -463,25 +464,25 @@ void ui_dropdown_option_set_hover_color (Dropdown *dropdown, RGBA_Color color) {
 }
 
 // render the dropdown to the screen
-void ui_dropdown_render (Dropdown *dropdown) {
+void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer) {
 
-    if (dropdown) {
+    if (dropdown && renderer) {
         // render the background
         if (dropdown->bg_texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, dropdown->bg_texture, 
+            SDL_RenderCopyEx (renderer->renderer, dropdown->bg_texture, 
                 &dropdown->bg_texture_rect, &dropdown->transform->rect, 
                 0, 0, SDL_FLIP_NONE);
         }
 
         else if (dropdown->colour) 
-            render_basic_filled_rect (&dropdown->transform->rect, dropdown->bg_colour);
+            render_basic_filled_rect (renderer, &dropdown->transform->rect, dropdown->bg_colour);
 
         // check if the mouse is in the dropdown
         if (dropdown->active) {
             if (mousePos.x >= dropdown->transform->rect.x && mousePos.x <= (dropdown->transform->rect.x + dropdown->transform->rect.w) && 
                 mousePos.y >= dropdown->transform->rect.y && mousePos.y <= (dropdown->transform->rect.y + dropdown->transform->rect.h)) {
                 // the mouse is over use
-                render_basic_filled_rect (&dropdown->transform->rect, RGBA_BLACK);
+                render_basic_filled_rect (renderer, &dropdown->transform->rect, RGBA_BLACK);
 
                 // check if the user pressed the left dropdown over the mouse
                 if (input_get_mouse_button_state (MOUSE_LEFT)) {
@@ -504,10 +505,10 @@ void ui_dropdown_render (Dropdown *dropdown) {
 
         // render the outline rect
         if (dropdown->outline) 
-            render_basic_outline_rect (&dropdown->transform->rect, dropdown->outline_colour);
+            render_basic_outline_rect (renderer, &dropdown->transform->rect, dropdown->outline_colour);
 
         // render the placeholder text (also the selected option text)
-        ui_text_component_render (dropdown->placeholder);
+        ui_text_component_render (dropdown->placeholder, renderer);
 
         // render the extended section (options)
         if (dropdown->extended) {
@@ -518,7 +519,7 @@ void ui_dropdown_render (Dropdown *dropdown) {
                 if (mousePos.x >= option->transform->rect.x && mousePos.x <= (option->transform->rect.x + option->transform->rect.w) && 
                 mousePos.y >= option->transform->rect.y && mousePos.y <= (option->transform->rect.y + option->transform->rect.h)) {
                     // FIXME: create a colour ptr to check for colour!
-                    ui_dropdown_option_render (option, &dropdown->option_hover_colour, dropdown->option_hover_texture);
+                    ui_dropdown_option_render (option, renderer, &dropdown->option_hover_colour, dropdown->option_hover_texture);
 
                     // check if the user pressed the left button over the mouse
                     if (input_get_mouse_button_state (MOUSE_LEFT)) {
@@ -529,16 +530,16 @@ void ui_dropdown_render (Dropdown *dropdown) {
                         if (option->pressed) {
                             option->pressed = false;
                             dropdown->option_selected = option;
-                            ui_dropdown_set_placeholder (dropdown, 
+                            ui_dropdown_set_placeholder (dropdown, renderer,
                                 option->option->text->str, 
                                 dropdown->placeholder->font, dropdown->placeholder->size, dropdown->placeholder->text_color);
-                            ui_dropdown_set_placeholder_pos (dropdown, UI_POS_MIDDLE_CENTER);
+                            ui_dropdown_set_placeholder_pos (dropdown, renderer, UI_POS_MIDDLE_CENTER);
                         }
                     }
                 }
 
                 else {
-                    ui_dropdown_option_render (option, NULL, NULL);
+                    ui_dropdown_option_render (option, renderer, NULL, NULL);
                 } 
             }
         }

@@ -59,7 +59,7 @@ typedef struct Button {
 extern void ui_button_delete (void *button_ptr);
 
 // sets the buttons's UI position
-extern void ui_button_set_pos (Button *button, UIRect *ref_rect, UIPosition pos);
+extern void ui_button_set_pos (Button *button, UIRect *ref_rect, UIPosition pos, Renderer *renderer);
 
 // sets the button's render dimensions
 extern void ui_button_set_dimensions (Button *button, unsigned int width, unsigned int height);
@@ -74,14 +74,14 @@ extern void ui_button_set_active (Button *button, bool active);
 extern void ui_button_toggle_active (Button *button);
 
 // sets the button text
-extern void ui_button_set_text (Button *button, const char *text, 
+extern void ui_button_set_text (Button *button, Renderer *renderer, const char *text, 
     Font *font, u32 size, RGBA_Color text_color);
 
 // sets the button's text position
 extern void ui_button_set_text_pos (Button *button, UIPosition pos);
 
 // sets the button's text color
-extern void ui_button_set_text_color (Button *button, RGBA_Color color);
+extern void ui_button_set_text_color (Button *button, Renderer *renderer, RGBA_Color color);
 
 // sets the button's outline colour
 extern void ui_button_set_ouline_colour (Button *button, RGBA_Color colour);
@@ -90,14 +90,14 @@ extern void ui_button_set_ouline_colour (Button *button, RGBA_Color colour);
 extern void ui_button_remove_outline (Button *button);
 
 // sets the background color of the button
-extern void ui_button_set_bg_color (Button *button, RGBA_Color color);
+extern void ui_button_set_bg_color (Button *button, Renderer *renderer, RGBA_Color color);
 
 // removes the background from the button
 extern void ui_button_remove_background (Button *button);
 
 // sets an sprite for each button state
 // the sprite is loaded and deleted when the button gets deleted
-extern void ui_button_set_sprite (Button *button, ButtonState state, const char *filename);
+extern void ui_button_set_sprite (Button *button, Renderer *renderer, ButtonState state, const char *filename);
 
 // uses a refrence to the sprite and does not load or destroy it 
 extern void ui_button_ref_sprite (Button *button, ButtonState state, Sprite *sprite);
@@ -106,9 +106,9 @@ extern void ui_button_ref_sprite (Button *button, ButtonState state, Sprite *spr
 extern void ui_button_set_action (Button *button, Action action, void *args);
 
 // creates a new button
-extern Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
+extern Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
 // draws a button
-extern void ui_button_draw (Button *button);
+extern void ui_button_draw (Button *button, Renderer *renderer);
 
 #endif

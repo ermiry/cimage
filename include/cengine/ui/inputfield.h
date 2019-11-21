@@ -54,27 +54,27 @@ extern void ui_input_field_set_active (InputField *input, bool active);
 extern void ui_input_field_toggle_active (InputField *input);
 
 // sets the input placeholder text
-extern void ui_input_field_placeholder_text_set (InputField *input, const char *text,
+extern void ui_input_field_placeholder_text_set (InputField *input, Renderer *renderer, const char *text,
     Font *font, u32 size, RGBA_Color text_color);
 
 // updates the input's placeholder text
-extern void ui_input_field_placeholder_text_update (InputField *input, const char *text);
+extern void ui_input_field_placeholder_text_update (InputField *input, Renderer *renderer, const char *text);
 
 // sets the input placeholder text position
 extern void ui_input_field_placeholder_text_pos_set (InputField *input, UIPosition pos);
 
 // sets the input field's text
-extern void ui_input_field_text_set (InputField *input, const char *text,
+extern void ui_input_field_text_set (InputField *input, Renderer *renderer, const char *text,
     Font *font, u32 size, RGBA_Color text_color, bool is_password);
 
 // updates the placeholder text (redraws the text component)
-extern void ui_input_field_text_update (InputField *input, const char *update_text);
+extern void ui_input_field_text_update (InputField *input, Renderer *renderer, const char *update_text);
 
 // sets the input field's text position
 extern void ui_input_field_text_pos_set (InputField *input, UIPosition pos);
 
 // sets the input field's text color
-extern void ui_input_field_text_color_set (InputField *input, RGBA_Color color);
+extern void ui_input_field_text_color_set (InputField *input, Renderer *renderer, RGBA_Color color);
 
 // returns the current input text
 extern String *ui_input_field_input_get (InputField *input);
@@ -89,7 +89,7 @@ extern void ui_input_field_ouline_set_colour (InputField *input, RGBA_Color colo
 extern void ui_input_field_outline_remove (InputField *input);
 
 // sets the input field's background color
-extern void ui_input_field_bg_color_set (InputField *input, RGBA_Color color);
+extern void ui_input_field_bg_color_set (InputField *input, Renderer *renderer, RGBA_Color color);
 
 // removes the background from the input field
 extern void ui_input_field_bg_remove (InputField *input);
@@ -98,12 +98,12 @@ extern void ui_input_field_bg_remove (InputField *input);
 extern void ui_input_field_selected_set (InputField *input, RGBA_Color selected_color);
 
 // creates a new input field
-extern InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
+extern InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
 // draws the input field
-extern void ui_input_field_draw (InputField *input);
+extern void ui_input_field_draw (InputField *input, Renderer *renderer);
 
 // updates the input field with the correct values
-extern void ui_input_field_update (InputField *input);
+extern void ui_input_field_update (InputField *input, Renderer *renderer);
 
 #endif

@@ -27,10 +27,10 @@ void cimage_die (const char *error) {
 
 };
 
-Renderer *main_renderer = NULL;
+// Renderer *main_renderer = NULL;
 SDL_Surface *icon_surface = NULL;
 
-static int cimage_init_ui (void) {
+static int cimage_init_ui (Renderer *renderer) {
 
     u8 retval = 1;
 
@@ -40,7 +40,7 @@ static int cimage_init_ui (void) {
         Font *main_font = ui_font_create ("roboto", "./assets/fonts/Roboto-Regular.ttf");
         if (main_font) {
             ui_font_set_sizes (main_font, 6, 16, 20, 24, 32, 64, 200);
-            ui_font_load (main_font, TTF_STYLE_NORMAL);
+            ui_font_load (main_font, renderer, TTF_STYLE_NORMAL);
 
             retval = 0;
         }
@@ -74,14 +74,14 @@ int cimage_init (void) {
 
     // create our main renderer
     WindowSize window_size = { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
-    main_renderer = renderer_create_with_window ("main", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
+    Renderer *main_renderer = renderer_create_with_window ("main", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
         "Cimage", window_size, 0);
 
     icon_surface = surface_load_image ("./assets/cimage-128.png");
     if (icon_surface) window_set_icon (main_renderer->window, icon_surface);
     else cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to load icon!");
 
-    retval = cimage_init_ui ();
+    retval = cimage_init_ui (main_renderer);
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cimage's ui!");
     errors |= retval;
 

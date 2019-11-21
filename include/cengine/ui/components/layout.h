@@ -23,7 +23,7 @@ typedef struct LayoutGroup {
 extern void ui_layout_group_delete (void *layout_group_ptr);
 
 // creates a new layout group
-extern LayoutGroup *ui_layout_group_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos);
+extern LayoutGroup *ui_layout_group_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
 // sets the layout group's elements options
 // max display: the max number of elements to display; -1 for no limit

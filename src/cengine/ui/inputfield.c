@@ -19,7 +19,7 @@
 #include "cengine/ui/components/transform.h"
 #include "cengine/ui/components/text.h"
 
-extern void ui_input_field_update (InputField *input);
+void ui_input_field_update (InputField *input, Renderer *renderer);
 
 static InputField *ui_input_field_new (void) {
 
@@ -78,7 +78,7 @@ void ui_input_field_toggle_active (InputField *input) {
 }
 
 // sets the input placeholder text
-void ui_input_field_placeholder_text_set (InputField *input, const char *text,
+void ui_input_field_placeholder_text_set (InputField *input, Renderer *renderer, const char *text,
     Font *font, u32 size, RGBA_Color text_color) {
 
     if (input) {
@@ -93,20 +93,20 @@ void ui_input_field_placeholder_text_set (InputField *input, const char *text,
             input->placeholder->transform->rect.x = input->transform->rect.x;
             input->placeholder->transform->rect.y = input->transform->rect.y;
 
-            ui_text_component_draw (input->placeholder);
+            ui_text_component_draw (input->placeholder, renderer);
         }
     }
 
 }
 
 // updates the input's placeholder text
-void ui_input_field_placeholder_text_update (InputField *input, const char *text) {
+void ui_input_field_placeholder_text_update (InputField *input, Renderer *renderer, const char *text) {
 
     if (input) {
         if (input->placeholder) {
             ui_text_component_set_text (input->placeholder, text);
-            ui_text_component_draw (input->placeholder);
-            ui_transform_component_set_pos (input->placeholder->transform, 
+            ui_text_component_draw (input->placeholder, renderer);
+            ui_transform_component_set_pos (input->placeholder->transform, NULL, 
                 &input->transform->rect, input->placeholder->transform->pos, true);
         }
     }
@@ -118,13 +118,13 @@ void ui_input_field_placeholder_text_pos_set (InputField *input, UIPosition pos)
 
     if (input) {
         if (input->placeholder) 
-            ui_transform_component_set_pos (input->placeholder->transform, &input->transform->rect, pos, true);
+            ui_transform_component_set_pos (input->placeholder->transform, NULL, &input->transform->rect, pos, true);
     }
 
 }
 
 // sets the input field's text
-void ui_input_field_text_set (InputField *input, const char *text,
+void ui_input_field_text_set (InputField *input, Renderer *renderer, const char *text,
     Font *font, u32 size, RGBA_Color text_color, bool is_password) {
 
     if (input) {
@@ -139,26 +139,26 @@ void ui_input_field_text_set (InputField *input, const char *text,
             input->text->transform->rect.x = input->transform->rect.x;
             input->text->transform->rect.y = input->transform->rect.y;
 
-            ui_text_component_draw (input->text);
+            ui_text_component_draw (input->text, renderer);
         }
 
         if (is_password) {
             input->is_password = true;
             input->password = text ? str_new (text) : str_new ("");
-            ui_input_field_update (input);
+            ui_input_field_update (input, renderer);
         } 
     }
 
 }
 
 // updates the placeholder text (redraws the text component)
-void ui_input_field_text_update (InputField *input, const char *update_text) {
+void ui_input_field_text_update (InputField *input, Renderer *renderer, const char *update_text) {
 
     if (input) {
         if (input->text) {
             ui_text_component_set_text (input->text, update_text);
-            ui_text_component_draw (input->text);
-            ui_transform_component_set_pos (input->text->transform, 
+            ui_text_component_draw (input->text, renderer);
+            ui_transform_component_set_pos (input->text->transform, NULL,
                 &input->transform->rect, input->text->transform->pos, true);
         }
     }
@@ -170,17 +170,17 @@ void ui_input_field_text_pos_set (InputField *input, UIPosition pos) {
 
     if (input) {
         if (input->text) 
-            ui_transform_component_set_pos (input->text->transform, &input->transform->rect, pos, true);
+            ui_transform_component_set_pos (input->text->transform, NULL, &input->transform->rect, pos, true);
     }
 
 }
 
 // sets the input field's text color
-void ui_input_field_text_color_set (InputField *input, RGBA_Color color) {
+void ui_input_field_text_color_set (InputField *input, Renderer *renderer, RGBA_Color color) {
 
     if (input) {
         input->text->text_color = color;
-        ui_text_component_draw (input->text);
+        ui_text_component_draw (input->text, renderer);
     }
 
 }
@@ -220,12 +220,12 @@ void ui_input_field_outline_remove (InputField *input) {
 }
 
 // sets the input field's background color
-void ui_input_field_bg_color_set (InputField *input, RGBA_Color color) {
+void ui_input_field_bg_color_set (InputField *input, Renderer *renderer, RGBA_Color color) {
 
     if (input) {
         input->bg_colour = color;
         if (color.a < 255) {
-            input->bg_texture = render_complex_transparent_rect (&input->transform->rect, color);
+            input->bg_texture = render_complex_transparent_rect (renderer, &input->transform->rect, color);
             input->bg_texture_rect.w = input->transform->rect.w;
             input->bg_texture_rect.h = input->transform->rect.h;
         }
@@ -261,7 +261,7 @@ void ui_input_field_selected_set (InputField *input, RGBA_Color selected_color) 
 }
 
 // creates a new input field
-InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
+InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer) {
 
     InputField *input = NULL;
 
@@ -271,7 +271,7 @@ InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
         if (input) {
             input->ui_element = ui_element;
             input->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (input->transform, NULL, pos, true);
+            ui_transform_component_set_pos (input->transform, renderer, NULL, pos, true);
             ui_element->element = input;
         }
 
@@ -283,18 +283,18 @@ InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos) {
 }
 
 // draws the input field
-void ui_input_field_draw (InputField *input) {
+void ui_input_field_draw (InputField *input, Renderer *renderer) {
 
-    if (input) {
+    if (input && renderer) {
         // render the background
         if (input->bg_texture) {
-            SDL_RenderCopyEx (main_renderer->renderer, input->bg_texture, 
+            SDL_RenderCopyEx (renderer->renderer, input->bg_texture, 
                 &input->bg_texture_rect, &input->transform->rect, 
                 0, 0, SDL_FLIP_NONE);
         }
 
         else if (input->colour) 
-            render_basic_filled_rect (&input->transform->rect, input->bg_colour);
+            render_basic_filled_rect (renderer, &input->transform->rect, input->bg_colour);
 
         // check if the mouse is in the input
         if (input->active) {
@@ -320,27 +320,27 @@ void ui_input_field_draw (InputField *input) {
 
         if (input->pressed) {
             if (input->draw_selected) 
-                render_basic_outline_rect (&input->transform->rect, input->selected_color);
+                render_basic_outline_rect (renderer, &input->transform->rect, input->selected_color);
         }
 
-        else if (input->outline) render_basic_outline_rect (&input->transform->rect, input->outline_colour);
+        else if (input->outline) render_basic_outline_rect (renderer, &input->transform->rect, input->outline_colour);
         
         // draw the correct text
         if (input->empty_text) {
             // draw the placeholder text
-            ui_text_component_render (input->placeholder);
+            ui_text_component_render (input->placeholder, renderer);
         }
 
         else {
             // draw the input text
-            ui_text_component_render (input->text);
+            ui_text_component_render (input->text, renderer);
         }
     }
 
 }
 
 // updates the input field with the correct values
-void ui_input_field_update (InputField *input) {
+void ui_input_field_update (InputField *input, Renderer *renderer) {
 
     if (input) {
         // check if the input text is empty
@@ -366,8 +366,8 @@ void ui_input_field_update (InputField *input) {
             else input->empty_text = true;
         }
 
-        ui_text_component_draw (input->text);
-        ui_transform_component_set_pos (input->text->transform, 
+        ui_text_component_draw (input->text, renderer);
+        ui_transform_component_set_pos (input->text->transform, renderer,
             &input->transform->rect, input->text->transform->pos, false);
     }
 
