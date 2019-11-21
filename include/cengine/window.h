@@ -43,7 +43,8 @@ typedef struct _Window Window;
 extern void window_delete (void *window_ptr);
 
 // creates a new window with the requested arguments
-extern Window *window_create (const char *title, WindowSize window_size, Uint32 window_flags);
+extern Window *window_create (const char *title, WindowSize window_size, Uint32 window_flags,
+    int display_idx);
 
 // gets window size into renderer data struct
 extern int window_get_size (Window *window, WindowSize *window_size);

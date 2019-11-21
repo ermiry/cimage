@@ -10,6 +10,7 @@
 
 #include "cengine/renderer.h"
 #include "cengine/window.h"
+#include "cengine/video.h"
 
 #ifdef CENGINE_DEBUG
 #include "cengine/utils/utils.h"
@@ -48,24 +49,41 @@ void window_delete (void *window_ptr) {
 }
 
 // creates a new window with the requested arguments
-Window *window_create (const char *title, WindowSize window_size, Uint32 window_flags) {
+Window *window_create (const char *title, WindowSize window_size, Uint32 window_flags,
+    int display_idx) {
 
     Window *window = NULL;
 
     if (title) {
         window = window_new ();
 
-        // FIXME: get maximum size possible
-        // creates a window of the size of the screen
-        window->window = SDL_CreateWindow (title,
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-            window_size.width, window_size.height, window_flags);
+        window->display_index = display_idx;
 
-        window_get_size (window, &window->window_size);
+        if (!video_get_display_mode (window->display_index, &window->display_mode)) {
+            u32 width = window_size.width;
+            u32 height = window_size.height;
 
-        window->window_title = title ? str_new (title) : NULL;
-        window->window_flags = window_flags;
-        window->fullscreen = window_flags & SDL_WINDOW_FULLSCREEN;
+            // cap to maximum display size
+            if (width > window->display_mode.w) width = window->display_mode.w;
+            if (height > window->display_mode.h) height = window->display_mode.h;
+
+            // creates a window of the size of the screen
+            window->window = SDL_CreateWindow (title,
+                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+                width, height, window_flags);
+
+            // sets the actual window size in the correct places
+            window_get_size (window, &window->window_size);
+
+            window->window_title = title ? str_new (title) : NULL;
+            window->window_flags = window_flags;
+            window->fullscreen = window_flags & SDL_WINDOW_FULLSCREEN;
+        }
+
+        else {
+            window_delete (window);
+            window = NULL;
+        }
     }
 
     return window;
@@ -112,17 +130,22 @@ int window_resize (Window *window, u32 new_width, u32 new_height) {
     int retval = 1;
 
     if (window) {
-        // check if we have a valid new size
-        if (new_width <= window->display_mode.w && new_width > 0 &&
-            new_height <= window->display_mode.h && new_height > 0) {
-            SDL_SetWindowSize (window->window, new_width, new_height);
-            window_get_size (window->window, &window->window_size);
+        // cap to maximum display size
+        u32 width = new_width;
+        u32 height = new_height;
 
-            SDL_RenderSetLogicalSize (window->renderer, 
-                window->window_size.width, window->window_size.height);
+        if (width > window->display_mode.w) width = window->display_mode.w;
+        if (height > window->display_mode.h) height = window->display_mode.h;
 
-            retval = 0;
-        }
+        SDL_SetWindowSize (window->window, new_width, new_height);
+
+        // sets the actual window size in the correct places
+        window_get_size (window, &window->window_size);
+
+        SDL_RenderSetLogicalSize (window->renderer->renderer, 
+            window->window_size.width, window->window_size.height);
+
+        retval = 0;
     }
 
     return retval;

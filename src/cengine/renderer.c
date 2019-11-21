@@ -56,7 +56,7 @@ void surface_texture_delete (void *st_ptr) {
 
 DoubleList *renderers = NULL;
 
-int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
+int renderer_window_attach (Renderer *renderer, Uint32 render_flags, int display_idx,
     const char *window_title, WindowSize window_size, Uint32 window_flags);
 
 static Renderer *renderer_new (void) {
@@ -110,30 +110,6 @@ Renderer *renderer_get_by_name (const char *name) {
 
 }
 
-int video_get_display_mode (int display_index, SDL_DisplayMode display_mode) {
-
-    if (!SDL_GetCurrentDisplayMode (renderer->display_index, &renderer->display_mode)) {
-        #ifdef CENGINE_DEBUG
-        cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE,
-            c_string_create ("Display with idx %i mode is %dx%dpx @ %dhz.",
-            renderer->display_index, 
-            renderer->display_mode.w, renderer->display_mode.h, 
-            renderer->display_mode.refresh_rate));
-        #endif
-    }
-
-    else {
-        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
-            c_string_create ("Failed to get display mode for display with idx %i", renderer->display_index));
-        #ifdef CENGINE_DEBUG
-        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, SDL_GetError ());
-        #endif
-        renderer_delete (renderer);
-        renderer = NULL;
-    }
-
-}
-
 // creates a new empty renderer without a window attached to it
 Renderer *renderer_create_empty (const char *name, int display_idx) {
 
@@ -158,7 +134,7 @@ Renderer *renderer_create_with_window (const char *name, int display_idx,
     Renderer *renderer = renderer_create_empty (name, display_idx);
     if (renderer) {
         renderer->render_flags = render_flags;
-        renderer_window_attach (renderer, render_flags, 
+        renderer_window_attach (renderer, render_flags, display_idx,
             window_title, window_size, window_flags);
     }
 
@@ -169,13 +145,13 @@ Renderer *renderer_create_with_window (const char *name, int display_idx,
 // attaches a new window to a renderer
 // creates a new window and then a new render (SDL_Renderer) for it
 // retunrs 0 on success, 1 on error
-int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
+int renderer_window_attach (Renderer *renderer, Uint32 render_flags, int display_idx,
     const char *window_title, WindowSize window_size, Uint32 window_flags) {
 
     int retval = 0;
 
     if (renderer) {
-        renderer->window = window_create (window_title, window_size, window_flags);
+        renderer->window = window_create (window_title, window_size, window_flags, display_idx);
         if (renderer->window) {
             // SDL_CreateRenderer (main_window, 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED);
             renderer->renderer = SDL_CreateRenderer (renderer->window->window, renderer->window->display_index, render_flags);

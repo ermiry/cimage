@@ -68,7 +68,7 @@ extern Renderer *renderer_create_with_window (const char *name, int display_idx,
 // attaches a new window to a renderer
 // creates a new window and then a new render (SDL_Renderer) for it
 // retunrs 0 on success, 1 on error
-extern int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
+extern int renderer_window_attach (Renderer *renderer, Uint32 render_flags, int display_idx,
     const char *window_title, WindowSize window_size, Uint32 window_flags);
 
 extern int renderer_init_main (Uint32 flags,
