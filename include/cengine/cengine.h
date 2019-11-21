@@ -20,8 +20,8 @@ extern void cengine_assets_set_path (const char *pathname);
 
 /*** cengine ***/
 
-// call this to initialize the cengine and create a new window
-extern int cengine_init (const char *window_title, WindowSize window_size, bool full_screen);
+// call this to initialize cengine
+extern int cengine_init (void);
 
 // call this when you want to exit cengine 
 extern int cengine_end (void);

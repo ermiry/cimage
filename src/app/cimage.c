@@ -27,6 +27,7 @@ void cimage_die (const char *error) {
 
 };
 
+Renderer *main_renderer = NULL;
 SDL_Surface *icon_surface = NULL;
 
 static int cimage_init_ui (void) {
@@ -67,10 +68,14 @@ int cimage_init (void) {
 
     // TODO: load settings
 
-    WindowSize window_size = { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
-    retval = cengine_init ("Cimage", window_size, false);
+    retval = cengine_init ();
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
     errors |= retval;
+
+    // create our main renderer
+    WindowSize window_size = { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
+    main_renderer = renderer_create_with_window ("main", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
+        "Cimage", window_size, 0);
 
     icon_surface = surface_load_image ("./assets/cimage-128.png");
     if (icon_surface) window_set_icon (main_renderer->window, icon_surface);

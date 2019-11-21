@@ -7,6 +7,8 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/collections/dlist.h"
+
 #include "cengine/animation.h"
 #include "cengine/input.h"
 #include "cengine/renderer.h"
@@ -37,7 +39,7 @@ void cengine_assets_set_path (const char *pathname) {
 
 /*** cengine ***/
 
-int cengine_init (const char *window_title, WindowSize window_size, bool full_screen) {
+int cengine_init (void) {
 
     int errors = 0;
     int retval = 0;
@@ -57,11 +59,6 @@ int cengine_init (const char *window_title, WindowSize window_size, bool full_sc
         if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's renderer!");
         errors |= retval;
 
-        retval = renderer_init_main (SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED, 
-            window_title, window_size, full_screen);
-        if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's renderer!");
-        errors |= retval;
-
         retval = game_objects_init_all ();
         if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine's game objects!");
         errors |= retval;
@@ -72,8 +69,8 @@ int cengine_init (const char *window_title, WindowSize window_size, bool full_sc
 
         input_init ();
 
-        main_camera = camera_new (main_renderer->window_size.width, main_renderer->window_size.height);
-        retval = main_camera ? 0 : 1;
+        // main_camera = camera_new (main_renderer->window_size.width, main_renderer->window_size.height);
+        // retval = main_camera ? 0 : 1;
 
         errors |= retval;
     }
@@ -98,7 +95,6 @@ int cengine_end (void) {
     input_end ();
     camera_destroy (main_camera);
     ui_destroy ();
-    renderer_delete_main ();
     render_end ();
     game_object_destroy_all ();
     animations_end ();
@@ -198,7 +194,8 @@ static void cengine_run (void) {
 
         input_handle (event);
 
-        render ();
+        // TODO: maybe create a new thread for every renderer
+        for (ListElement *le = dlist_start (renderers); le; le = le->next) render ((Renderer *) le->data);
 
         // limit the FPS
         sleep_time = time_per_frame - (SDL_GetTicks () - frame_start);

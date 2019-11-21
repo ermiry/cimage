@@ -81,10 +81,7 @@ struct _Renderer {
 
 typedef struct _Renderer Renderer;
 
-// FIXME:
-// TODO: as of 03/06/2019 we only have support for one renderer, the main one
-// the plan is to have as many as you want in order to support multiple windows 
-extern Renderer *main_renderer;
+extern DoubleList *renderers;
 
 extern void renderer_delete (void *ptr);
 
@@ -183,7 +180,7 @@ extern SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color c
 
 /*** Render ***/
 
-extern void render (void);
+extern void render (Renderer *renderer);
 
 /*** Public ***/
 

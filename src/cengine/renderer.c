@@ -130,9 +130,7 @@ static SDL_Window *window_create (const char *title, WindowSize window_size, Uin
 
 #pragma region Renderer
 
-// TODO: as of 03/06/2019 we only have support for one renderer, the main one
-// the plan is to have as many as you want in order to support multiple windows 
-Renderer *main_renderer = NULL;
+DoubleList *renderers = NULL;
 
 int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
     const char *window_title, WindowSize window_size, Uint32 window_flags);
@@ -267,16 +265,6 @@ int renderer_window_attach (Renderer *renderer, Uint32 render_flags,
     return retval;
 
 }
-
-int renderer_init_main (Uint32 flags,
-    const char *window_title, WindowSize window_size, Uint32 window_flags) {
-
-    return ((main_renderer = renderer_create_with_window ("main", 0, flags, 
-        window_title, window_size, window_flags)) ? 0 : 1);
-
-}
-
-void renderer_delete_main (void) { renderer_delete (main_renderer); }
 
 void renderer_queue_push (Renderer *renderer, SurfaceTexture *st) {
 
@@ -627,56 +615,58 @@ SDL_Texture *render_complex_transparent_rect (SDL_Rect *rect, SDL_Color color) {
 #pragma region Render
 
 // FIXME: we need to implement occlusion culling!
-// renders the game objects to the screen
-void render (void) {
+void render (Renderer *renderer) {
 
-    // TODO: ability to choose how many textures to load at a time
-    // load any texturex in queue
-    if (main_renderer->textures_queue->num_els > 0) {
-        SurfaceTexture *st = NULL;
-        queue_get (main_renderer->textures_queue, (void **) &st);
-        if (st) {
-            *st->texture = SDL_CreateTextureFromSurface (main_renderer->renderer, st->surface);
-            surface_texture_delete (st);
-        } 
-    }
+    if (renderer) {
+        // TODO: ability to choose how many textures to load at a time
+        // load any texturex in queue
+        if (renderer->textures_queue->num_els > 0) {
+            SurfaceTexture *st = NULL;
+            queue_get (renderer->textures_queue, (void **) &st);
+            if (st) {
+                *st->texture = SDL_CreateTextureFromSurface (renderer->renderer, st->surface);
+                surface_texture_delete (st);
+            } 
+        }
 
-    SDL_SetRenderDrawColor (main_renderer->renderer, 0, 0, 0, 255);
-    SDL_RenderClear (main_renderer->renderer);
+        SDL_SetRenderDrawColor (renderer->renderer, 0, 0, 0, 255);
+        SDL_RenderClear (renderer->renderer);
 
-    // render by layers
-    Layer *layer = NULL;
-    GameObject *go = NULL;
-    Transform *transform = NULL;
-    Graphics *graphics = NULL;
-    for (ListElement *layer_le = dlist_start (gos_layers); layer_le; layer_le = layer_le->next) {
-        layer = (Layer *) layer_le->data;
+        // FIXME: 20/11/2019 --- we are no longer creating the camera!!
+        // render by layers
+        Layer *layer = NULL;
+        GameObject *go = NULL;
+        Transform *transform = NULL;
+        Graphics *graphics = NULL;
+        for (ListElement *layer_le = dlist_start (gos_layers); layer_le; layer_le = layer_le->next) {
+            layer = (Layer *) layer_le->data;
 
-        for (ListElement *le = dlist_start (layer->elements); le; le = le->next) {
-            go = (GameObject *) le->data;
+            for (ListElement *le = dlist_start (layer->elements); le; le = le->next) {
+                go = (GameObject *) le->data;
 
-            transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
-            graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
-            if (transform && graphics) {
-                if (graphics->multipleSprites) {
-                    texture_draw_frame (main_camera, graphics->spriteSheet, 
-                        transform->position.x, transform->position.y, 
-                        graphics->x_sprite_offset, graphics->y_sprite_offset,
-                        graphics->flip);
-                }
-                
-                else {
-                    texture_draw (main_camera, graphics->sprite, 
-                        transform->position.x, transform->position.y, 
-                        graphics->flip);
+                transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
+                graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
+                if (transform && graphics) {
+                    if (graphics->multipleSprites) {
+                        texture_draw_frame (main_camera, graphics->spriteSheet, 
+                            transform->position.x, transform->position.y, 
+                            graphics->x_sprite_offset, graphics->y_sprite_offset,
+                            graphics->flip);
+                    }
+                    
+                    else {
+                        texture_draw (main_camera, graphics->sprite, 
+                            transform->position.x, transform->position.y, 
+                            graphics->flip);
+                    }
                 }
             }
         }
+
+        ui_render ();       // render ui elements
+
+        SDL_RenderPresent (renderer->renderer);
     }
-
-    ui_render ();       // render ui elements
-
-    SDL_RenderPresent (main_renderer->renderer);
 
 }
 
@@ -687,13 +677,24 @@ void render (void) {
 // inits cengine render capabilities
 u8 render_init (void) {
 
-    return layers_init ();
+    u8 errors = 0;
+
+    errors |= layers_init ();
+
+    renderers = dlist_init (renderer_delete, NULL);
+    u8 retval = renderers ? 0 : 1;
+
+    errors |= retval;
+
+    return errors;
 
 }
 
 void render_end (void) {
 
     layers_end ();
+
+    dlist_delete (renderers);
 
 }
 
