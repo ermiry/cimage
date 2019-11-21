@@ -103,6 +103,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_sprite (image, main_renderer, filename);
         ui_image_set_ouline_colour (image, RGBA_WHITE);
         ui_image_set_outline_scale (image, 2, 2);
+        ui_image_toggle_active (image);
 
         ui_layout_grid_add_element (grid, image->ui_element);
     }

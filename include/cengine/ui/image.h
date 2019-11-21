@@ -32,6 +32,12 @@ typedef struct Image {
     float outline_scale_x;
     float outline_scale_y;
 
+    // event listener
+    bool active;
+    bool pressed;
+    Action action;
+    void *args;
+
 } Image;
 
 extern void ui_image_delete (void *image_ptr);
@@ -70,6 +76,17 @@ extern void ui_image_set_outline_scale (Image *image, float x_scale, float y_sca
 
 // removes the ouline form the image
 extern void ui_image_remove_outline (Image *image);
+
+// sets the image to be active depending on value
+// action listerner working
+extern void ui_image_set_active (Image *image, bool active);
+
+// toggles the image to be active or not
+// action listerner working
+extern void ui_image_toggle_active (Image *image);
+
+// sets an action to be triggered when the image is clicked
+extern void ui_image_set_action (Image *image, Action action, void *args);
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position

@@ -7,9 +7,11 @@
 #include <SDL2/SDL_image.h>
 
 #include "cengine/types/types.h"
+#include "cengine/types/vector2d.h"
 
 #include "cengine/sprites.h"
 #include "cengine/renderer.h"
+#include "cengine/input.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/image.h"
@@ -24,6 +26,11 @@ static Image *ui_image_new (void) {
         image->sprite = NULL;
         image->texture = NULL;
         image->sprite_sheet = NULL;
+
+        image->active = NULL;
+        image->pressed = NULL;
+        image->action = NULL;
+        image->args = NULL;
     }
 
     return image;
@@ -187,6 +194,32 @@ void ui_image_remove_outline (Image *image) {
 
 }
 
+// sets the image to be active depending on value
+// action listerner working
+void ui_image_set_active (Image *image, bool active) {
+
+    if (image) image->active = active;
+
+}
+
+// toggles the image to be active or not
+// action listerner working
+void ui_image_toggle_active (Image *image) {
+
+    if (image) image->active = !image->active;
+
+}
+
+// sets an action to be triggered when the image is clicked
+void ui_image_set_action (Image *image, Action action, void *args) {
+
+    if (image) {
+        image->action = action;
+        image->args = args;
+    } 
+
+}
+
 static Image *ui_image_create_common (void) {
 
     Image *image = NULL;
@@ -314,6 +347,28 @@ void ui_image_draw (Image *image, Renderer *renderer) {
         if (image->outline) 
             render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour, 
                 image->outline_scale_x, image->outline_scale_y);
+
+        // check for action listener
+        if (image->active) {
+            // check if the mouse is in the image
+            if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
+                mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
+                // check if the user pressed the left button over the image
+                if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                    image->pressed = true;
+                }
+                
+                else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                    if (image->pressed) {
+                        image->pressed = false;
+                        if (image->action) image->action (image->args);
+                        // printf ("Pressed!\n");
+                    }
+                }
+            }
+        
+            else image->pressed = false;
+        }
     }
 
 }

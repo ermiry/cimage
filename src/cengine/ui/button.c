@@ -337,11 +337,6 @@ void ui_button_draw (Button *button, Renderer *renderer) {
         else if (button->colour) 
             render_basic_filled_rect (renderer, &button->transform->rect, button->bg_colour);
 
-        // render the outline border
-        if (button->outline) 
-            render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour,
-                button->outline_scale_x, button->outline_scale_y);
-
         Sprite *selected_sprite = NULL;
 
         if (button->active) {
@@ -388,6 +383,11 @@ void ui_button_draw (Button *button, Renderer *renderer) {
 
         // draw button text
         ui_text_component_render (button->text, renderer);
+
+        // render the outline border
+        if (button->outline) 
+            render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour,
+                button->outline_scale_x, button->outline_scale_y);
     }
 
 }
