@@ -38,6 +38,8 @@ typedef struct Image {
     Action action;
     void *args;
 
+    SDL_Texture *overlay_texture;
+
 } Image;
 
 extern void ui_image_delete (void *image_ptr);
@@ -87,6 +89,12 @@ extern void ui_image_toggle_active (Image *image);
 
 // sets an action to be triggered when the image is clicked
 extern void ui_image_set_action (Image *image, Action action, void *args);
+
+// sets an overlay to the image that only renders when you hover the image
+extern void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color);
+
+// removes the overlay from the image
+extern void ui_image_remove_overlay (Image *image);
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position

@@ -144,7 +144,7 @@ void ui_dropdown_option_set_bg_color (DropdownOption *option, Renderer *renderer
     if (option) {
         option->bg_colour = color;
         if (color.a < 255) {
-            option->bg_texture = render_complex_transparent_rect (renderer, &option->transform->rect, color);
+            render_complex_transparent_rect (renderer, &option->bg_texture, &option->transform->rect, color);
             option->bg_texture_rect.w = option->transform->rect.w;
             option->bg_texture_rect.h = option->transform->rect.h;
         }
@@ -366,7 +366,7 @@ void ui_dropdown_set_bg_color (Dropdown *dropdown, Renderer *renderer, RGBA_Colo
     if (dropdown) {
         dropdown->bg_colour = color;
         if (color.a < 255) {
-            dropdown->bg_texture = render_complex_transparent_rect (renderer, &dropdown->transform->rect, color);
+            render_complex_transparent_rect (renderer, &dropdown->bg_texture, &dropdown->transform->rect, color);
             dropdown->bg_texture_rect.w = dropdown->transform->rect.w;
             dropdown->bg_texture_rect.h = dropdown->transform->rect.h;
         }
@@ -482,7 +482,8 @@ void ui_dropdown_option_set_hover_color (Dropdown *dropdown, Renderer *renderer,
         dropdown->option_hover_colour = color;
         if (color.a < 255) {
             DropdownOption *option = ((DropdownOption *) dlist_start (dropdown->options)->data);
-            dropdown->option_hover_texture = render_complex_transparent_rect (renderer, &option->transform->rect, color);
+            render_complex_transparent_rect (renderer, &dropdown->option_hover_texture,
+                &option->transform->rect, color);
             dropdown->bg_texture_rect.w = option->transform->rect.w;
             dropdown->bg_texture_rect.h = option->transform->rect.h;
         }

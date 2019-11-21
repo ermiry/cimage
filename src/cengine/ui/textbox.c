@@ -164,7 +164,7 @@ void ui_textbox_set_bg_color (TextBox *textbox, Renderer *renderer, RGBA_Color c
     if (textbox) {
         textbox->bg_colour = color;
         if (color.a < 255) {
-            textbox->bg_texture = render_complex_transparent_rect (renderer, &textbox->transform->rect, color);
+            render_complex_transparent_rect (renderer, &textbox->bg_texture, &textbox->transform->rect, color);
             textbox->bg_texture_rect.w = textbox->transform->rect.w;
             textbox->bg_texture_rect.h = textbox->transform->rect.h;
         }

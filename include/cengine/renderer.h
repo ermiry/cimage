@@ -184,7 +184,7 @@ extern void render_basic_line (Renderer *renderer, int x1, int x2, int y1, int y
 /*** Render Complex ***/
 
 // renders a rect with transparency
-extern SDL_Texture *render_complex_transparent_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color);
+extern void render_complex_transparent_rect (Renderer *renderer, SDL_Texture **texture, SDL_Rect *rect, SDL_Color color);
 
 /*** Render ***/
 

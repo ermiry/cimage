@@ -235,7 +235,8 @@ void ui_input_field_bg_color_set (InputField *input, Renderer *renderer, RGBA_Co
     if (input) {
         input->bg_colour = color;
         if (color.a < 255) {
-            input->bg_texture = render_complex_transparent_rect (renderer, &input->transform->rect, color);
+            render_complex_transparent_rect (renderer, &input->bg_texture,
+                &input->transform->rect, color);
             input->bg_texture_rect.w = input->transform->rect.w;
             input->bg_texture_rect.h = input->transform->rect.h;
         }

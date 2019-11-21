@@ -617,7 +617,8 @@ void ui_noti_center_set_bg_color (NotiCenter *noti_center, Renderer *renderer, R
     if (noti_center) {
         noti_center->bg_colour = color;
         if (color.a < 255) {
-            noti_center->bg_texture = render_complex_transparent_rect (renderer, &noti_center->transform->rect, color);
+            render_complex_transparent_rect (renderer, &noti_center->bg_texture,
+                &noti_center->transform->rect, color);
             noti_center->bg_texture_rect.w = noti_center->transform->rect.w;
             noti_center->bg_texture_rect.h = noti_center->transform->rect.h;
         }

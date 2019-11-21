@@ -680,19 +680,27 @@ void render_basic_line (Renderer *renderer, int x1, int x2, int y1, int y2, SDL_
 #pragma region Complex
 
 // renders a rect with transparency
-SDL_Texture *render_complex_transparent_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color) {
+void render_complex_transparent_rect (Renderer *renderer, SDL_Texture **texture, SDL_Rect *rect, SDL_Color color) {
 
-    SDL_Texture *texture = NULL;
+    if (renderer && texture && rect) {
+        SDL_Surface *surface = surface_create (rect->w, rect->h);
+        if (surface) {
+            (void) SDL_FillRect (surface, NULL, convert_rgba_to_hex (color.r, color.g, color.b, color.a));
 
-    SDL_Surface *surface = surface_create (rect->w, rect->h);
-    if (surface) {
-        (void) SDL_FillRect (surface, NULL, 
-            convert_rgba_to_hex (color.r, color.g, color.b, color.a));
-        texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
-        SDL_FreeSurface (surface); 
+            pthread_t thread_id = pthread_self ();
+            // printf ("Loading texture in thread: %ld\n", thread_id);
+            if (thread_id == renderer->thread_id) {
+                // load texture as always
+                *texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
+                SDL_FreeSurface (surface);
+            }
+
+            else {
+                // send image to renderer queue
+                renderer_queue_push (renderer, surface_texture_new (surface, texture));
+            }
+        }
     }
-
-    return texture;
 
 }
 

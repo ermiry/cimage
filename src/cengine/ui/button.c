@@ -202,7 +202,7 @@ void ui_button_set_bg_color (Button *button, Renderer *renderer, RGBA_Color colo
     if (button) {
         button->bg_colour = color;
         if (color.a < 255) {
-            button->bg_texture = render_complex_transparent_rect (renderer, &button->transform->rect, color);
+            render_complex_transparent_rect (renderer, &button->bg_texture, &button->transform->rect, color);
             button->bg_texture_rect.w = button->transform->rect.w;
             button->bg_texture_rect.h = button->transform->rect.h;
         }

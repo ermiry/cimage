@@ -31,6 +31,8 @@ static Image *ui_image_new (void) {
         image->pressed = NULL;
         image->action = NULL;
         image->args = NULL;
+
+        image->overlay_texture = NULL;
     }
 
     return image;
@@ -56,6 +58,8 @@ void ui_image_delete (void *image_ptr) {
         }
 
         if (image->texture) SDL_DestroyTexture (image->texture);
+
+        if (image->overlay_texture) SDL_DestroyTexture (image->overlay_texture);
 
         free (image);
     }
@@ -220,6 +224,32 @@ void ui_image_set_action (Image *image, Action action, void *args) {
 
 }
 
+// sets an overlay to the image that only renders when you hover the image
+void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color) {
+
+    if (image) {
+        if (image->overlay_texture) {
+            SDL_DestroyTexture (image->overlay_texture);
+            image->overlay_texture = NULL;
+        }
+
+        render_complex_transparent_rect (renderer, &image->overlay_texture, &image->transform->rect, color); 
+    }
+
+}
+
+// removes the overlay from the image
+void ui_image_remove_overlay (Image *image) {
+
+    if (image) {
+        if (image->overlay_texture) {
+            SDL_DestroyTexture (image->overlay_texture);
+            image->overlay_texture = NULL;
+        }
+    }
+
+}
+
 static Image *ui_image_create_common (void) {
 
     Image *image = NULL;
@@ -353,6 +383,12 @@ void ui_image_draw (Image *image, Renderer *renderer) {
             // check if the mouse is in the image
             if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
                 mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
+                if (image->overlay_texture) {
+                    SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
+                        NULL, &image->transform->rect, 
+                        0, 0, image->flip);
+                }
+
                 // check if the user pressed the left button over the image
                 if (input_get_mouse_button_state (MOUSE_LEFT)) {
                     image->pressed = true;

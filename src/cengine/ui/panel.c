@@ -45,7 +45,7 @@ void ui_panel_set_bg_colour (Panel *panel, Renderer *renderer, RGBA_Color colour
         panel->colour = true;
         panel->bg_colour = colour;
         if (colour.a < 255) {
-            panel->bg_texture = render_complex_transparent_rect (renderer, &panel->transform->rect, colour);
+            render_complex_transparent_rect (renderer, &panel->bg_texture, &panel->transform->rect, colour);
             panel->bg_texture_rect.w = panel->transform->rect.w;
             panel->bg_texture_rect.h = panel->transform->rect.h;
         }
