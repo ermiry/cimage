@@ -11,6 +11,13 @@
 #include "cengine/renderer.h"
 #include "cengine/window.h"
 
+#ifdef CENGINE_DEBUG
+#include "cengine/utils/utils.h"
+#include "cengine/utils/log.h"
+#endif
+
+int window_get_size (Window *window, WindowSize *window_size);
+
 static Window *window_new (void) {
 
     Window *window = (Window *) malloc (sizeof (Window));
@@ -53,6 +60,12 @@ Window *window_create (const char *title, WindowSize window_size, Uint32 window_
         window->window = SDL_CreateWindow (title,
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
             window_size.width, window_size.height, window_flags);
+
+        window_get_size (window, &window->window_size);
+
+        window->window_title = title ? str_new (title) : NULL;
+        window->window_flags = window_flags;
+        window->fullscreen = window_flags & SDL_WINDOW_FULLSCREEN;
     }
 
     return window;
@@ -77,38 +90,40 @@ int window_get_size (Window *window, WindowSize *window_size) {
 
 }
 
-// FIXME:
+// FIXME: do we need to update the renderer?
 // toggles window full screen on and off
 int window_toggle_full_screen (Window *window) {
 
     int retval = 1;
 
-    // if (renderer) {
-    //     renderer->fullscreen = SDL_GetWindowFlags (renderer->window) & SDL_WINDOW_FULLSCREEN;
-    //     retval = SDL_SetWindowFullscreen (renderer->window, renderer->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
-    //     renderer->fullscreen = SDL_GetWindowFlags (renderer->window) & SDL_WINDOW_FULLSCREEN;
-    // }
+    if (window) {
+        window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
+        retval = SDL_SetWindowFullscreen (window->window, window->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+        window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
+    }
 
     return retval;
 
 }
 
-// FIXME:
-// FIXME: do we need to update the renderer?
 // resizes the window asscoaited with a renderer
 int window_resize (Window *window, u32 new_width, u32 new_height) {
 
     int retval = 1;
 
-    // if (renderer) {
+    if (window) {
         // check if we have a valid new size
-        // if (new_width <= renderer->display_mode.w && new_width > 0 &&
-        //     new_height <= renderer->display_mode.h && new_height > 0) {
-        //     SDL_SetWindowSize (renderer->window, new_width, new_height);
-        //     window_get_size (renderer->window, &renderer->window_size);
-        //     retval = 0;
-        // }
-    // }
+        if (new_width <= window->display_mode.w && new_width > 0 &&
+            new_height <= window->display_mode.h && new_height > 0) {
+            SDL_SetWindowSize (window->window, new_width, new_height);
+            window_get_size (window->window, &window->window_size);
+
+            SDL_RenderSetLogicalSize (window->renderer, 
+                window->window_size.width, window->window_size.height);
+
+            retval = 0;
+        }
+    }
 
     return retval;
 

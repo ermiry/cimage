@@ -21,6 +21,9 @@ typedef struct WindowSize {
 
 struct _Window {
 
+    int display_index;
+    SDL_DisplayMode display_mode;
+
     SDL_Window *window;
     Uint32 window_flags;
 
@@ -29,6 +32,9 @@ struct _Window {
     bool fullscreen;
 
     SDL_Surface *icon;
+
+    // reference to the window renderer
+    struct _Renderer *renderer;
 
 };
 

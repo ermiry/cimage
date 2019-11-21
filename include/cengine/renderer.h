@@ -18,6 +18,8 @@
 
 #include "cengine/window.h"
 
+struct _Window;
+
 // auxiliary structure to map the source surface to a texture
 typedef struct SurfaceTexture {
 
@@ -42,14 +44,7 @@ struct _Renderer {
 
     queue_t *textures_queue;
 
-    int display_index;
-    SDL_DisplayMode display_mode;
-
-    SDL_Window *window;
-    Uint32 window_flags;
-    String *window_title;
-    WindowSize window_size;
-    bool fullscreen;
+    struct _Window *window;
 
 };
 

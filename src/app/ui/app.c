@@ -66,8 +66,8 @@ void app_ui_init (void) {
 
     Font *font = ui_font_get_default ();
 
-    u32 screen_width = main_renderer->window_size.width;
-    u32 screen_height = main_renderer->window_size.height;
+    u32 screen_width = main_renderer->window->window_size.width;
+    u32 screen_height = main_renderer->window->window_size.height;
 
     /*** background ***/
     RGBA_Color electromagnetic = { 47, 54, 64, 255 };

@@ -71,15 +71,15 @@ void camera_set_target (Camera *cam, Transform *target) {
 static void camera_init (Camera *cam, Renderer *renderer) {
 
     // position
-    cam->transform.position.x = renderer->window_size.width / 2;
-    cam->transform.position.y = renderer->window_size.height / 2;
+    cam->transform.position.x = renderer->window->window_size.width / 2;
+    cam->transform.position.y = renderer->window->window_size.height / 2;
 
-    cam->windowWidth = renderer->window_size.width;
-    cam->windowHeight = renderer->window_size.height;
+    cam->windowWidth = renderer->window->window_size.width;
+    cam->windowHeight = renderer->window->window_size.height;
 
     cam->bounds.x = cam->bounds.y = 0;
-    cam->bounds.w = renderer->window_size.width;
-    cam->bounds.h = renderer->window_size.height;
+    cam->bounds.w = renderer->window->window_size.width;
+    cam->bounds.h = renderer->window->window_size.height;
 
     // motion
     cam->accelerationRate = DEFAULT_CAM_ACCEL;
