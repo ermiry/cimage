@@ -91,6 +91,22 @@ void app_ui_end (void) {
 
 #pragma region images
 
+void app_ui_image_display_in_window (void *img_ptr) {
+
+    if (img_ptr) {
+        Image *image = (Image *) img_ptr;
+
+        // FIXME: we need to save the original image size here!!
+        // FIXME: check if this size if possible
+        // TODO: also we dont want to cover the full screen, we need to constraint to, lets say, max 80% of the full screen
+        WindowSize window_size = { .width = image->transform->rect.w, .height =  image->transform->rect.h };
+        // FIXME: we need the image name here!!
+        Renderer *renderer = renderer_create_with_window ("test", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
+            "Image Name Here!", window_size, 0);
+    }
+
+}
+
 // TODO: first reduce the image and then render what we want
 void app_ui_image_display (const char *filename) {
 
@@ -104,6 +120,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_ouline_colour (image, RGBA_WHITE);
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
+        // ui_image_set_action (image, app_ui_image_display_in_window, image);
 
         ui_layout_grid_add_element (grid, image->ui_element);
     }
