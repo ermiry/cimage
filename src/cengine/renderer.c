@@ -561,35 +561,73 @@ void surface_delete (SDL_Surface *surface) { if (surface) SDL_FreeSurface (surfa
 #pragma region Basic
 
 // renders a dot
-void render_basic_dot (Renderer *renderer, int x, int y, SDL_Color color) {
+void render_basic_dot (Renderer *renderer, int x, int y, SDL_Color color,
+    float x_scale, float y_scale) {
 
-    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawPoint (renderer->renderer, x ,y);
+    if (renderer) {
+        float original_scale_x = 0;
+        float original_scale_y = 0;
+
+        SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
+
+        SDL_RenderSetScale (renderer->renderer, x_scale, y_scale);
+        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
+
+        SDL_RenderDrawPoint (renderer->renderer, x / x_scale, y / y_scale);
+
+        SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
+    }
 
 }
 
 // renders a horizontal line of dots
-void render_basic_dot_line_horizontal (Renderer *renderer, int start, int y, int length, int offset, SDL_Color color) {
+void render_basic_dot_line_horizontal (Renderer *renderer, int start, int end, int y, int offset, SDL_Color color,
+    float x_scale, float y_scale) {
 
-    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
-    for (unsigned int i = start; i < length; i += offset)
-        SDL_RenderDrawPoint (renderer->renderer, i, y);
+    if (renderer) {
+        float original_scale_x = 0;
+        float original_scale_y = 0;
+
+        SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
+
+        SDL_RenderSetScale (renderer->renderer, x_scale, y_scale);
+        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
+
+        int scale_offset = (offset * x_scale);
+        for (unsigned int i = start; i < end; i += scale_offset)
+            SDL_RenderDrawPoint (renderer->renderer, i / x_scale, y / y_scale);
+
+        SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
+    }
 
 }
 
 // renders a vertical line of dots
-void render_basic_dot_line_vertical (Renderer *renderer, int x, int start, int length, int offset, SDL_Color color) {
+void render_basic_dot_line_vertical (Renderer *renderer, int start, int end, int x, int offset, SDL_Color color,
+    float x_scale, float y_scale) {
 
-    SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
-    for (unsigned int i = start; i < length; i += offset)
-        SDL_RenderDrawPoint (renderer->renderer, x, i);
+    if (renderer) {
+        float original_scale_x = 0;
+        float original_scale_y = 0;
+
+        SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
+
+        SDL_RenderSetScale (renderer->renderer, x_scale, y_scale);
+        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);
+
+        int scale_offset = (offset * x_scale);
+        for (unsigned int i = start; i < end; i += scale_offset)
+            SDL_RenderDrawPoint (renderer->renderer, x / x_scale, i / y_scale);
+
+        SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
+    }
 
 }
 
 // renders a filled rect
 void render_basic_filled_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color color) {
 
-    if (rect) {
+    if (renderer && rect) {
         SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
         SDL_RenderFillRect (renderer->renderer, rect);
     }
@@ -607,9 +645,9 @@ void render_basic_outline_rect (Renderer *renderer, SDL_Rect *rect, SDL_Color co
         SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
 
         SDL_RenderSetScale (renderer->renderer, scale_x, scale_y);
-        SDL_Rect temp_rect = { .x = rect->x / scale_x, .y = rect->y / scale_y, .w = rect->w / scale_x, .h = rect->h / scale_y };
-
         SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);      
+
+        SDL_Rect temp_rect = { .x = rect->x / scale_x, .y = rect->y / scale_y, .w = rect->w / scale_x, .h = rect->h / scale_y };
         SDL_RenderDrawRect (renderer->renderer, &temp_rect);
 
         SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
@@ -628,9 +666,9 @@ void render_basic_line (Renderer *renderer, int x1, int x2, int y1, int y2, SDL_
         SDL_RenderGetScale (renderer->renderer, &original_scale_x, &original_scale_y);
 
         SDL_RenderSetScale (renderer->renderer, scale_x, scale_y);
+        SDL_SetRenderDrawColor (renderer->renderer, 255, 255, 255, 255);        
 
-        SDL_SetRenderDrawColor (renderer->renderer, color.r, color.g, color.b, color.a);        
-        SDL_RenderDrawLine (renderer->renderer, x1, y1, x2, y2);
+        SDL_RenderDrawLine (renderer->renderer, x1 / scale_x, y1 / scale_y, x2 / scale_x, y2 / scale_y);
 
         SDL_RenderSetScale (renderer->renderer, original_scale_x, original_scale_y);
     }

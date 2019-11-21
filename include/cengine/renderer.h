@@ -159,13 +159,16 @@ extern SDL_Surface *surface_load_image (const char *filename);
 /*** Render Basic ***/
 
 // renders a dot
-extern void render_basic_dot (Renderer *renderer,int x, int y, SDL_Color color);
+extern void render_basic_dot (Renderer *renderer, int x, int y, SDL_Color color,
+    float x_scale, float y_scale);
 
 // renders a horizontal line of dots
-extern void render_basic_dot_line_horizontal (Renderer *renderer,int start, int y, int length, int offset, SDL_Color color);
+extern void render_basic_dot_line_horizontal (Renderer *renderer, int start, int end, int y, int offset, SDL_Color color,
+    float x_scale, float y_scale);
 
 // renders a vertical line of dots
-extern void render_basic_dot_line_vertical (Renderer *renderer,int x, int start, int length, int offset, SDL_Color color);
+extern void render_basic_dot_line_vertical (Renderer *renderer, int start, int end, int x, int offset, SDL_Color color,
+    float x_scale, float y_scale);
 
 // renders a filled rect
 extern void render_basic_filled_rect (Renderer *renderer,SDL_Rect *rect, SDL_Color color);
