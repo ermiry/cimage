@@ -218,7 +218,6 @@ void renderer_set_background_texture_loading_factor (Renderer *renderer, u32 bg_
 #pragma region Layers
 
 DoubleList *gos_layers = NULL;              // render layers for the gameobjects
-DoubleList *ui_elements_layers = NULL;      // render layers for the ui elements
 
 Layer *layer_get_by_pos (DoubleList *layers, int pos) {
 
@@ -393,18 +392,10 @@ int layer_remove_element_by_name (DoubleList *layers, const char *layer_name, vo
 
 }
 
-static u8 layers_init (void) {
+// init the ui elements layers
+DoubleList *ui_layers_init (void) {
 
-    // ini the game objects layers
-    gos_layers = dlist_init (layer_delete, layer_comparator);
-    if (gos_layers) {
-        // add the default layer to the list
-        Layer *default_layer = layer_new (gos_layers, "default", 0, true);
-        dlist_insert_after (gos_layers, dlist_end (gos_layers), default_layer);
-    }
-
-    // init the ui elements layers
-    ui_elements_layers = dlist_init (layer_delete, layer_comparator);
+    DoubleList *ui_elements_layers = dlist_init (layer_delete, layer_comparator);
     if (ui_elements_layers) {
         // add the default layers to the list
         Layer *back_layer = layer_new (ui_elements_layers, "back", 0, false);
@@ -417,17 +408,33 @@ static u8 layers_init (void) {
         dlist_insert_after (ui_elements_layers, dlist_end (ui_elements_layers), top_layer);
     }
 
-    return (gos_layers && ui_elements_layers ? 0 : 1);
+    return ui_elements_layers;
 
 }
 
+// FIXME: 22/11/2019 -- we are not calling this any more!!
+static u8 layers_init (void) {
+
+    // ini the game objects layers
+    gos_layers = dlist_init (layer_delete, layer_comparator);
+    if (gos_layers) {
+        // add the default layer to the list
+        Layer *default_layer = layer_new (gos_layers, "default", 0, true);
+        dlist_insert_after (gos_layers, dlist_end (gos_layers), default_layer);
+    }
+
+    return (gos_layers ? 0 : 1);
+
+}
+
+// FIXME: 22/11/2019 -- we are not calling this any more!!
 static void layers_end (void) { 
     
     dlist_delete (gos_layers);
     gos_layers = NULL;
 
-    dlist_delete (ui_elements_layers);
-    ui_elements_layers = NULL;
+    // dlist_delete (ui_elements_layers);
+    // ui_elements_layers = NULL;
     
 }
 
@@ -693,7 +700,7 @@ u8 render_init (void) {
 
     u8 errors = 0;
 
-    errors |= layers_init ();
+    // errors |= layers_init ();
 
     renderers = dlist_init (renderer_delete, NULL);
     u8 retval = renderers ? 0 : 1;
@@ -709,7 +716,7 @@ u8 render_init (void) {
 
 void render_end (void) {
 
-    layers_end ();
+    // layers_end ();
 
     dlist_delete (renderers);
 

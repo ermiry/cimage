@@ -83,7 +83,7 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
 
     // by default, add the ui element to the middle layer
     if (new_element) {
-        Layer *layer = layer_get_by_name (ui_elements_layers, "middle");
+        Layer *layer = layer_get_by_name (ui->ui_elements_layers, "middle");
         layer_add_element (layer, new_element);
         new_element->id = layer->pos;
     }
@@ -160,14 +160,14 @@ int ui_element_comparator (const void *one, const void *two) {
 // sets the render layer of the ui element
 // removes it from the one it is now and adds it to the new one
 // returns 0 on success, 1 on error
-int ui_element_set_layer (UIElement *ui_element, const char *layer_name) {
+int ui_element_set_layer (UI *ui, UIElement *ui_element, const char *layer_name) {
 
     int retval = 1;
 
     if (ui_element && layer_name) {
-        Layer *layer = layer_get_by_name (ui_elements_layers, layer_name);
+        Layer *layer = layer_get_by_name (ui->ui_elements_layers, layer_name);
         if (layer) {
-            Layer *curr_layer = layer_get_by_pos (ui_elements_layers, ui_element->layer_id);
+            Layer *curr_layer = layer_get_by_pos (ui->ui_elements_layers, ui_element->layer_id);
             layer_remove_element (curr_layer, ui_element);
 
             retval = layer_add_element (layer, ui_element);
@@ -231,6 +231,8 @@ UI *ui_create (void) {
             ui->max_ui_elements = DEFAULT_MAX_UI_ELEMENTS;
             ui->curr_max_ui_elements = 0;
             ui->new_ui_element_id = 0;
+
+            ui->ui_elements_layers = ui_layers_init ();
         }
     }
 
@@ -275,7 +277,7 @@ void ui_render (Renderer *renderer) {
 
     Layer *layer = NULL;
     UIElement *ui_element = NULL;
-    for (ListElement *le = dlist_start (ui_elements_layers); le; le = le->next) {
+    for (ListElement *le = dlist_start (renderer->ui->ui_elements_layers); le; le = le->next) {
         layer = (Layer *) le->data;
 
         for (ListElement *le_sub = dlist_start (layer->elements); le_sub; le_sub = le_sub->next) {

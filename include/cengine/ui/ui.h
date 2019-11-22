@@ -58,7 +58,7 @@ extern int ui_element_comparator (const void *one, const void *two);
 // sets the render layer of the ui element
 // removes it from the one it is now and adds it to the new one
 // returns 0 on success, 1 on error
-extern int ui_element_set_layer (UIElement *ui_element, const char *layer_name);
+extern int ui_element_set_layer (struct _UI *ui, UIElement *ui_element, const char *layer_name);
 
 extern void ui_element_toggle_active (UIElement *ui_element);
 

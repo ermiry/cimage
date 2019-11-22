@@ -31,19 +31,19 @@ static void sidebar_init (u32 screen_height) {
 
     sidebar = ui_panel_create (0, 0, 100, screen_height, UI_POS_LEFT_UPPER_CORNER, main_renderer);
     ui_panel_set_bg_colour (sidebar, main_renderer, blue_night);
-    ui_element_set_layer (sidebar->ui_element, "top");
+    ui_element_set_layer (main_renderer->ui, sidebar->ui_element, "top");
 
     photos_button = ui_button_create (18, 18, 64, 64, UI_POS_LEFT_UPPER_CORNER, main_renderer);
     // ui_button_set_action (photos_button, NULL, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
     ui_button_set_sprite (photos_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/gallery.png");
-    ui_element_set_layer (photos_button->ui_element, "top");
+    ui_element_set_layer (main_renderer->ui, photos_button->ui_element, "top");
 
     settings_button = ui_button_create (18, -18, 64, 64, UI_POS_LEFT_BOTTOM_CORNER, main_renderer);
     // ui_button_set_action (settings_button, game_state_change, change_main_state_settings);
     // ui_button_set_ouline_colour (settings_button, RGBA_WHITE);
     ui_button_set_sprite (settings_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/settings.png");
-    ui_element_set_layer (settings_button->ui_element, "top");
+    ui_element_set_layer (main_renderer->ui, settings_button->ui_element, "top");
 
 }
 
@@ -118,7 +118,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_ouline_colour (image, RGBA_WHITE);
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
-        // ui_image_set_action (image, app_ui_image_display_in_window, image);
+        ui_image_set_action (image, app_ui_image_display_in_window, image);
 
         // TODO: 21/11/2019 - it seems overlay uses a lot of memory
         // maybe create only one overlay and add a ref and only display the size of the image

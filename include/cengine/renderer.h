@@ -103,7 +103,6 @@ typedef struct Layer {
 } Layer;
 
 extern DoubleList *gos_layers;              // render layers for the gameobjects
-extern DoubleList *ui_elements_layers;      // render layers for the ui elements
 
 extern Layer *layer_get_by_pos (DoubleList *layers, int pos);
 
@@ -130,6 +129,9 @@ extern int layer_remove_element (Layer *layer, void *ptr);
 // removes an element from a layer taht is gotten by its name
 // returns 0 on succes, 1 on error
 extern int layer_remove_element_by_name (DoubleList *layers, const char *layer_name, void *ptr);
+
+// init the ui elements layers
+extern DoubleList *ui_layers_init (void);
 
 /*** Surfaces ***/
 
