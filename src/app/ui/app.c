@@ -101,6 +101,12 @@ void app_ui_image_display_in_window (void *img_ptr) {
         WindowSize window_size = { .width = image->sprite->img_data->w, .height =  image->sprite->img_data->h };
         Renderer *renderer = renderer_create_with_window ("test", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
             image->sprite->img_data->filename->str, window_size, 0);
+
+        // load a new image
+        Image *new_image = ui_image_create_static (0, 0, renderer);
+        ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
+        ui_image_set_sprite (new_image, renderer, image->sprite->img_data->filename->str);
+        // ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
     }
 
 }
