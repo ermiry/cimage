@@ -224,3 +224,33 @@ char *c_string_reverse (char *str) {
     return NULL;
 
 }
+
+// removes a substring from a c string
+char *c_string_remove (char *str, const char *sub) {
+
+    char *p, *q, *r;
+    if ((q = r = strstr (str, sub)) != NULL) {
+        size_t len = strlen (sub);
+        while ((r = strstr (p = r + len, sub)) != NULL) {
+            memmove (q, p, r - p);
+            q += r - p;
+        }
+        memmove (q, p, strlen (p) + 1);
+    }
+    
+    return str;
+
+}
+
+// removes all ocurrances of a char from a string
+void c_string_remove_char (char *string, char garbage) {
+
+    char *src, *dst;
+    for (src = dst = string; *src != '\0'; src++) {
+        *dst = *src;
+        if (*dst != garbage) dst++;
+    }
+    
+    *dst = '\0';
+
+}

@@ -46,4 +46,10 @@ extern void c_string_copy (char *to, const char *from);
 // revers a c string
 extern char *c_string_reverse (char *str);
 
+// removes a substring from a c string
+extern char *c_string_remove (char *str, const char *sub);
+
+// removes all ocurrances of a char from a string
+extern void c_string_remove_char (char *string, char garbage);
+
 #endif
