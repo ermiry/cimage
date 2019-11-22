@@ -72,61 +72,100 @@ RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a) {
 
 #pragma region ui elements
 
-UIElement **ui_elements = NULL;
-static u32 max_ui_elements;
-u32 curr_max_ui_elements;
-static u32 new_ui_element_id;
+typedef struct UI {
 
-static void ui_element_delete_element (UIElement *ui_element);
+    UIElement **ui_elements;
+    u32 max_ui_elements;
+    u32 curr_max_ui_elements;
+    u32 new_ui_element_id;
 
-static u8 ui_elements_realloc (void) {
+    DoubleList *ui_elements_layers;
 
-    u32 new_max_ui_elements = curr_max_ui_elements * 2;
+} UI;
 
-    ui_elements = realloc (ui_elements, new_max_ui_elements * sizeof (UIElement *));
-    if (ui_elements) {
-        max_ui_elements = new_max_ui_elements;
-        return 0;
+static UI *ui_new (void) {
+
+    UI *ui = (UI *) malloc (sizeof (UI));
+    if (ui) {
+        ui->ui_elements = NULL;
+        ui->max_ui_elements = 0;
+        ui->curr_max_ui_elements = 0;
+        ui->new_ui_element_id = 0;
+
+        ui->ui_elements_layers = NULL;
     }
 
-    return 1;
+    return ui;
+
+}
+
+void ui_delete (void *ui_ptr) {
+
+    if (ui_ptr) {
+        UI *ui = (UI *) ui_ptr;
+
+        if (ui->ui_elements) {
+            for (u32 i = 0; i < ui->curr_max_ui_elements; i++)
+                ui_element_delete (ui->ui_elements[i]);
+
+            free (ui->ui_elements);
+        }
+
+        dlist_delete (ui->ui_elements_layers);
+
+        free (ui_ptr);
+    }
 
 }
 
 // init our ui elements structures
-static u8 ui_elements_init (void) {
+// returns 0 on success, 1 on error
+u8 ui_create (UI *ui) {
 
-    ui_elements = (UIElement **) calloc (DEFAULT_MAX_UI_ELEMENTS, sizeof (UIElement *));
-    if (ui_elements) {
-        for (u32 i = 0; i < DEFAULT_MAX_UI_ELEMENTS; i++) ui_elements[i] = NULL;
+    u8 retval = 1;
 
-        max_ui_elements = DEFAULT_MAX_UI_ELEMENTS;
-        curr_max_ui_elements = 0;
-        new_ui_element_id = 0;
+    if (ui) {
+        ui->ui_elements = (UIElement **) calloc (DEFAULT_MAX_UI_ELEMENTS, sizeof (UIElement *));
+        if (ui->ui_elements) {
+            for (u32 i = 0; i < DEFAULT_MAX_UI_ELEMENTS; i++) ui->ui_elements[i] = NULL;
 
-        return 0;
+            ui->max_ui_elements = DEFAULT_MAX_UI_ELEMENTS;
+            ui->curr_max_ui_elements = 0;
+            ui->new_ui_element_id = 0;
+
+            retval = 0;
+        }
     }
 
-    return 1;
+    return retval;
 
 }
 
-static void ui_elements_end (void) {
+static u8 ui_elements_realloc (UI *ui) {
 
-    if (ui_elements) {
-        for (u32 i = 0; i < curr_max_ui_elements; i++)
-            ui_element_delete (ui_elements[i]);
+    u8 retval = 1;
 
-        free (ui_elements);
+    if (ui) {
+        u32 new_max_ui_elements = ui->curr_max_ui_elements * 2;
+
+        ui->ui_elements = realloc (ui->ui_elements, new_max_ui_elements * sizeof (UIElement *));
+        if (ui->ui_elements) {
+            ui->max_ui_elements = new_max_ui_elements;
+            retval = 0;;
+        }
     }
+
+    return retval;
 
 }
 
-static i32 ui_element_get_free_spot (void) {
+static i32 ui_elements_get_free_spot (UI *ui) {
 
-    for (u32 i = 0; i < curr_max_ui_elements; i++) 
-        if (ui_elements[i]->id == -1)
-            return i;
+    if (ui) {
+        for (u32 i = 0; i < ui->curr_max_ui_elements; i++) 
+            if (ui->ui_elements[i]->id == -1)
+                return (i32) i;
+    }
 
     return -1;
 
@@ -358,25 +397,22 @@ void ui_render (Renderer *renderer) {
 
 #pragma region public
 
-// init main ui elements
+// init common ui elements
 u8 ui_init (void) {
 
     int errors = 0;
-
-    // init ui elements
-    errors = ui_elements_init ();
+    int retval = 0;
 
     // init and load fonts
-    errors = ui_fonts_init ();
+    retval = ui_fonts_init ();
+    errors |= retval;
 
     return errors;
 
 }
 
-// destroy main ui elements
-u8 ui_destroy (void) {
-
-    ui_elements_end ();
+// destroy common ui elements
+u8 ui_end (void) {
 
     ui_cursor_delete (main_cursor);     // cursor
 

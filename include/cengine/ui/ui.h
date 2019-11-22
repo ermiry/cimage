@@ -50,7 +50,7 @@ typedef enum UIElementType {
 
 } UIElementType;
 
-#define DEFAULT_MAX_UI_ELEMENTS     10
+#define DEFAULT_MAX_UI_ELEMENTS         64
 
 typedef struct UIElement {
 
