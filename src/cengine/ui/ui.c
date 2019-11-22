@@ -27,15 +27,6 @@
 
 #include "cengine/utils/log.h"
 
-/*** Common RGBA Colors ***/
-
-RGBA_Color RGBA_NO_COLOR = { 0, 0, 0, 0 };
-RGBA_Color RGBA_WHITE = { 255, 255, 255, 255 };
-RGBA_Color RGBA_BLACK = { 0, 0, 0, 255 };
-RGBA_Color RGBA_RED = { 255, 0, 0, 255 };
-RGBA_Color RGBA_GREEN = { 0, 255, 0, 255 };
-RGBA_Color RGBA_BLUE = { 0, 0, 255, 255 };
-
 /*** Basic UI Elements ***/
 
 #pragma region Basic UI Elements
@@ -55,13 +46,6 @@ UIRect ui_rect_union (UIRect a, UIRect b) {
     u32 y2 = MAX (a.y + a.h, b.y + b.h);
 
     UIRect retval = { x1, y1, MAX (0, x2 - x1), MAX (0, y2 - y1) };
-    return retval;
-
-}
-
-RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a) { 
-
-    RGBA_Color retval = { r, g, b, a };
     return retval;
 
 }
