@@ -10,6 +10,7 @@
 #include "cengine/collections/dlist.h"
 
 #include "cengine/animation.h"
+#include "cengine/assets.h"
 #include "cengine/input.h"
 #include "cengine/renderer.h"
 
@@ -24,20 +25,6 @@
 
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
-
-/*** assets ***/
-
-const String *cengine_assets_path = NULL;
-
-// sets the path for the assets folder
-void cengine_assets_set_path (const char *pathname) {
-
-    if (cengine_assets_path) str_delete ((String *) cengine_assets_path);
-    cengine_assets_path = pathname ? str_new (pathname) : NULL;
-
-}
-
-/*** cengine ***/
 
 int cengine_init (void) {
 
@@ -92,6 +79,7 @@ int cengine_end (void) {
     manager->curr_state->on_exit ();
     manager_delete (manager);
 
+    assets_end ();
     input_end ();
     camera_destroy (main_camera);
     ui_end ();
@@ -99,8 +87,6 @@ int cengine_end (void) {
     game_object_destroy_all ();
     animations_end ();
     thread_hub_end_global ();
-
-    str_delete ((String *) cengine_assets_path);
 
     SDL_Quit ();
 

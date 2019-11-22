@@ -3,20 +3,12 @@
 
 #include <stdbool.h>
 
-#include "cengine/types/string.h"
 #include "cengine/renderer.h"
 
 #include "cengine/ui/textbox.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-/*** assets ***/
-
-extern const String *cengine_assets_path;
-
-// sets the path for the assets folder
-extern void cengine_assets_set_path (const char *pathname);
 
 /*** cengine ***/
 

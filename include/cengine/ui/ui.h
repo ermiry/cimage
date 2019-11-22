@@ -84,12 +84,6 @@ extern void ui_render (Renderer *renderer);
 // initializes cengine's ui capabilities
 extern u8 ui_init (void);
 
-// sets the location of cengine's default ui assets
-extern void ui_default_assets_set_path (const char *pathname);
-
-// loads cengine's default ui assets
-extern u8 ui_default_assets_load (void);
-
 // destroy common ui elements
 extern u8 ui_end (void);
 

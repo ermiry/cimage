@@ -268,50 +268,6 @@ static i32 ui_elements_get_free_spot (UI *ui) {
 
 }
 
-#pragma region default assets
-
-static const String *ui_default_assets_path = NULL;
-
-// sets the location of cengine's default ui assets
-void ui_default_assets_set_path (const char *pathname) {
-
-    str_delete ((String *) ui_default_assets_path);
-    ui_default_assets_path = pathname ? str_new (pathname) : NULL;
-
-}
-
-static u8 ui_default_assets_load_checks (void) {
-
-    u8 retval = 1;
-
-    // TODO:
-
-    return retval;
-
-}
-
-// loads cengine's default ui assets
-u8 ui_default_assets_load (void) {
-
-    u8 retval = 1;
-
-    if (ui_default_assets_path) {
-        // printf ("%s\n", ui_default_assets_path->str);
-
-        retval = 0;
-    }
-
-    else {
-        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
-            "Failed to load cengine's default assets - ui default assets path set to NULL!");
-    }
-
-    return retval;
-
-}
-
-#pragma endregion
-
 #pragma region render
 
 // render the ui elements to the screen
@@ -371,8 +327,6 @@ u8 ui_end (void) {
     ui_cursor_delete (main_cursor);     // cursor
 
     ui_font_end ();     // fonts
-
-    str_delete ((String *) ui_default_assets_path);
 
     #ifdef CENGINE_DEBUG
     cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done cleaning cengine ui.");
