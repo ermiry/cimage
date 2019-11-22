@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
-
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
@@ -27,136 +25,22 @@
 
 #include "cengine/utils/log.h"
 
-/*** Basic UI Elements ***/
+static UIElement *ui_element_new (void) {
 
-#pragma region Basic UI Elements
-
-UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h) {
-
-    UIRect ret = { x, y, w, h };
-    return ret;
-
-}
-
-UIRect ui_rect_union (UIRect a, UIRect b) {
-
-    u32 x1 = MIN (a.x, b.x);
-    u32 y1 = MIN (a.y, b.y);
-    u32 x2 = MAX (a.x + a.w, b.x + b.w);
-    u32 y2 = MAX (a.y + a.h, b.y + b.h);
-
-    UIRect retval = { x1, y1, MAX (0, x2 - x1), MAX (0, y2 - y1) };
-    return retval;
-
-}
-
-#pragma endregion
-
-/*** ui elements ***/
-
-#pragma region ui elements
-
-typedef struct UI {
-
-    UIElement **ui_elements;
-    u32 max_ui_elements;
-    u32 curr_max_ui_elements;
-    u32 new_ui_element_id;
-
-    DoubleList *ui_elements_layers;
-
-} UI;
-
-static UI *ui_new (void) {
-
-    UI *ui = (UI *) malloc (sizeof (UI));
-    if (ui) {
-        ui->ui_elements = NULL;
-        ui->max_ui_elements = 0;
-        ui->curr_max_ui_elements = 0;
-        ui->new_ui_element_id = 0;
-
-        ui->ui_elements_layers = NULL;
+    UIElement *ui_element = (UIElement *) malloc (sizeof (UIElement));
+    if (ui_element) {
+        ui_element->id = -1;
+        ui_element->active = false;
+        ui_element->layer_id = -1;
+        ui_element->element = NULL;
     }
 
-    return ui;
-
-}
-
-void ui_delete (void *ui_ptr) {
-
-    if (ui_ptr) {
-        UI *ui = (UI *) ui_ptr;
-
-        if (ui->ui_elements) {
-            for (u32 i = 0; i < ui->curr_max_ui_elements; i++)
-                ui_element_delete (ui->ui_elements[i]);
-
-            free (ui->ui_elements);
-        }
-
-        dlist_delete (ui->ui_elements_layers);
-
-        free (ui_ptr);
-    }
-
-}
-
-// init our ui elements structures
-// returns 0 on success, 1 on error
-u8 ui_create (UI *ui) {
-
-    u8 retval = 1;
-
-    if (ui) {
-        ui->ui_elements = (UIElement **) calloc (DEFAULT_MAX_UI_ELEMENTS, sizeof (UIElement *));
-        if (ui->ui_elements) {
-            for (u32 i = 0; i < DEFAULT_MAX_UI_ELEMENTS; i++) ui->ui_elements[i] = NULL;
-
-            ui->max_ui_elements = DEFAULT_MAX_UI_ELEMENTS;
-            ui->curr_max_ui_elements = 0;
-            ui->new_ui_element_id = 0;
-
-            retval = 0;
-        }
-    }
-
-    return retval;
-
-}
-
-static u8 ui_elements_realloc (UI *ui) {
-
-    u8 retval = 1;
-
-    if (ui) {
-        u32 new_max_ui_elements = ui->curr_max_ui_elements * 2;
-
-        ui->ui_elements = realloc (ui->ui_elements, new_max_ui_elements * sizeof (UIElement *));
-        if (ui->ui_elements) {
-            ui->max_ui_elements = new_max_ui_elements;
-            retval = 0;;
-        }
-    }
-
-    return retval;
-
-}
-
-static i32 ui_elements_get_free_spot (UI *ui) {
-
-    if (ui) {
-        for (u32 i = 0; i < ui->curr_max_ui_elements; i++) 
-            if (ui->ui_elements[i]->id == -1)
-                return (i32) i;
-    }
-
-    return -1;
+    return ui_element;
 
 }
 
 // ui element constructor
-UIElement *ui_element_new (UIElementType type) {
+UIElement *ui_element_create (UI *ui, UIElementType type) {
 
     UIElement *new_element = NULL;
 
@@ -179,17 +63,17 @@ UIElement *ui_element_new (UIElementType type) {
     // }
 
     // else {
-        if (new_ui_element_id >= max_ui_elements) ui_elements_realloc ();
+        if (ui->new_ui_element_id >= ui->max_ui_elements) ui_elements_realloc (ui);
 
         new_element = (UIElement *) malloc (sizeof (UIElement));
         if (new_element) {
-            new_element->id = new_ui_element_id;
+            new_element->id = ui->new_ui_element_id;
             new_element->type = type;
             new_element->active = true;
             new_element->element = NULL;
-            ui_elements[new_element->id] = new_element;
-            new_ui_element_id++;
-            curr_max_ui_elements++;
+            ui->ui_elements[new_element->id] = new_element;
+            ui->new_ui_element_id++;
+            ui->curr_max_ui_elements++;
         }
     // }
 
@@ -296,7 +180,93 @@ void ui_element_toggle_active (UIElement *ui_element) {
 
 }
 
-#pragma endregion
+static UI *ui_new (void) {
+
+    UI *ui = (UI *) malloc (sizeof (UI));
+    if (ui) {
+        ui->ui_elements = NULL;
+        ui->max_ui_elements = 0;
+        ui->curr_max_ui_elements = 0;
+        ui->new_ui_element_id = 0;
+
+        ui->ui_elements_layers = NULL;
+    }
+
+    return ui;
+
+}
+
+void ui_delete (void *ui_ptr) {
+
+    if (ui_ptr) {
+        UI *ui = (UI *) ui_ptr;
+
+        if (ui->ui_elements) {
+            for (u32 i = 0; i < ui->curr_max_ui_elements; i++)
+                ui_element_delete (ui->ui_elements[i]);
+
+            free (ui->ui_elements);
+        }
+
+        dlist_delete (ui->ui_elements_layers);
+
+        free (ui_ptr);
+    }
+
+}
+
+// init our ui elements structures
+// returns 0 on success, 1 on error
+u8 ui_create (UI *ui) {
+
+    u8 retval = 1;
+
+    if (ui) {
+        ui->ui_elements = (UIElement **) calloc (DEFAULT_MAX_UI_ELEMENTS, sizeof (UIElement *));
+        if (ui->ui_elements) {
+            for (u32 i = 0; i < DEFAULT_MAX_UI_ELEMENTS; i++) ui->ui_elements[i] = NULL;
+
+            ui->max_ui_elements = DEFAULT_MAX_UI_ELEMENTS;
+            ui->curr_max_ui_elements = 0;
+            ui->new_ui_element_id = 0;
+
+            retval = 0;
+        }
+    }
+
+    return retval;
+
+}
+
+static u8 ui_elements_realloc (UI *ui) {
+
+    u8 retval = 1;
+
+    if (ui) {
+        u32 new_max_ui_elements = ui->curr_max_ui_elements * 2;
+
+        ui->ui_elements = realloc (ui->ui_elements, new_max_ui_elements * sizeof (UIElement *));
+        if (ui->ui_elements) {
+            ui->max_ui_elements = new_max_ui_elements;
+            retval = 0;;
+        }
+    }
+
+    return retval;
+
+}
+
+static i32 ui_elements_get_free_spot (UI *ui) {
+
+    if (ui) {
+        for (u32 i = 0; i < ui->curr_max_ui_elements; i++) 
+            if (ui->ui_elements[i]->id == -1)
+                return (i32) i;
+    }
+
+    return -1;
+
+}
 
 #pragma region default assets
 

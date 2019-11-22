@@ -6,8 +6,11 @@
 #include <SDL2/SDL_rect.h>
 
 #include "cengine/types/types.h"
+#include "cengine/collections/dlist.h"
 
 #include "cengine/renderer.h"
+
+typedef SDL_Rect UIRect;
 
 typedef enum UIElementType {
 
@@ -35,7 +38,7 @@ typedef struct UIElement {
 } UIElement;
 
 // ui element constructor
-extern UIElement *ui_element_new (UIElementType type);
+extern UIElement *ui_element_create (UI *ui, UIElementType type);
 
 // deactivates the ui element and destroys its component (this is what the user should call)
 extern void ui_element_destroy (UIElement *ui_element);
@@ -56,10 +59,22 @@ extern int ui_element_set_layer (UIElement *ui_element, const char *layer_name);
 
 extern void ui_element_toggle_active (UIElement *ui_element);
 
-typedef SDL_Rect UIRect;
+typedef struct UI {
 
-extern UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h);
-extern UIRect ui_rect_union (UIRect a, UIRect b);
+    UIElement **ui_elements;
+    u32 max_ui_elements;
+    u32 curr_max_ui_elements;
+    u32 new_ui_element_id;
+
+    DoubleList *ui_elements_layers;
+
+} UI;
+
+extern void ui_delete (void *ui_ptr);
+
+// init our ui elements structures
+// returns 0 on success, 1 on error
+extern u8 ui_create (UI *ui);
 
 /*** Public ui funcs ***/
 
@@ -75,7 +90,7 @@ extern void ui_default_assets_set_path (const char *pathname);
 // loads cengine's default ui assets
 extern u8 ui_default_assets_load (void);
 
-// destroys any cengine ui element left and deallocates memory
-extern u8 ui_destroy (void);
+// destroy common ui elements
+extern u8 ui_end (void);
 
 #endif

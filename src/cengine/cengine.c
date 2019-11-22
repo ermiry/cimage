@@ -94,7 +94,7 @@ int cengine_end (void) {
 
     input_end ();
     camera_destroy (main_camera);
-    ui_destroy ();
+    ui_end ();
     render_end ();
     game_object_destroy_all ();
     animations_end ();
