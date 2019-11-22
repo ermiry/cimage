@@ -194,7 +194,7 @@ TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer
 
     TextBox *textbox = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_TEXTBOX);
+    UIElement *ui_element = ui_element_create (renderer->ui, UI_TEXTBOX);
     if (ui_element) {
         textbox = ui_textbox_new ();
         if (textbox) {

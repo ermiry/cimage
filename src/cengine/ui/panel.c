@@ -104,7 +104,7 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *re
 
     Panel *panel = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_PANEL);
+    UIElement *ui_element = ui_element_create (renderer->ui, UI_PANEL);
     if (ui_element) {
         panel = ui_panel_new ();
         if (panel) {

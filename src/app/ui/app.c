@@ -112,7 +112,7 @@ void app_ui_image_display (const char *filename) {
         // FIXME:
         Renderer *main_renderer = renderer_get_by_name ("main");
 
-        Image *image = ui_image_create_static (0, 0);
+        Image *image = ui_image_create_static (0, 0, main_renderer);
         ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER, main_renderer);
         ui_image_set_sprite (image, main_renderer, filename);
         ui_image_set_ouline_colour (image, RGBA_WHITE);

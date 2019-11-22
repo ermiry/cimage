@@ -10,6 +10,7 @@
 #include "cengine/types/types.h"
 #include "cengine/collections/dlist.h"
 
+#include "cengine/graphics.h"
 #include "cengine/timer.h"
 
 #include "cengine/ui/ui.h"
@@ -160,7 +161,7 @@ extern void ui_noti_center_delete (void *noti_center_ptr);
 // creates a new notification center
 // max_display: max number of notifications to display at once
 // position: where do you want the notification center to be
-extern NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos, Renderer *renderer);
+extern NotiCenter *ui_noti_center_create (UI *ui, u8 max_display, UIPosition pos, Renderer *renderer);
 
 // sets the notification center position in the screen
 extern void ui_noti_center_set_position (NotiCenter *noti_center, UIPosition pos);

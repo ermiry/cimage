@@ -250,11 +250,11 @@ void ui_image_remove_overlay (Image *image) {
 
 }
 
-static Image *ui_image_create_common (void) {
+static Image *ui_image_create_common (Renderer *renderer) {
 
     Image *image = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_IMAGE);
+    UIElement *ui_element = ui_element_create (renderer->ui, UI_IMAGE);
     if (ui_element) {
         image = ui_image_new ();
         if (image) {
@@ -271,9 +271,9 @@ static Image *ui_image_create_common (void) {
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position
-Image *ui_image_create_static (u32 x, u32 y) {
+Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer) {
 
-    Image *image = ui_image_create_common ();
+    Image *image = ui_image_create_common (renderer);
     if (image) {
         image->transform = ui_transform_component_create (x, y, 0, 0);
     }
@@ -335,9 +335,9 @@ u8 ui_image_update_streaming_texture_mem (Image *image, void *mem, int mem_size)
 // usefull for streaming video
 // x and y for position
 // w and h for dimensions
-Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h) {
+Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h, Renderer *renderer) {
 
-    Image *image = ui_image_create_common ();
+    Image *image = ui_image_create_common (renderer);
     if (image) {
         image->transform = ui_transform_component_create (x, y, w, h);
     }

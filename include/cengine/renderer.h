@@ -16,11 +16,15 @@
 
 #include "cengine/threads/thread.h"
 
+#include "cengine/graphics.h"
 #include "cengine/window.h"
+
+#include "cengine/ui/ui.h"
 
 #define DEFAULT_BG_LOADING_FACTOR               1
 
 struct _Window;
+struct _UI;
 
 // auxiliary structure to map the source surface to a texture
 typedef struct SurfaceTexture {
@@ -48,6 +52,8 @@ struct _Renderer {
     u32 bg_loading_factor;
 
     struct _Window *window;
+
+    struct _UI *ui;
 
 };
 

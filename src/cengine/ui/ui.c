@@ -25,6 +25,9 @@
 
 #include "cengine/utils/log.h"
 
+static u8 ui_elements_realloc (UI *ui);
+static i32 ui_elements_get_free_spot (UI *ui);
+
 static UIElement *ui_element_new (void) {
 
     UIElement *ui_element = (UIElement *) malloc (sizeof (UIElement));
@@ -45,7 +48,7 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
     UIElement *new_element = NULL;
 
     // first check if we have a reusable ui element
-    i32 spot = ui_element_get_free_spot ();
+    i32 spot = ui_elements_get_free_spot (ui);
 
     // if (spot >= 0) {
     //     // FIXME: are we correctly removing all past elements from the layers??
@@ -65,12 +68,13 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
     // else {
         if (ui->new_ui_element_id >= ui->max_ui_elements) ui_elements_realloc (ui);
 
-        new_element = (UIElement *) malloc (sizeof (UIElement));
+        new_element = ui_element_new ();
         if (new_element) {
             new_element->id = ui->new_ui_element_id;
             new_element->type = type;
             new_element->active = true;
-            new_element->element = NULL;
+            // new_element->element = NULL;
+
             ui->ui_elements[new_element->id] = new_element;
             ui->new_ui_element_id++;
             ui->curr_max_ui_elements++;
@@ -216,11 +220,9 @@ void ui_delete (void *ui_ptr) {
 }
 
 // init our ui elements structures
-// returns 0 on success, 1 on error
-u8 ui_create (UI *ui) {
+UI *ui_create (void) {
 
-    u8 retval = 1;
-
+    UI *ui = ui_new ();
     if (ui) {
         ui->ui_elements = (UIElement **) calloc (DEFAULT_MAX_UI_ELEMENTS, sizeof (UIElement *));
         if (ui->ui_elements) {
@@ -229,12 +231,10 @@ u8 ui_create (UI *ui) {
             ui->max_ui_elements = DEFAULT_MAX_UI_ELEMENTS;
             ui->curr_max_ui_elements = 0;
             ui->new_ui_element_id = 0;
-
-            retval = 0;
         }
     }
 
-    return retval;
+    return ui;
 
 }
 

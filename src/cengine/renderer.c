@@ -69,6 +69,9 @@ static Renderer *renderer_new (void) {
         renderer->textures_queue = NULL;
 
         renderer->renderer = NULL;
+        renderer->window = NULL;
+
+        renderer->ui = NULL;
     }
 
     return renderer;
@@ -85,6 +88,8 @@ void renderer_delete (void *ptr) {
 
         if (renderer->textures_queue) 
             queue_destroy_complete (renderer->textures_queue, surface_texture_delete);
+
+        ui_delete (renderer->ui);
 
         free (renderer);
     }
@@ -120,6 +125,8 @@ Renderer *renderer_create_empty (const char *name, int display_idx) {
         // renderer->display_index = display_idx;
         renderer->textures_queue = queue_create ();
         renderer->bg_loading_factor = DEFAULT_BG_LOADING_FACTOR;
+
+        renderer->ui = ui_create ();
 
         dlist_insert_after (renderers, dlist_end (renderers), renderer);
     }
@@ -637,38 +644,38 @@ void render (Renderer *renderer) {
 
         // FIXME: 20/11/2019 --- we are no longer creating the camera!!
         // render by layers
-        Layer *layer = NULL;
-        GameObject *go = NULL;
-        Transform *transform = NULL;
-        Graphics *graphics = NULL;
-        for (ListElement *layer_le = dlist_start (gos_layers); layer_le; layer_le = layer_le->next) {
-            layer = (Layer *) layer_le->data;
+        // Layer *layer = NULL;
+        // GameObject *go = NULL;
+        // Transform *transform = NULL;
+        // Graphics *graphics = NULL;
+        // for (ListElement *layer_le = dlist_start (gos_layers); layer_le; layer_le = layer_le->next) {
+        //     layer = (Layer *) layer_le->data;
 
-            for (ListElement *le = dlist_start (layer->elements); le; le = le->next) {
-                go = (GameObject *) le->data;
+        //     for (ListElement *le = dlist_start (layer->elements); le; le = le->next) {
+        //         go = (GameObject *) le->data;
 
-                transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
-                graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
-                if (transform && graphics) {
-                    if (graphics->multipleSprites) {
-                        texture_draw_frame (main_camera, 
-                            renderer,
-                            graphics->spriteSheet, 
-                            transform->position.x, transform->position.y, 
-                            graphics->x_sprite_offset, graphics->y_sprite_offset,
-                            graphics->flip);
-                    }
+        //         transform = (Transform *) game_object_get_component (go, TRANSFORM_COMP);
+        //         graphics = (Graphics *) game_object_get_component (go, GRAPHICS_COMP);
+        //         if (transform && graphics) {
+        //             if (graphics->multipleSprites) {
+        //                 texture_draw_frame (main_camera, 
+        //                     renderer,
+        //                     graphics->spriteSheet, 
+        //                     transform->position.x, transform->position.y, 
+        //                     graphics->x_sprite_offset, graphics->y_sprite_offset,
+        //                     graphics->flip);
+        //             }
                     
-                    else {
-                        texture_draw (main_camera, 
-                            renderer,
-                            graphics->sprite, 
-                            transform->position.x, transform->position.y, 
-                            graphics->flip);
-                    }
-                }
-            }
-        }
+        //             else {
+        //                 texture_draw (main_camera, 
+        //                     renderer,
+        //                     graphics->sprite, 
+        //                     transform->position.x, transform->position.y, 
+        //                     graphics->flip);
+        //             }
+        //         }
+        //     }
+        // }
 
         ui_render (renderer);       // render ui elements
 

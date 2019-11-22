@@ -276,7 +276,7 @@ InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, R
 
     InputField *input = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_INPUT);
+    UIElement *ui_element = ui_element_create (renderer->ui, UI_INPUT);
     if (ui_element) {
         input = ui_input_field_new ();
         if (input) {

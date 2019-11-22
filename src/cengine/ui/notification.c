@@ -526,11 +526,11 @@ static void ui_noti_center_update_pos (NotiCenter *noti_center) {
 // creates a new notification center
 // max_display: max number of notifications to display at once
 // position: where do you want the notification center to be
-NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos, Renderer *renderer) {
+NotiCenter *ui_noti_center_create (UI *ui, u8 max_display, UIPosition pos, Renderer *renderer) {
 
     NotiCenter *noti_center = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_NOTI_CENTER);
+    UIElement *ui_element = ui_element_create (ui, UI_NOTI_CENTER);
 
     if (ui_element) {
         noti_center = ui_noti_center_new ();

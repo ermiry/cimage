@@ -8,6 +8,7 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/graphics.h"
 #include "cengine/renderer.h"
 
 #include "cengine/ui/ui.h"

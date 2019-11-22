@@ -10,6 +10,9 @@
 
 #include "cengine/renderer.h"
 
+struct _Renderer;
+struct _UI;
+
 typedef SDL_Rect UIRect;
 
 typedef enum UIElementType {
@@ -38,7 +41,7 @@ typedef struct UIElement {
 } UIElement;
 
 // ui element constructor
-extern UIElement *ui_element_create (UI *ui, UIElementType type);
+extern UIElement *ui_element_create (struct _UI *ui, UIElementType type);
 
 // deactivates the ui element and destroys its component (this is what the user should call)
 extern void ui_element_destroy (UIElement *ui_element);
@@ -59,7 +62,7 @@ extern int ui_element_set_layer (UIElement *ui_element, const char *layer_name);
 
 extern void ui_element_toggle_active (UIElement *ui_element);
 
-typedef struct UI {
+struct _UI {
 
     UIElement **ui_elements;
     u32 max_ui_elements;
@@ -68,18 +71,19 @@ typedef struct UI {
 
     DoubleList *ui_elements_layers;
 
-} UI;
+};
+
+typedef struct _UI UI;
 
 extern void ui_delete (void *ui_ptr);
 
 // init our ui elements structures
-// returns 0 on success, 1 on error
-extern u8 ui_create (UI *ui);
+extern UI *ui_create (void);
 
 /*** Public ui funcs ***/
 
 // renders all the current active ui to the screen
-extern void ui_render (Renderer *renderer);
+extern void ui_render (struct _Renderer *renderer);
 
 // initializes cengine's ui capabilities
 extern u8 ui_init (void);

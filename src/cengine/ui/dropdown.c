@@ -10,6 +10,7 @@
 #include "cengine/types/vector2d.h"
 #include "cengine/collections/dlist.h"
 
+#include "cengine/graphics.h"
 #include "cengine/renderer.h"
 #include "cengine/input.h"
 
@@ -261,7 +262,7 @@ Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Render
 
     Dropdown *dropdown = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_DROPDOWN);
+    UIElement *ui_element = ui_element_create (renderer->ui, UI_DROPDOWN);
     if (ui_element) {
         dropdown = ui_dropdown_new ();
         if (dropdown) {

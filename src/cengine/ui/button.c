@@ -303,7 +303,7 @@ Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *
 
     Button *button = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_BUTTON);
+    UIElement *ui_element = ui_element_create (renderer->ui, UI_BUTTON);
     if (ui_element) {
         button = ui_button_new ();
         if (button) {

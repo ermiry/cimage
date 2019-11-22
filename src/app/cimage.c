@@ -8,6 +8,8 @@
 #include "cengine/types/types.h"
 
 #include "cengine/cengine.h"
+#include "cengine/assets.h"
+
 #include "cengine/threads/thread.h"
 #include "cengine/manager/manager.h"
 

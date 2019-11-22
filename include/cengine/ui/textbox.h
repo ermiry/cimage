@@ -9,6 +9,8 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/graphics.h"
+
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
 #include "cengine/ui/components/transform.h"

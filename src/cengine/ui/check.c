@@ -3,6 +3,7 @@
 
 #include "cengine/types/types.h"
 
+#include "cengine/ui/ui.h"
 #include "cengine/ui/check.h"
 #include "cengine/ui/components/transform.h"
 
@@ -34,11 +35,11 @@ void ui_check_delete (void *check_ptr) {
 
 // creates a new check
 // x and y for position
-Check *ui_check_create (u32 x, u32 y) {
+Check *ui_check_create (UI *ui, u32 x, u32 y) {
 
     Check *check = NULL;
 
-    UIElement *ui_element = ui_element_new (UI_CHECK);
+    UIElement *ui_element = ui_element_create (ui, UI_CHECK);
     if (ui_element) {
         check = ui_check_new ();
         if (check) {

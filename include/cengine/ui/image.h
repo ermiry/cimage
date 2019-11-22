@@ -98,7 +98,7 @@ extern void ui_image_remove_overlay (Image *image);
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position
-extern Image *ui_image_create_static (u32 x, u32 y);
+extern Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer);
 
 // manually creates a streaming access texture, usefull for constant updates
 extern u8 ui_image_create_streaming_texture (Image *image, Renderer *renderer, Uint32 sdl_pixel_format);
@@ -111,7 +111,7 @@ extern u8 ui_image_update_streaming_texture_mem (Image *image, void *mem, int me
 // usefull for streaming video
 // x and y for position
 // w and h for dimensions
-extern Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h);
+extern Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h, Renderer *renderer);
 
 // draws the image to the screen
 extern void ui_image_draw (Image *image, Renderer *renderer);
