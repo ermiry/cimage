@@ -12,7 +12,7 @@
 #include "cengine/ui/layout/layout.h"
 #include "cengine/ui/layout/grid.h"
 
-void ui_panel_remove_layout (Panel *panel);
+void ui_panel_layout_remove (Panel *panel);
 
 static Panel *ui_panel_new (void) {
 
@@ -106,10 +106,10 @@ void ui_panel_remove_outline (Panel *panel) {
 }
 
 // sets the layout for the panel
-void ui_panel_set_layout (Panel *panel, LayoutType type, void *layout) {
+void ui_panel_layout_set (Panel *panel, LayoutType type, void *layout) {
 
     if (panel && layout) {
-        if (panel->layout) ui_panel_remove_layout (panel);
+        if (panel->layout) ui_panel_layout_remove (panel);
 
         panel->layout_type = type;
         panel->layout = layout;
@@ -118,7 +118,7 @@ void ui_panel_set_layout (Panel *panel, LayoutType type, void *layout) {
 }
 
 // removes the existing layout form the panel
-void ui_panel_remove_layout (Panel *panel) {
+void ui_panel_layout_remove (Panel *panel) {
 
     if (panel) {
         if (panel->layout) {
@@ -132,6 +132,44 @@ void ui_panel_remove_layout (Panel *panel) {
 
             panel->layout = NULL;
             panel->layout_type = LAYOUT_TYPE_NONE;
+        }
+    }
+
+}
+
+// adds a new ui elment to the layout of the panel
+void ui_panel_layout_add_element (Panel *panel, UIElement *ui_element) {
+
+    if (panel && ui_element) {
+        if (panel->layout) {
+            switch (panel->layout_type) {
+                case LAYOUT_TYPE_HORIZONTAL: break;
+                case LAYOUT_TYPE_VERTICAL: break;
+                case LAYOUT_TYPE_GRID: 
+                    ui_layout_grid_add_element ((GridLayout *) panel->layout, ui_element); 
+                    break;
+
+                default: break;
+            }
+        }
+    }
+
+}
+
+// removes a ui element form the panel layout
+void ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element) {
+
+    if (panel && ui_element) {
+        if (panel->layout) {
+            switch (panel->layout_type) {
+                case LAYOUT_TYPE_HORIZONTAL: break;
+                case LAYOUT_TYPE_VERTICAL: break;
+                case LAYOUT_TYPE_GRID: 
+                    ui_layout_grid_remove_element ((GridLayout *) panel->layout, ui_element); 
+                    break;
+
+                default: break;
+            }
         }
     }
 

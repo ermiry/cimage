@@ -139,7 +139,8 @@ u8 ui_layout_grid_add_element (GridLayout *grid, UIElement *ui_element) {
 
 }
 
-void ui_layout_grid_remove_element (GridLayout *grid) {
+// removes an element from the grid
+void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element) {
 
     if (grid) {
 

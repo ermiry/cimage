@@ -34,4 +34,7 @@ extern GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h);
 // returns 0 on success, 1 if failed to add
 extern u8 ui_layout_grid_add_element (GridLayout *grid, UIElement *ui_element);
 
+// removes an element from the grid
+extern void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element);
+
 #endif

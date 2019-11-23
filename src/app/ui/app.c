@@ -15,8 +15,8 @@
 #include "cengine/ui/layout/grid.h"
 
 static Panel *background_panel = NULL;
-
 static Panel *sidebar = NULL;
+static Panel *images_panel = NULL;
 
 static Button *photos_button = NULL;
 static Button *settings_button = NULL;
@@ -56,8 +56,6 @@ static void sidebar_end (void) {
 
 }
 
-GridLayout *grid = NULL;
-
 void app_ui_init (void) {
 
     // FIXME:
@@ -72,11 +70,14 @@ void app_ui_init (void) {
     RGBA_Color electromagnetic = { 47, 54, 64, 255 };
     background_panel = ui_panel_create (0, 0, screen_width, screen_height, UI_POS_MIDDLE_CENTER, main_renderer);
     ui_panel_set_bg_colour (background_panel, main_renderer, electromagnetic);
+    ui_element_set_layer (main_renderer->ui, background_panel->ui_element, "back");
 
     sidebar_init (screen_height);
 
-    grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
+    GridLayout *grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
     ui_layout_grid_set_grid (grid, 5, 4);
+    images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_MIDDLE_CENTER, main_renderer);
+    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
 
 }
 
@@ -130,7 +131,7 @@ void app_ui_image_display (const char *filename) {
         RGBA_Color overlay_colour = { 255, 255, 255, 70 };
         ui_image_set_overlay (image, main_renderer, overlay_colour);
 
-        ui_layout_grid_add_element (grid, image->ui_element);
+        ui_panel_layout_add_element (images_panel, image->ui_element);
     }
 
 }
