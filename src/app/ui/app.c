@@ -59,6 +59,23 @@ static void sidebar_end (void) {
 
 }
 
+#include <unistd.h>
+
+static void app_images_folder_select (void *args) {
+
+    char username[1024];
+    getlogin_r (username, 1024);
+    printf ("%s\n", username);
+
+    // char *user_pictures_dir = 
+
+    char filename[1024];
+    FILE *f = popen ("zenity  --file-selection --title=\"Choose a photos directory\" --filename=/home/ermiry/ --save --directory", "r");
+    fgets (filename, 1024, f);
+    printf ("\n%s\n", filename);
+
+}
+
 void app_ui_init (void) {
 
     // FIXME:
@@ -84,7 +101,7 @@ void app_ui_init (void) {
     // ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
 
     open_folder_button = ui_button_create (0, 0, 128, 128, UI_POS_MIDDLE_CENTER, main_renderer);
-    // ui_button_set_action (photos_button, NULL, NULL);
+    ui_button_set_action (open_folder_button, app_images_folder_select, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
     ui_button_set_sprite (open_folder_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/folder.png");
     ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "top");
