@@ -14,6 +14,8 @@
 
 #include "cengine/ui/layout/grid.h"
 
+#include "app/states/app.h"
+
 static Panel *background_panel = NULL;
 static Panel *sidebar = NULL;
 static Panel *images_panel = NULL;
@@ -59,23 +61,6 @@ static void sidebar_end (void) {
 
 }
 
-#include <unistd.h>
-
-static void app_images_folder_select (void *args) {
-
-    char username[1024];
-    getlogin_r (username, 1024);
-    printf ("%s\n", username);
-
-    // char *user_pictures_dir = 
-
-    char filename[1024];
-    FILE *f = popen ("zenity  --file-selection --title=\"Choose a photos directory\" --filename=/home/ermiry/ --save --directory", "r");
-    fgets (filename, 1024, f);
-    printf ("\n%s\n", filename);
-
-}
-
 void app_ui_init (void) {
 
     // FIXME:
@@ -94,14 +79,8 @@ void app_ui_init (void) {
 
     sidebar_init (screen_height);
 
-    // TODO: set the dimensions of the grid to the ones of the panel
-    // GridLayout *grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
-    // ui_layout_grid_set_grid (grid, 5, 4);
-    // images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_MIDDLE_CENTER, main_renderer);
-    // ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
-
     open_folder_button = ui_button_create (0, 0, 128, 128, UI_POS_MIDDLE_CENTER, main_renderer);
-    ui_button_set_action (open_folder_button, app_images_folder_select, NULL);
+    ui_button_set_action (open_folder_button, images_folder_select, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
     ui_button_set_sprite (open_folder_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/folder.png");
     ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "top");
@@ -121,6 +100,27 @@ void app_ui_end (void) {
 }
 
 #pragma region images
+
+// prepare the ui for the images to be displayed
+void app_ui_images_set_ui_elements (void) {
+
+    // FIXME:
+    Renderer *main_renderer = renderer_get_by_name ("main");
+
+    u32 screen_width = main_renderer->window->window_size.width;
+    u32 screen_height = main_renderer->window->window_size.height;
+
+    // remove past buttons
+    open_folder_button->ui_element->active = false;
+    open_folder_text->ui_element->active = false;
+
+    // TODO: set the dimensions of the grid to the ones of the panel
+    GridLayout *grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
+    ui_layout_grid_set_grid (grid, 5, 4);
+    images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_MIDDLE_CENTER, main_renderer);
+    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
+
+}
 
 void app_ui_image_display_in_window (void *img_ptr) {
 
@@ -155,7 +155,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_ouline_colour (image, RGBA_WHITE);
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
-        ui_image_set_action (image, app_ui_image_display_in_window, image);
+        // ui_image_set_action (image, app_ui_image_display_in_window, image);
 
         // TODO: 21/11/2019 - it seems overlay uses a lot of memory
         // maybe create only one overlay and add a ref and only display the size of the image

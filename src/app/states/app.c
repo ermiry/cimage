@@ -1,5 +1,11 @@
 #include <stdlib.h>
 
+#ifdef CIMAGE_DEBUG
+#include <errno.h>
+#endif
+
+#include <unistd.h>
+
 #define _XOPEN_SOURCE 700
 #include <sys/types.h>
 #include <dirent.h>
@@ -45,7 +51,7 @@ static bool is_image_file (const char *filename) {
 }
 
 // get a list of valid images names from the directory
-DoubleList *images_read_from_dir (const char *images_dir) {
+static DoubleList *images_folder_read (const char *images_dir) {
 
     DoubleList *images = NULL;
 
@@ -77,10 +83,60 @@ DoubleList *images_read_from_dir (const char *images_dir) {
                 cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
                 free (status);
             }
+
+            #ifdef CIMAGE_DEBUG
+            perror ("Error");
+            #endif
         }
     }
 
     return images;
+
+}
+
+static void *images_load (void *folder_name_ptr) {
+
+    if (folder_name_ptr) {
+        String *folder_name = (String *) folder_name_ptr;
+
+        // get images from directory
+        images = images_folder_read (folder_name->str);
+        if (images) {
+            // prepare ui for images
+            app_ui_images_set_ui_elements ();
+
+            for (ListElement *le = dlist_start (images); le; le = le->next) {
+                printf ("%s\n", ((String *) le->data)->str);
+                app_ui_image_display (((String *) le->data)->str);
+            }
+        }
+    }
+
+    return NULL;
+
+}
+
+void images_folder_select (void *args) {
+
+    // FIXME: use this!
+    // char username[1024];
+    // getlogin_r (username, 1024);
+    // printf ("%s\n", username);
+
+    // char *user_pictures_dir = 
+
+    char folder_name[1024];
+    FILE *pipe = popen ("zenity  --file-selection --title=\"Choose a photos directory\" --filename=/home/ermiry/ --save --directory", "r");
+    if (pipe) {
+        fgets (folder_name, 1024, pipe);
+        fclose (pipe);
+        printf ("\n%s\n", folder_name);
+
+        c_string_remove_char (folder_name, '\n');
+        String *selected_folder = str_new (folder_name);
+
+        thread_create_detachable (images_load, selected_folder);
+    }
 
 }
 
@@ -94,35 +150,11 @@ static void app_update (void) {
 
 }
 
-static void *app_load_images (void *ptr) {
-
-    // get images from directory
-    images = images_read_from_dir ("./images");
-    if (images) {
-        for (ListElement *le = dlist_start (images); le; le = le->next) {
-            printf ("%s\n", ((String *) le->data)->str);
-            app_ui_image_display (((String *) le->data)->str);
-        }
-    }
-
-    return NULL;
-
-}
-
 static void app_on_enter (void) { 
 
     app_state->update = app_update;
 
     app_ui_init ();
-
-    // thread_create_detachable (app_load_images, NULL);
-    // images = images_read_from_dir ("./images");
-    // if (images) {
-    //     for (ListElement *le = dlist_start (images); le; le = le->next) {
-    //         printf ("%s\n", ((String *) le->data)->str);
-    //         app_ui_image_display (((String *) le->data)->str);
-    //     }
-    // }
 
 }
 
