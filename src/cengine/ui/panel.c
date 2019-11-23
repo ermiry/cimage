@@ -10,6 +10,7 @@
 #include "cengine/ui/components/transform.h"
 
 #include "cengine/ui/layout/layout.h"
+#include "cengine/ui/layout/horizontal.h"
 #include "cengine/ui/layout/grid.h"
 
 void ui_panel_layout_remove (Panel *panel);
@@ -123,7 +124,7 @@ void ui_panel_layout_remove (Panel *panel) {
     if (panel) {
         if (panel->layout) {
             switch (panel->layout_type) {
-                case LAYOUT_TYPE_HORIZONTAL: break;
+                case LAYOUT_TYPE_HORIZONTAL: ui_layout_horizontal_delete (panel->layout); break;
                 case LAYOUT_TYPE_VERTICAL: break;
                 case LAYOUT_TYPE_GRID: ui_layout_grid_delete (panel->layout); break;
 
