@@ -24,9 +24,42 @@
 
 #include "app/ui/app.h"
 
-#pragma region images
+// general information of the things we are working on
+typedef struct Cimage {
 
-static DoubleList *images = NULL;
+    String *opened_folder_name;
+    DoubleList *images;
+
+} Cimage;
+
+Cimage *cimage = NULL;
+
+static Cimage *cimage_new (void) {
+
+    Cimage *cimage = (Cimage *) malloc (sizeof (cimage));
+    if (cimage) {
+        cimage->opened_folder_name = NULL;
+        cimage->images = NULL;
+    }
+
+    return cimage;
+
+}
+
+static void cimage_delete (void *cimage_ptr) {
+
+    if (cimage_ptr) {
+        Cimage *cimage = (Cimage *) cimage_ptr;
+
+        str_delete (cimage->opened_folder_name);
+        dlist_delete (cimage->images);
+
+        free (cimage_ptr);
+    }
+
+}
+
+#pragma region images
 
 // FIXME: also read jpeg images
 static bool is_image_file (const char *filename) {
@@ -94,21 +127,39 @@ static DoubleList *images_folder_read (const char *images_dir) {
 
 }
 
-// TODO: check if we could load any image
 static void *images_load (void *folder_name_ptr) {
 
     if (folder_name_ptr) {
         String *folder_name = (String *) folder_name_ptr;
 
         // get images from directory
-        images = images_folder_read (folder_name->str);
-        if (images) {
-            // prepare ui for images
-            app_ui_images_set_ui_elements ();
+        cimage->images = images_folder_read (folder_name->str);
+        if (cimage->images) {
+            if (dlist_size (cimage->images) > 0) {
+                // prepare ui for images
+                app_ui_images_set_ui_elements ();
 
-            for (ListElement *le = dlist_start (images); le; le = le->next) {
-                printf ("%s\n", ((String *) le->data)->str);
-                app_ui_image_display (((String *) le->data)->str);
+                for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
+                    printf ("%s\n", ((String *) le->data)->str);
+                    app_ui_image_display (((String *) le->data)->str);
+                }
+            }
+            
+            else {
+                // TODO: display error message in ui
+                #ifdef CIMAGE_DEBUG
+                char *status = c_string_create ("No images found in dir: %s!", folder_name->str);
+                if (status) {
+                    cengine_log_msg (stderr, LOG_WARNING, LOG_NO_TYPE, status);
+                    free (status);
+                }
+                #endif
+
+                dlist_delete (cimage->images);
+                cimage->images = NULL; 
+
+                str_delete (cimage->opened_folder_name);
+                cimage->opened_folder_name = NULL;
             }
         }
     }
@@ -143,9 +194,9 @@ void images_folder_select (void *args) {
             // printf ("\n%s\n", folder_name);
 
             c_string_remove_char (folder_name, '\n');
-            String *selected_folder = str_new (folder_name);
+            cimage->opened_folder_name = str_new (folder_name);
 
-            thread_create_detachable (images_load, selected_folder);
+            thread_create_detachable (images_load, cimage->opened_folder_name);
         }
 
         free (command);
@@ -166,6 +217,8 @@ static void app_update (void) {
 
 static void app_on_enter (void) { 
 
+    cimage = cimage_new ();
+
     app_state->update = app_update;
 
     app_ui_init ();
@@ -176,7 +229,7 @@ static void app_on_exit (void) {
 
     app_ui_end ();
 
-    dlist_delete (images);
+    cimage_delete (cimage);
 
 }
 
