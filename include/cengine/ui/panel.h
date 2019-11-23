@@ -10,6 +10,7 @@
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
+#include "cengine/ui/layout/layout.h"
 
 typedef struct Panel {
 
@@ -27,6 +28,10 @@ typedef struct Panel {
     RGBA_Color outline_colour;
     float outline_scale_x;
     float outline_scale_y;
+
+    // layout
+    LayoutType layout_type;
+    void *layout;
 
 } Panel;
 

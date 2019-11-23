@@ -20,6 +20,8 @@ static Panel *ui_panel_new (void) {
         panel->colour = false;
         panel->bg_texture = NULL;
         panel->outline = false;
+
+        panel->layout = NULL;
     }
 
     return panel;
