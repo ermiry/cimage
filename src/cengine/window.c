@@ -189,6 +189,7 @@ void window_set_icon (Window *window, SDL_Surface *icon_surface) {
 
 }
 
+// TODO: maybe close program completely when main window is closed
 // handle windows events
 void windows_handle_events (SDL_Event event) {
 
@@ -267,6 +268,7 @@ void windows_handle_events (SDL_Event event) {
                 case SDL_WINDOWEVENT_CLOSE:
                     // SDL_HideWindow (win->window);
                     window_to_remove = win;
+                    printf ("close!\n");
                     break;
 
                 default: break;
@@ -274,13 +276,12 @@ void windows_handle_events (SDL_Event event) {
         }
     }
 
-    // FIXME: try checking for a flag that we can set in the window instead
     // 23/11/2019 -- we do this because our dlist is not yet therad safe
-    // if (window_to_remove) {
-    //     // printf ("%s\n", (window_to_remove)->renderer->name->str);
-    //     dlist_remove (renderers, (window_to_remove)->renderer);
-    //     dlist_remove (windows, window_to_remove);
-    //     window_to_remove = NULL;
-    // } 
+    if (window_to_remove) {
+        // printf ("%s\n", (window_to_remove)->renderer->name->str);
+        renderer_delete (dlist_remove (renderers, (window_to_remove)->renderer));
+        window_delete (dlist_remove (windows, window_to_remove));
+        window_to_remove = NULL;
+    } 
 
 }
