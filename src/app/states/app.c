@@ -94,6 +94,7 @@ static DoubleList *images_folder_read (const char *images_dir) {
 
 }
 
+// TODO: check if we could load any image
 static void *images_load (void *folder_name_ptr) {
 
     if (folder_name_ptr) {
@@ -116,27 +117,40 @@ static void *images_load (void *folder_name_ptr) {
 
 }
 
+// TODO: implement cross-platform code
 void images_folder_select (void *args) {
 
-    // FIXME: use this!
-    // char username[1024];
-    // getlogin_r (username, 1024);
-    // printf ("%s\n", username);
-
-    // char *user_pictures_dir = 
-
-    char folder_name[1024];
-    FILE *pipe = popen ("zenity  --file-selection --title=\"Choose a photos directory\" --filename=/home/ermiry/ --save --directory", "r");
-    if (pipe) {
-        fgets (folder_name, 1024, pipe);
-        fclose (pipe);
-        printf ("\n%s\n", folder_name);
-
-        c_string_remove_char (folder_name, '\n');
-        String *selected_folder = str_new (folder_name);
-
-        thread_create_detachable (images_load, selected_folder);
+    #ifdef OS_LINUX
+    char *command = NULL;
+    char *username = getlogin ();
+    if (username) {
+        // printf ("%s\n", username);
+        command = c_string_create ("zenity  --file-selection --title=\"Choose a photos directory\" --filename=/home/%s/ --save --directory", 
+            username);
     }
+
+    else {
+        // if for whatever reason we can get the username, just open in root folder
+        command = c_string_create ("zenity  --file-selection --title=\"Choose a photos directory\" --filename=/ --save --directory");
+    }
+
+    if (command) {
+        char folder_name[1024];
+        FILE *pipe = popen (command, "r");
+        if (pipe) {
+            fgets (folder_name, 1024, pipe);
+            fclose (pipe);
+            // printf ("\n%s\n", folder_name);
+
+            c_string_remove_char (folder_name, '\n');
+            String *selected_folder = str_new (folder_name);
+
+            thread_create_detachable (images_load, selected_folder);
+        }
+
+        free (command);
+    }
+    #endif
 
 }
 
