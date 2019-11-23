@@ -10,6 +10,7 @@
 
 #include "cengine/cengine.h"
 #include "cengine/input.h"
+#include "cengine/window.h"
 
 #include "cengine/ui/inputfield.h"
 #include "cengine/ui/components/text.h"
@@ -313,6 +314,9 @@ void input_handle (SDL_Event event) {
     while (SDL_PollEvent (&event)) {
         switch (event.type) {
             case SDL_QUIT: if (cengine_quit) cengine_quit (); break;
+
+            // handle window events
+            case SDL_WINDOWEVENT: windows_handle_events (event); break;
 
             case SDL_MOUSEMOTION: 
                 mousePos.x = event.motion.x;

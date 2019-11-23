@@ -1,5 +1,6 @@
 .vscode
 bin
 objs
+.gdb_history
 
 images

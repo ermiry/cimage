@@ -23,6 +23,8 @@ typedef struct WindowSize {
 
 struct _Window {
 
+    u32 id;
+
     int display_index;
     SDL_DisplayMode display_mode;
 
@@ -38,13 +40,20 @@ struct _Window {
     // reference to the window renderer
     struct _Renderer *renderer;
 
+    // events
+    bool shown;
+
 };
 
 typedef struct _Window Window;
 
 extern DoubleList *windows;
 
+extern Window *window_to_remove;
+
 extern void window_delete (void *window_ptr);
+
+extern int window_comparator (const void *a, const void *b);
 
 // creates a new window with the requested arguments
 extern Window *window_create (const char *title, WindowSize window_size, Uint32 window_flags,
@@ -61,5 +70,8 @@ extern int window_resize (Window *window, u32 new_width, u32 new_height);
 
 // sets the window's icon, the surface gets destroyed when the window is destroyed
 extern void window_set_icon (Window *window, SDL_Surface *icon_surface);
+
+// handle windows events
+extern void windows_handle_events (SDL_Event event);
 
 #endif

@@ -29,6 +29,8 @@
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
+static u64 next_renderer_id = 0;
+
 SurfaceTexture *surface_texture_new (SDL_Surface *surface, SDL_Texture **texture) {
 
     SurfaceTexture *st = (SurfaceTexture *) malloc (sizeof (SurfaceTexture));
@@ -96,6 +98,21 @@ void renderer_delete (void *ptr) {
 
 }
 
+static int renderer_comparator (const void *a, const void *b) {
+
+    if (a && b) {
+        Renderer *ren_a = (Renderer *) a;
+        Renderer *ren_b = (Renderer *) b;
+
+        if (ren_a->id < ren_b->id) return -1;
+        if (ren_a->id == ren_b->id) return 0;
+        else return 1;
+    }
+
+    return -1;
+
+}
+
 // gets the renderer by its name
 Renderer *renderer_get_by_name (const char *name) {
 
@@ -121,6 +138,9 @@ Renderer *renderer_create_empty (const char *name, int display_idx) {
 
     Renderer *renderer = renderer_new ();
     if (renderer) {
+        renderer->id = next_renderer_id;
+        next_renderer_id += 1;
+
         renderer->name = name ? str_new (name) : NULL;
         // renderer->display_index = display_idx;
         renderer->textures_queue = queue_create ();
@@ -702,12 +722,12 @@ u8 render_init (void) {
 
     // errors |= layers_init ();
 
-    renderers = dlist_init (renderer_delete, NULL);
+    renderers = dlist_init (renderer_delete, renderer_comparator);
     u8 retval = renderers ? 0 : 1;
 
     errors |= retval;
 
-    windows = dlist_init (window_delete, NULL);
+    windows = dlist_init (window_delete, window_comparator);
     retval = windows ? 0 : 1;
 
     return errors;

@@ -42,6 +42,8 @@ extern void surface_texture_delete (void *st_ptr);
 
 struct _Renderer {
 
+    u64 id;
+
     String *name;
     pthread_t thread_id;
 

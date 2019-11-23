@@ -13,6 +13,7 @@
 #include "cengine/assets.h"
 #include "cengine/input.h"
 #include "cengine/renderer.h"
+#include "cengine/window.h"
 
 #include "cengine/threads/thread.h"
 
