@@ -21,6 +21,9 @@ static Panel *images_panel = NULL;
 static Button *photos_button = NULL;
 static Button *settings_button = NULL;
 
+static Button *open_folder_button = NULL;
+static TextBox *open_folder_text = NULL;
+
 // FIXME: set actions
 static void sidebar_init (u32 screen_height) {
 
@@ -75,10 +78,20 @@ void app_ui_init (void) {
     sidebar_init (screen_height);
 
     // TODO: set the dimensions of the grid to the ones of the panel
-    GridLayout *grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
-    ui_layout_grid_set_grid (grid, 5, 4);
-    images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_MIDDLE_CENTER, main_renderer);
-    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
+    // GridLayout *grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
+    // ui_layout_grid_set_grid (grid, 5, 4);
+    // images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_MIDDLE_CENTER, main_renderer);
+    // ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
+
+    open_folder_button = ui_button_create (0, 0, 128, 128, UI_POS_MIDDLE_CENTER, main_renderer);
+    // ui_button_set_action (photos_button, NULL, NULL);
+    // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
+    ui_button_set_sprite (open_folder_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/folder.png");
+    ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "top");
+
+    open_folder_text = ui_textbox_create (0, 100, 200, 50, UI_POS_MIDDLE_CENTER, main_renderer);
+    ui_textbox_set_text (open_folder_text, main_renderer, "Open a photos folder", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (open_folder_text, UI_POS_MIDDLE_CENTER);
 
 }
 

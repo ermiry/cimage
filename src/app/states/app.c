@@ -115,7 +115,7 @@ static void app_on_enter (void) {
 
     app_ui_init ();
 
-    thread_create_detachable (app_load_images, NULL);
+    // thread_create_detachable (app_load_images, NULL);
     // images = images_read_from_dir ("./images");
     // if (images) {
     //     for (ListElement *le = dlist_start (images); le; le = le->next) {
