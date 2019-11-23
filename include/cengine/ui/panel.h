@@ -52,6 +52,12 @@ extern void ui_panel_set_ouline_scale (Panel *panel, float x_scale, float y_scal
 // removes the ouline form the panel
 extern void ui_panel_remove_outline (Panel *panel);
 
+// sets the layout for the panel
+extern void ui_panel_set_layout (Panel *panel, LayoutType type, void *layout);
+
+// removes the existing layout form the panel
+extern void ui_panel_remove_layout (Panel *panel);
+
 // creates a new panel
 // x and y for position
 extern Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);

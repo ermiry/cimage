@@ -56,7 +56,6 @@ static void sidebar_end (void) {
 
 }
 
-// FIXME:
 GridLayout *grid = NULL;
 
 void app_ui_init (void) {

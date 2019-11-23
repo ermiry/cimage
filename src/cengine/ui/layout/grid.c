@@ -15,10 +15,7 @@ static GridLayout *ui_layout_grid_new (void) {
     if (grid) {
         memset (grid, 0, sizeof (GridLayout));
 
-        grid->ui_element = NULL;
         grid->transform = NULL;
-
-        grid->bg_texture = NULL;
 
         grid->ui_elements = NULL;
     }
@@ -32,10 +29,14 @@ void ui_layout_grid_delete (void *grid_ptr) {
     if (grid_ptr) {
         GridLayout *grid = (GridLayout *) grid_ptr;
 
-        grid->ui_element = NULL;
         ui_transform_component_delete (grid->transform);
 
-        if (grid->bg_texture) SDL_DestroyTexture (grid->bg_texture);
+        if (grid->ui_elements) {
+            for (u32 i = 0; i < grid->cols; i++) 
+                if (grid->ui_elements[i]) free (grid->ui_elements[i]);
+
+            free (grid->ui_elements);
+        }
 
         free (grid);
     }

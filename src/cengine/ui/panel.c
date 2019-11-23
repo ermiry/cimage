@@ -9,6 +9,11 @@
 #include "cengine/ui/panel.h"
 #include "cengine/ui/components/transform.h"
 
+#include "cengine/ui/layout/layout.h"
+#include "cengine/ui/layout/grid.h"
+
+void ui_panel_remove_layout (Panel *panel);
+
 static Panel *ui_panel_new (void) {
 
     Panel *panel = (Panel *) malloc (sizeof (Panel));
@@ -96,6 +101,38 @@ void ui_panel_remove_outline (Panel *panel) {
     if (panel) {
         memset (&panel->outline_colour, 0, sizeof (RGBA_Color));
         panel->outline = false;
+    }
+
+}
+
+// sets the layout for the panel
+void ui_panel_set_layout (Panel *panel, LayoutType type, void *layout) {
+
+    if (panel && layout) {
+        if (panel->layout) ui_panel_remove_layout (panel);
+
+        panel->layout_type = type;
+        panel->layout = layout;
+    }
+
+}
+
+// removes the existing layout form the panel
+void ui_panel_remove_layout (Panel *panel) {
+
+    if (panel) {
+        if (panel->layout) {
+            switch (panel->layout_type) {
+                case LAYOUT_TYPE_HORIZONTAL: break;
+                case LAYOUT_TYPE_VERTICAL: break;
+                case LAYOUT_TYPE_GRID: ui_layout_grid_delete (panel->layout); break;
+
+                default: break;
+            }
+
+            panel->layout = NULL;
+            panel->layout_type = LAYOUT_TYPE_NONE;
+        }
     }
 
 }
