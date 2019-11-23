@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Cimage
+Comment=A photograph visualizer
+Exec=/home/ermiry/Documents/ermiry/cApps/cimage/cimage
+Icon=/home/ermiry/Documents/ermiry/cApps/cimage/assets/cimage-512.png
+Terminal=false
