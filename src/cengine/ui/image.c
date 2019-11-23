@@ -229,11 +229,32 @@ void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color) {
 
     if (image) {
         if (image->overlay_texture) {
-            SDL_DestroyTexture (image->overlay_texture);
-            image->overlay_texture = NULL;
+            if (!image->overlay_reference) {
+                SDL_DestroyTexture (image->overlay_texture);
+                image->overlay_texture = NULL;
+            }
         }
 
         render_complex_transparent_rect (renderer, &image->overlay_texture, &image->transform->rect, color); 
+        image->overlay_reference = false;   
+    }
+
+}
+
+// sets an overlay to the image that only renders when you hover the image
+// you need to pass a refrence to the texture
+void ui_image_set_overlay_ref (Image *image, SDL_Texture *overlay_ref) {
+
+    if (image && overlay_ref) {
+        if (image->overlay_texture) {
+            if (!image->overlay_reference) {
+                SDL_DestroyTexture (image->overlay_texture);
+                image->overlay_texture = NULL;
+            }
+        }
+
+        image->overlay_texture = overlay_ref;
+        image->overlay_reference = true;
     }
 
 }
@@ -243,8 +264,10 @@ void ui_image_remove_overlay (Image *image) {
 
     if (image) {
         if (image->overlay_texture) {
-            SDL_DestroyTexture (image->overlay_texture);
-            image->overlay_texture = NULL;
+            if (!image->overlay_reference) {
+                SDL_DestroyTexture (image->overlay_texture);
+                image->overlay_texture = NULL;
+            }
         }
     }
 

@@ -26,6 +26,8 @@ static Button *settings_button = NULL;
 static Button *open_folder_button = NULL;
 static TextBox *open_folder_text = NULL;
 
+static SDL_Texture *overlay_texture = NULL;
+
 // FIXME: set actions
 static void sidebar_init (u32 screen_height) {
 
@@ -89,6 +91,10 @@ void app_ui_init (void) {
     ui_textbox_set_text (open_folder_text, main_renderer, "Open a photos folder", font, 24, RGBA_WHITE, false);
     ui_textbox_set_text_pos (open_folder_text, UI_POS_MIDDLE_CENTER);
 
+    SDL_Rect rect = { .x = 0, .y = 0, .w = screen_width, .h = screen_height };
+    RGBA_Color overlay_colour = { 255, 255, 255, 70 };
+    render_complex_transparent_rect (main_renderer, &overlay_texture, &rect, overlay_colour); 
+
 }
 
 void app_ui_end (void) {
@@ -96,6 +102,8 @@ void app_ui_end (void) {
     sidebar_end ();
 
     ui_element_destroy (background_panel->ui_element);
+
+    if (overlay_texture) SDL_DestroyTexture (overlay_texture);
 
 }
 
@@ -155,12 +163,8 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_ouline_colour (image, RGBA_WHITE);
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
+        ui_image_set_overlay_ref (image, overlay_texture);
         // ui_image_set_action (image, app_ui_image_display_in_window, image);
-
-        // TODO: 21/11/2019 - it seems overlay uses a lot of memory
-        // maybe create only one overlay and add a ref and only display the size of the image
-        RGBA_Color overlay_colour = { 255, 255, 255, 70 };
-        ui_image_set_overlay (image, main_renderer, overlay_colour);
 
         ui_panel_layout_add_element (images_panel, image->ui_element);
     }

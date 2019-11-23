@@ -38,6 +38,7 @@ typedef struct Image {
     Action action;
     void *args;
 
+    bool overlay_reference;
     SDL_Texture *overlay_texture;
 
 } Image;
@@ -92,6 +93,10 @@ extern void ui_image_set_action (Image *image, Action action, void *args);
 
 // sets an overlay to the image that only renders when you hover the image
 extern void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color);
+
+// sets an overlay to the image that only renders when you hover the image
+// you need to pass a refrence to the texture
+extern void ui_image_set_overlay_ref (Image *image, SDL_Texture *overlay_ref);
 
 // removes the overlay from the image
 extern void ui_image_remove_overlay (Image *image);
