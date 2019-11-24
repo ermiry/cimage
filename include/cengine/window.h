@@ -33,7 +33,9 @@ struct _Window {
 
     String *window_title;
     WindowSize window_size;
+
     bool fullscreen;
+    bool borders;
 
     SDL_Surface *icon;
 
@@ -68,7 +70,7 @@ extern Window *window_create (const char *title, WindowSize window_size, Uint32 
 extern int window_get_size (Window *window, WindowSize *window_size);
 
 // toggles window full screen on and off
-extern int window_toggle_full_screen (Window *window);
+extern void window_toggle_full_screen (Window *window);
 
 // resizes the window asscoaited with a renderer
 extern int window_resize (Window *window, u32 new_width, u32 new_height);

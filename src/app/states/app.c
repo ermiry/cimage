@@ -220,7 +220,12 @@ void main_screen_input (void *win_ptr) {
         Window *win = (Window *) win_ptr;
 
         if (win->keyboard) {
-            if (input_is_key_down (SDL_SCANCODE_UP)) {
+            if (input_is_key_down (SDL_SCANCODE_F11)) {
+                // make window fullscreen
+                window_toggle_full_screen (win);
+            }
+
+            else if (input_is_key_down (SDL_SCANCODE_UP)) {
                 // move images up
                 app_ui_images_move_down (10);
             }

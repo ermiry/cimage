@@ -139,19 +139,39 @@ int window_get_size (Window *window, WindowSize *window_size) {
 
 }
 
-// FIXME: do we need to update the renderer?
-// toggles window full screen on and off
-int window_toggle_full_screen (Window *window) {
 
-    int retval = 1;
+// toggles window full screen on and off
+void window_toggle_full_screen (Window *window) {
 
     if (window) {
+        u32 max_width = window->display_mode.w;
+        u32 max_height = window->display_mode.h;
+
+        SDL_SetWindowSize (window->window, max_width, max_height);
+        SDL_Rect viewport = { .x = 0, .y = 0, .w = max_width, .h = max_height };
+        SDL_RenderSetViewport (window->renderer->renderer, &viewport);
+        SDL_RenderSetLogicalSize (window->renderer->renderer, max_width, max_height);
+
         window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
-        retval = SDL_SetWindowFullscreen (window->window, window->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+        SDL_SetWindowFullscreen (window->window, window->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
         window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
+
+        // int w, h;
+        // SDL_RenderGetLogicalSize (window->renderer->renderer, &w, & h);
+        // SDL_RenderPresent (window->renderer->renderer);
+        // printf ("logical size: %d - %d\n", w, h);
     }
 
-    return retval;
+}
+
+// toggles window borders on and off
+void window_toggle_borders (Window *window) {
+
+    if (window) {
+        window->borders = SDL_GetWindowFlags (window->window) & SDL_WINDOW_BORDERLESS;
+        SDL_SetWindowBordered (window->window, window->borders ? SDL_WINDOW_BORDERLESS : 0);
+        window->borders = SDL_GetWindowFlags (window->window) & SDL_WINDOW_BORDERLESS;
+    }
 
 }
 
