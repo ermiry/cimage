@@ -155,15 +155,15 @@ void ui_panel_layout_remove (Panel *panel) {
 }
 
 // adds a new ui elment to the layout of the panel
-void ui_panel_layout_add_element (Panel *panel, UIElement *ui_element) {
+void ui_panel_layout_add_element (Panel *panel, UITransform *ui_element_trans) {
 
-    if (panel && ui_element) {
+    if (panel && ui_element_trans) {
         if (panel->layout) {
             switch (panel->layout_type) {
                 case LAYOUT_TYPE_HORIZONTAL: break;
                 case LAYOUT_TYPE_VERTICAL: break;
                 case LAYOUT_TYPE_GRID: 
-                    ui_layout_grid_add_element ((GridLayout *) panel->layout, ui_element); 
+                    ui_layout_grid_add_element ((GridLayout *) panel->layout, ui_element_trans); 
                     break;
 
                 default: break;
@@ -174,15 +174,15 @@ void ui_panel_layout_add_element (Panel *panel, UIElement *ui_element) {
 }
 
 // removes a ui element form the panel layout
-void ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element) {
+void ui_panel_layout_remove_element (Panel *panel, UITransform *ui_element_trans) {
 
-    if (panel && ui_element) {
+    if (panel && ui_element_trans) {
         if (panel->layout) {
             switch (panel->layout_type) {
                 case LAYOUT_TYPE_HORIZONTAL: break;
                 case LAYOUT_TYPE_VERTICAL: break;
                 case LAYOUT_TYPE_GRID: 
-                    ui_layout_grid_remove_element ((GridLayout *) panel->layout, ui_element); 
+                    ui_layout_grid_remove_element ((GridLayout *) panel->layout, ui_element_trans); 
                     break;
 
                 default: break;

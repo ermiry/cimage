@@ -59,10 +59,10 @@ extern void ui_panel_layout_set (Panel *panel, LayoutType type);
 extern void ui_panel_layout_remove (Panel *panel);
 
 // adds a new ui elment to the layout of the panel
-extern void ui_panel_layout_add_element (Panel *panel, UIElement *ui_element);
+extern void ui_panel_layout_add_element (Panel *panel, UITransform *ui_element_trans);
 
 // removes a ui element form the panel layout
-extern void ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element);
+extern void ui_panel_layout_remove_element (Panel *panel, UITransform *ui_element_trans);
 
 // creates a new panel
 // x and y for position

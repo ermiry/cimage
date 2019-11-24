@@ -129,9 +129,8 @@ void app_ui_images_move_up (u32 movement) {
 
             for (u32 i = 0; i < grid->cols; i++) {
                 for (u32 j = 0; j < grid->rows; j++) {
-                    if (grid->ui_elements[i][j]) {
-                        Image *image = (Image *) grid->ui_elements[i][j]->element;
-                        image->transform->rect.y -= movement;
+                    if (grid->ui_elements_trans[i][j]) {
+                        grid->ui_elements_trans[i][j]->rect.y -= movement;
                     }
                 }
             }
@@ -153,9 +152,8 @@ void app_ui_images_move_down (u32 movement) {
 
             for (u32 i = 0; i < grid->cols; i++) {
                 for (u32 j = 0; j < grid->rows; j++) {
-                    if (grid->ui_elements[i][j]) {
-                        Image *image = (Image *) grid->ui_elements[i][j]->element;
-                        image->transform->rect.y += movement;
+                    if (grid->ui_elements_trans[i][j]) {
+                        grid->ui_elements_trans[i][j]->rect.y += movement;
                     }
                 }
             }
@@ -237,7 +235,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_overlay_ref (image, overlay_texture);
         ui_image_set_action (image, app_ui_image_display_in_window, image);
 
-        ui_panel_layout_add_element (images_panel, image->ui_element);
+        ui_panel_layout_add_element (images_panel, image->transform);
     }
 
 }
