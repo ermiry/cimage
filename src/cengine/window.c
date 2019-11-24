@@ -202,13 +202,13 @@ void windows_handle_events (SDL_Event event) {
                 // Window appeared
                 case SDL_WINDOWEVENT_SHOWN:
                     win->shown = true;
-                    printf ("show!\n");
+                    // printf ("show!\n");
                     break;
 
                 // Window disappeared
                 case SDL_WINDOWEVENT_HIDDEN:
                     win->shown = false;
-                    printf ("hide!\n");
+                    // printf ("hide!\n");
                     break;
 
                 // TODO:
@@ -268,7 +268,7 @@ void windows_handle_events (SDL_Event event) {
                 case SDL_WINDOWEVENT_CLOSE:
                     // SDL_HideWindow (win->window);
                     window_to_remove = win;
-                    printf ("close!\n");
+                    // printf ("close!\n");
                     break;
 
                 default: break;

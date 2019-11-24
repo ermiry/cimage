@@ -15,9 +15,11 @@
 
 #include "cengine/collections/dlist.h"
 
+#include "cengine/input.h"
+
 #include "cengine/threads/thread.h"
 #include "cengine/manager/manager.h"
-#include "cengine/game/go.h"
+// #include "cengine/game/go.h"
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
@@ -211,7 +213,17 @@ State *app_state = NULL;
 
 static void app_update (void) {
 
-    game_object_update_all ();
+    // game_object_update_all ();
+
+    if (input_is_key_down (SDL_SCANCODE_UP)) {
+        // move images up
+        app_ui_images_move_down (10);
+    }
+
+    else if (input_is_key_down (SDL_SCANCODE_DOWN)) {
+        // move images down
+        app_ui_images_move_up (10);
+    }
 
 }
 

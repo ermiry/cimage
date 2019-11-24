@@ -117,6 +117,60 @@ void app_ui_end (void) {
 
 #pragma region images
 
+void app_ui_images_move_up (u32 movement) {
+
+    if (images_panel) {
+        Renderer *main_renderer = renderer_get_by_name ("main");
+        u32 screen_height = main_renderer->window->window_size.height;
+
+        GridLayout *grid = (GridLayout *) images_panel->layout;
+        if ((abs (images_panel->transform->rect.y) + grid->cell_height) < (images_panel->transform->rect.h)) {
+            images_panel->transform->rect.y -= movement;
+            grid->transform->rect.y -= movement;
+
+            for (u32 i = 0; i < grid->cols; i++) {
+                for (u32 j = 0; j < grid->rows; j++) {
+                    if (grid->ui_elements[i][j]) {
+                        Image *image = (Image *) grid->ui_elements[i][j]->element;
+                        image->transform->rect.y -= movement;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+void app_ui_images_move_down (u32 movement) {
+
+    if (images_panel) {
+        Renderer *main_renderer = renderer_get_by_name ("main");
+        u32 screen_height = main_renderer->window->window_size.height;
+
+        if (images_panel->transform->rect.y < 0) {
+            images_panel->transform->rect.y += movement;
+            GridLayout *grid = (GridLayout *) images_panel->layout;
+            grid->transform->rect.y += movement;
+
+            for (u32 i = 0; i < grid->cols; i++) {
+                for (u32 j = 0; j < grid->rows; j++) {
+                    if (grid->ui_elements[i][j]) {
+                        Image *image = (Image *) grid->ui_elements[i][j]->element;
+                        image->transform->rect.y += movement;
+                    }
+                }
+            }
+        }
+
+        else {
+            images_panel->transform->rect.y = 0;
+            GridLayout *grid = (GridLayout *) images_panel->layout;
+            grid->transform->rect.y = 0;
+        }
+    }
+
+}
+
 // prepare the ui for the images to be displayed
 void app_ui_images_set_ui_elements (void) {
 
@@ -171,7 +225,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
         ui_image_set_overlay_ref (image, overlay_texture);
-        // ui_image_set_action (image, app_ui_image_display_in_window, image);
+        ui_image_set_action (image, app_ui_image_display_in_window, image);
 
         ui_panel_layout_add_element (images_panel, image->ui_element);
     }
