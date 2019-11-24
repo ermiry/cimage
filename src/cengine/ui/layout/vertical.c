@@ -33,3 +33,15 @@ void ui_layout_vertical_delete (void *vertical_ptr) {
     }
 
 }
+
+// creates a new horizontal layout
+// x and y for position, w and h for dimensions
+VerticalLayout *ui_layout_vertical_create (i32 x, i32 y, u32 w, u32 h) {
+
+    VerticalLayout *vertical = ui_layout_vertical_new ();
+
+    vertical->transform = ui_transform_component_create (x, y, w, h);
+
+    return vertical;
+
+}

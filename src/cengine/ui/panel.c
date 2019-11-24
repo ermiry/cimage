@@ -108,13 +108,28 @@ void ui_panel_remove_outline (Panel *panel) {
 }
 
 // sets the layout for the panel
-void ui_panel_layout_set (Panel *panel, LayoutType type, void *layout) {
+void ui_panel_layout_set (Panel *panel, LayoutType type) {
 
-    if (panel && layout) {
+    if (panel) {
         if (panel->layout) ui_panel_layout_remove (panel);
 
         panel->layout_type = type;
-        panel->layout = layout;
+        switch (panel->layout_type) {
+            case LAYOUT_TYPE_HORIZONTAL: 
+                panel->layout = ui_layout_horizontal_create (panel->transform->rect.y, panel->transform->rect.x, 
+                    panel->transform->rect.w, panel->transform->rect.h);
+                break;
+            case LAYOUT_TYPE_VERTICAL:
+                panel->layout = ui_layout_vertical_create (panel->transform->rect.y, panel->transform->rect.x, 
+                    panel->transform->rect.w, panel->transform->rect.h);
+                break;
+            case LAYOUT_TYPE_GRID: 
+                panel->layout = ui_layout_grid_create (panel->transform->rect.x, panel->transform->rect.y, 
+                    panel->transform->rect.w, panel->transform->rect.h);
+                break;
+
+            default: break;
+        }
     }
 
 }

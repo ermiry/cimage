@@ -130,11 +130,10 @@ void app_ui_images_set_ui_elements (void) {
     open_folder_button->ui_element->active = false;
     open_folder_text->ui_element->active = false;
 
-    // TODO: set the dimensions of the grid to the ones of the panel
-    GridLayout *grid = ui_layout_grid_create (100, 0, screen_width - 100, screen_height);
+    images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_FREE, main_renderer);
+    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID);
+    GridLayout *grid = (GridLayout *) images_panel->layout;
     ui_layout_grid_set_grid (grid, 5, 4);
-    images_panel = ui_panel_create (100, -1000, screen_width - 100, screen_height, UI_POS_FREE, main_renderer);
-    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, grid);
 
 }
 

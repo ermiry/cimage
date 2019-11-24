@@ -23,4 +23,8 @@ typedef struct VerticalLayout {
 
 extern void ui_layout_vertical_delete (void *horizontal_ptr);
 
+// creates a new horizontal layout
+// x and y for position, w and h for dimensions
+extern VerticalLayout *ui_layout_vertical_create (i32 x, i32 y, u32 w, u32 h);
+
 #endif

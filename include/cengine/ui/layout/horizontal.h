@@ -23,4 +23,8 @@ typedef struct HorizontalLayout {
 
 extern void ui_layout_horizontal_delete (void *horizontal_ptr);
 
+// creates a new horizontal layout
+// x and y for position, w and h for dimensions
+extern HorizontalLayout *ui_layout_horizontal_create (i32 x, i32 y, u32 w, u32 h);
+
 #endif

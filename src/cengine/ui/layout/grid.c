@@ -65,14 +65,12 @@ void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows) {
 
 }
 
-// TODO: do we need a ui element?
 // creates a new grid layout
 // x and y for position, w and h for dimensions
 GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h) {
 
-    GridLayout *grid = NULL;
-
-    grid = ui_layout_grid_new ();
+    GridLayout *grid = ui_layout_grid_new ();
+    
     grid->transform = ui_transform_component_create (x, y, w, h);
 
     return grid;
