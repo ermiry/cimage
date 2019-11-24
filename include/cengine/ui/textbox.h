@@ -75,6 +75,9 @@ extern void ui_textbox_remove_background (TextBox *textbox);
 // creates a new textbox
 extern TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
 
+// rezises the textbox based on window size
+extern void ui_textbox_resize (TextBox *textbox, WindowSize window_original_size, WindowSize window_new_size);
+
 // draws the textbox
 extern void ui_textbox_draw (TextBox *textbox, Renderer *renderer);
 

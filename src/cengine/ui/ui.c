@@ -280,16 +280,18 @@ void ui_resize (Window *window) {
             for (u32 i = 0; i < window->renderer->ui->curr_max_ui_elements; i++) {
                 if (window->renderer->ui->ui_elements[i] && (window->renderer->ui->ui_elements[i]->id >= 0)) {
                     switch (window->renderer->ui->ui_elements[i]->type) {
-                        case UI_PANEL: {
-                            Panel *panel = window->renderer->ui->ui_elements[i]->element;
-                            u32 new_width = (window->window_size.width * panel->transform->rect.w) / window->window_original_size.width;
-                            u32 new_height = (window->window_size.height * panel->transform->rect.h) / window->window_original_size.height;
-                            panel->transform->rect.w = new_width;
-                            panel->transform->rect.h = new_height;
-
-                            printf ("new w: %d - new h: %d\n", new_width, new_height);
-                        }
-                            break;
+                        case UI_TEXTBOX: ui_textbox_resize ((TextBox *) window->renderer->ui->ui_elements[i]->element,
+                            window->window_original_size, window->window_size); break;
+                        // case UI_IMAGE: ui_image_draw ((Image *) ui_element->element, renderer); break;
+                        case UI_PANEL: ui_panel_resize ((Panel *) window->renderer->ui->ui_elements[i]->element, 
+                            window->window_original_size, window->window_size); break;
+                        case UI_BUTTON: ui_button_resize ((Button *) window->renderer->ui->ui_elements[i]->element,
+                            window->window_original_size, window->window_size); break;
+                        // case UI_INPUT: ui_input_field_draw ((InputField *) ui_element->element, renderer); break;
+                        // case UI_CHECK: ui_check_draw ((Check *) ui_element->element, renderer); break;
+                        // case UI_NOTI_CENTER: ui_noti_center_draw ((NotiCenter *) ui_element->element, renderer); break;
+                        // case UI_DROPDOWN: ui_dropdown_render ((Dropdown *) ui_element->element, renderer); break;
+                        
 
                         default: break;
                     }

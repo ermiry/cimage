@@ -214,6 +214,18 @@ TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer
 
 }
 
+// rezises the textbox based on window size
+void ui_textbox_resize (TextBox *textbox, WindowSize window_original_size, WindowSize window_new_size) {
+
+    if (textbox) {
+        u32 new_width = (window_new_size.width * textbox->transform->rect.w) / window_original_size.width;
+        u32 new_height = (window_new_size.height * textbox->transform->rect.h) / window_original_size.height;
+        textbox->transform->rect.w = new_width;
+        textbox->transform->rect.h = new_height;
+    }
+
+}
+
 // draws the textbox
 void ui_textbox_draw (TextBox *textbox, Renderer *renderer) {
 

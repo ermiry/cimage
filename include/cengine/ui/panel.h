@@ -6,6 +6,7 @@
 
 #include "cengine/types/types.h"
 
+#include "cengine/video.h"
 #include "cengine/renderer.h"
 
 #include "cengine/ui/ui.h"
@@ -71,6 +72,9 @@ extern void ui_panel_layout_remove_element (Panel *panel, UITransform *ui_elemen
 // creates a new panel
 // x and y for position
 extern Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
+
+// rezises the panel based on window size
+extern void ui_panel_resize (Panel *panel, WindowSize window_original_size, WindowSize window_new_size);
 
 // draws the panel to the screen
 extern void ui_panel_draw (Panel *panel, Renderer *renderer);

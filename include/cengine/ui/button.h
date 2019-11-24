@@ -9,6 +9,8 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/video.h"
+#include "cengine/renderer.h"
 #include "cengine/sprites.h"
 
 #include "cengine/ui/ui.h"
@@ -112,6 +114,9 @@ extern void ui_button_set_action (Button *button, Action action, void *args);
 
 // creates a new button
 extern Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer);
+
+// rezises the button based on window size
+extern void ui_button_resize (Button *button, WindowSize window_original_size, WindowSize window_new_size);
 
 // draws a button
 extern void ui_button_draw (Button *button, Renderer *renderer);
