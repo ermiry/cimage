@@ -145,13 +145,24 @@ int window_get_size (Window *window, WindowSize *window_size) {
 void window_toggle_full_screen (Window *window) {
 
     if (window) {
-        u32 max_width = window->display_mode.w;
-        u32 max_height = window->display_mode.h;
+        u32 new_width = 0;
+        u32 new_height = 0;
 
-        SDL_SetWindowSize (window->window, max_width, max_height);
-        SDL_Rect viewport = { .x = 0, .y = 0, .w = max_width, .h = max_height };
+        // return window to original size before the fullscreen
+        if (window->fullscreen) {
+            new_width = window->window_original_size.width;
+            new_height = window->window_original_size.height;
+        }
+
+        else {
+            new_width = window->display_mode.w;
+            new_height = window->display_mode.h;
+        }
+
+        SDL_SetWindowSize (window->window, new_width, new_height);
+        SDL_Rect viewport = { .x = 0, .y = 0, .w = new_width, .h = new_height };
         SDL_RenderSetViewport (window->renderer->renderer, &viewport);
-        SDL_RenderSetLogicalSize (window->renderer->renderer, max_width, max_height);
+        SDL_RenderSetLogicalSize (window->renderer->renderer, new_width, new_height);
 
         window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
         SDL_SetWindowFullscreen (window->window, window->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);

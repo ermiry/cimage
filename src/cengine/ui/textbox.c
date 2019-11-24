@@ -205,6 +205,9 @@ TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer
 
             textbox->outline_scale_x = 1;
             textbox->outline_scale_y = 1;
+
+            textbox->original_w = w;
+            textbox->original_h = h;
         }
 
         else ui_element_delete (ui_element);
@@ -218,10 +221,17 @@ TextBox *ui_textbox_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer
 void ui_textbox_resize (TextBox *textbox, WindowSize window_original_size, WindowSize window_new_size) {
 
     if (textbox) {
-        u32 new_width = (window_new_size.width * textbox->transform->rect.w) / window_original_size.width;
-        u32 new_height = (window_new_size.height * textbox->transform->rect.h) / window_original_size.height;
-        textbox->transform->rect.w = new_width;
-        textbox->transform->rect.h = new_height;
+        if ((window_original_size.width == window_new_size.width) && window_original_size.height == window_new_size.height) {
+            textbox->transform->rect.w = textbox->original_w;
+            textbox->transform->rect.h = textbox->original_h;
+        }
+
+        else {
+            u32 new_width = (window_new_size.width * textbox->transform->rect.w) / window_original_size.width;
+            u32 new_height = (window_new_size.height * textbox->transform->rect.h) / window_original_size.height;
+            textbox->transform->rect.w = new_width;
+            textbox->transform->rect.h = new_height;
+        }
     }
 
 }

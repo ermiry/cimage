@@ -19,7 +19,6 @@
 typedef struct TextBox {
 
     UIElement *ui_element;
-
     UITransform *transform;
 
     bool outline;
@@ -33,6 +32,9 @@ typedef struct TextBox {
     SDL_Rect bg_texture_rect;
 
     Text *text;
+
+    // meida 
+    u32 original_w, original_h;
 
 } TextBox;
 

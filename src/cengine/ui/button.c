@@ -316,6 +316,9 @@ Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *
 
             button->outline_scale_x = 1;
             button->outline_scale_y = 1;
+
+            button->original_w = w;
+            button->original_h = h;
         }
 
         else ui_element_delete (ui_element);
@@ -329,10 +332,17 @@ Button *ui_button_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *
 void ui_button_resize (Button *button, WindowSize window_original_size, WindowSize window_new_size) {
 
     if (button) {
-        u32 new_width = (window_new_size.width * button->transform->rect.w) / window_original_size.width;
-        u32 new_height = (window_new_size.height * button->transform->rect.h) / window_original_size.height;
-        button->transform->rect.w = new_width;
-        button->transform->rect.h = new_height;
+        if ((window_original_size.width == window_new_size.width) && window_original_size.height == window_new_size.height) {
+            button->transform->rect.w = button->original_w;
+            button->transform->rect.h = button->original_h;
+        }
+
+        else {
+            u32 new_width = (window_new_size.width * button->transform->rect.w) / window_original_size.width;
+            u32 new_height = (window_new_size.height * button->transform->rect.h) / window_original_size.height;
+            button->transform->rect.w = new_width;
+            button->transform->rect.h = new_height;
+        }
     }
 
 }

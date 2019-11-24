@@ -32,7 +32,6 @@ typedef enum ButtonState {
 typedef struct Button {
 
     UIElement *ui_element;
-
     UITransform *transform;
 
     bool active;
@@ -57,6 +56,9 @@ typedef struct Button {
     bool pressed;
     Action action;
     void *args;
+
+    // media
+    u32 original_w, original_h;
 
 } Button;
 

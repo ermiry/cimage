@@ -35,8 +35,7 @@ typedef struct Panel {
     void *layout;
 
     // media
-    u32 original_width;
-    u32 original_height;
+    u32 original_w, original_h;
 
 } Panel;
 

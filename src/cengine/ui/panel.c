@@ -212,8 +212,8 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *re
             panel->outline_scale_x = 1;
             panel->outline_scale_y = 1;
 
-            panel->original_width = w;
-            panel->original_height = h;
+            panel->original_w = w;
+            panel->original_h = h;
         }
     }
 
@@ -225,10 +225,17 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *re
 void ui_panel_resize (Panel *panel, WindowSize window_original_size, WindowSize window_new_size) {
 
     if (panel) {
-        u32 new_width = (window_new_size.width * panel->transform->rect.w) / window_original_size.width;
-        u32 new_height = (window_new_size.height * panel->transform->rect.h) / window_original_size.height;
-        panel->transform->rect.w = new_width;
-        panel->transform->rect.h = new_height;
+        if ((window_original_size.width == window_new_size.width) && window_original_size.height == window_new_size.height) {
+            panel->transform->rect.w = panel->original_w;
+            panel->transform->rect.h = panel->original_h;
+        }
+
+        else {
+            u32 new_width = (window_new_size.width * panel->transform->rect.w) / window_original_size.width;
+            u32 new_height = (window_new_size.height * panel->transform->rect.h) / window_original_size.height;
+            panel->transform->rect.w = new_width;
+            panel->transform->rect.h = new_height;
+        }
     }
 
 }
