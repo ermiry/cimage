@@ -20,7 +20,7 @@
 #include "cengine/ui/dropdown.h"
 #include "cengine/ui/components/transform.h"
 #include "cengine/ui/components/text.h"
-#include "cengine/ui/components/layout.h"
+#include "cengine/ui/layout/vertical.h"
 
 void ui_dropdown_option_set_text (DropdownOption *option, Renderer *renderer, const char *option_text,
     Font *font, u32 size, RGBA_Color color);
@@ -228,7 +228,8 @@ static Dropdown *ui_dropdown_new (void) {
         dropdown->option_hover_texture = NULL;
         dropdown->option_selected = NULL;
         dropdown->options = NULL;
-        dropdown->layout = NULL;
+        dropdown->extended_panel = NULL;
+        dropdown->vertical_layout = NULL;
     }
 
     return dropdown;
@@ -246,9 +247,9 @@ void ui_dropdown_delete (void *dropdown_ptr) {
         ui_text_component_delete (dropdown->placeholder);
 
         dlist_delete (dropdown->options);
-        ui_layout_group_delete (dropdown->layout);
 
-        ui_element_destroy (dropdown->extended_panel->ui_element);
+        if (dropdown->extended_panel) ui_element_destroy (dropdown->extended_panel->ui_element);
+        ui_layout_vertical_delete (dropdown->vertical_layout);
 
         if (dropdown->option_hover_texture) SDL_DestroyTexture (dropdown->option_hover_texture);
 
@@ -271,6 +272,7 @@ Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Render
             ui_transform_component_set_pos (dropdown->transform, renderer, NULL, pos, true);
 
             ui_element->element = dropdown;
+            ui_element->active = true;
 
             dropdown->outline_scale_x = 1;
             dropdown->outline_scale_y = 1;
@@ -287,14 +289,14 @@ Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Render
 // x, y: set the position of the dropdown's extended panel
 // with, height: set the dimensions of the dropdown's extended panel
 void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
-    u32 options_width, u32 options_max_height, UIPosition pos) {
+    u32 options_width, u32 options_max_height, UIPosition pos, Renderer *renderer) {
 
     if (dropdown) {
         dropdown->option_selected = NULL;
         dropdown->options = dlist_init (ui_dropdown_option_delete, ui_dropdown_option_comparator);
 
         // create the extened panel 
-        dropdown->extended_panel = ui_panel_create (x, y, options_width, options_max_height, UI_POS_FREE, NULL);
+        dropdown->extended_panel = ui_panel_create (x, y, options_width, options_max_height, UI_POS_FREE, renderer);
         ui_transform_component_set_pos (dropdown->extended_panel->transform, NULL, &dropdown->transform->rect, pos, false);
         dropdown->extended_panel->transform->rect.y += options_max_height;
         dropdown->extended_panel->transform->rect.x += x;
@@ -302,11 +304,9 @@ void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
         dropdown->extended_panel->ui_element->active = false;
 
         // the layout group contains the transforms of the options that render on top of the extended panel
-        dropdown->layout = ui_layout_group_create (x, y,
-            options_width, options_max_height, UI_POS_FREE, 
-            NULL);
-        ui_transform_component_set_pos (dropdown->layout->transform, NULL, &dropdown->transform->rect, pos, false);
-        dropdown->layout->transform->rect.y += options_max_height;
+        dropdown->vertical_layout = ui_layout_vertical_create (x, y, options_width, options_max_height);
+        ui_transform_component_set_pos (dropdown->vertical_layout->transform, NULL, &dropdown->transform->rect, pos, false);
+        dropdown->vertical_layout->transform->rect.y += options_max_height;
     }
 
 }
@@ -432,20 +432,20 @@ void ui_dropdown_extened_set_bg_colour (Dropdown *dropdown, Renderer *renderer, 
 }
 
 // adds a new dropdown option to the dropdown
-void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option, Renderer *renderer) {
+void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option) {
 
     if (dropdown && option) {
         option->transform->pos = UI_POS_BOTTOM_CENTER;
         option->option->transform->pos = UI_POS_MIDDLE_CENTER;
-        ui_position_update (renderer, option->transform, &dropdown->transform->rect, false);
+        ui_position_update (NULL, option->transform, &dropdown->transform->rect, false);
         dlist_insert_after (dropdown->options, dlist_end (dropdown->options), option);
 
-        ui_layout_group_add (dropdown->layout, option->transform);
+        ui_layout_vertical_add (dropdown->vertical_layout, option->transform);
 
         DropdownOption *op = NULL;
         for (ListElement *le = dlist_start (dropdown->options); le; le = le->next) {
             op = (DropdownOption *) le->data;
-            ui_position_update (renderer, op->option->transform, &op->transform->rect, false);
+            ui_position_update (NULL, op->option->transform, &op->transform->rect, false);
         }
     }
 

@@ -27,8 +27,10 @@ void ui_position_update (Renderer *renderer, void *transform_ptr, SDL_Rect *ref_
         }
 
         else {
-            rect.w = renderer->window->window_size.width;
-            rect.h = renderer->window->window_size.height;
+            if (renderer) {
+                rect.w = renderer->window->window_size.width;
+                rect.h = renderer->window->window_size.height;
+            }
         }
 
         i32 x_offset = (rect.x - transform->rect.x);

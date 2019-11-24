@@ -16,7 +16,7 @@ typedef struct LayoutGroup {
 
     DoubleList *elements;
     int elements_max_display;
-    u32 elements_offset;            // offset between elements
+    u32 elements_offset;            
 
 } LayoutGroup;
 

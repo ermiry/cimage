@@ -18,7 +18,7 @@
 #include "cengine/ui/panel.h"
 #include "cengine/ui/components/transform.h"
 #include "cengine/ui/components/text.h"
-#include "cengine/ui/components/layout.h"
+#include "cengine/ui/layout/vertical.h"
 
 typedef struct DropdownOption {
 
@@ -105,11 +105,11 @@ typedef struct Dropdown {
     Panel *extended_panel;
 
     // options
+    VerticalLayout *vertical_layout;
     RGBA_Color option_hover_colour;
     SDL_Texture *option_hover_texture;
     DropdownOption *option_selected;
     DoubleList *options;
-    LayoutGroup *layout;
 
 } Dropdown;
 
@@ -122,7 +122,7 @@ extern Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos,
 // x, y: set the position of the dropdown's extended panel
 // with, height: set the dimensions of the dropdown's extended panel
 extern void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
-    u32 options_width, u32 options_max_height, UIPosition pos);
+    u32 options_width, u32 options_max_height, UIPosition pos, Renderer *renderer);
 
 // sets the dropdown to be active depending on values
 extern void ui_dropdown_set_active (Dropdown *dropdown, bool active);
@@ -156,7 +156,7 @@ extern void ui_dropdown_set_placeholder_pos (Dropdown *dropdown, Renderer *rende
 extern void ui_dropdown_extened_set_bg_colour (Dropdown *dropdown, Renderer *renderer, RGBA_Color colour);
 
 // adds a new dropdown option to the dropdown
-extern void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option, Renderer *renderer);
+extern void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option);
 
 // removes a dropdown option from the dropdown
 extern void ui_dropdown_option_remove (Dropdown *dropdown, DropdownOption *option);
