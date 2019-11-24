@@ -17,7 +17,7 @@ typedef struct Panel {
     UIElement *ui_element;
     UITransform *transform;
 
-     // background
+    // background
     bool colour;
     RGBA_Color bg_colour;
     SDL_Texture *bg_texture;
@@ -32,6 +32,10 @@ typedef struct Panel {
     // layout
     LayoutType layout_type;
     void *layout;
+
+    // media
+    u32 original_width;
+    u32 original_height;
 
 } Panel;
 

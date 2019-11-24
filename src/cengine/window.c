@@ -102,6 +102,7 @@ Window *window_create (const char *title, WindowSize window_size, Uint32 window_
 
                 // sets the actual window size in the correct places
                 window_get_size (window, &window->window_size);
+                window_get_size (window, &window->window_original_size);
 
                 window->window_title = title ? str_new (title) : NULL;
                 window->window_flags = window_flags;
@@ -156,10 +157,14 @@ void window_toggle_full_screen (Window *window) {
         SDL_SetWindowFullscreen (window->window, window->fullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
         window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
 
+        window_get_size (window, &window->window_size);
+
         // int w, h;
         // SDL_RenderGetLogicalSize (window->renderer->renderer, &w, & h);
         // SDL_RenderPresent (window->renderer->renderer);
         // printf ("logical size: %d - %d\n", w, h);
+
+        ui_resize (window);
     }
 
 }

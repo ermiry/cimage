@@ -11,15 +11,10 @@
 
 #include "cengine/collections/dlist.h"
 
+#include "cengine/video.h"
 #include "cengine/renderer.h"
 
 struct _Renderer;
-
-typedef struct WindowSize {
-
-    u32 width, height;
-
-} WindowSize;
 
 struct _Window {
 
@@ -33,6 +28,7 @@ struct _Window {
 
     String *window_title;
     WindowSize window_size;
+    WindowSize window_original_size;
 
     bool fullscreen;
     bool borders;

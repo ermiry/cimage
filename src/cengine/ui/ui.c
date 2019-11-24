@@ -272,6 +272,34 @@ static i32 ui_elements_get_free_spot (UI *ui) {
 
 #pragma region render
 
+// resize the ui elements to fit new window
+void ui_resize (Window *window) {
+
+    if (window) {
+        if (window->renderer->ui) {
+            for (u32 i = 0; i < window->renderer->ui->curr_max_ui_elements; i++) {
+                if (window->renderer->ui->ui_elements[i] && (window->renderer->ui->ui_elements[i]->id >= 0)) {
+                    switch (window->renderer->ui->ui_elements[i]->type) {
+                        case UI_PANEL: {
+                            Panel *panel = window->renderer->ui->ui_elements[i]->element;
+                            u32 new_width = (window->window_size.width * panel->transform->rect.w) / window->window_original_size.width;
+                            u32 new_height = (window->window_size.height * panel->transform->rect.h) / window->window_original_size.height;
+                            panel->transform->rect.w = new_width;
+                            panel->transform->rect.h = new_height;
+
+                            printf ("new w: %d - new h: %d\n", new_width, new_height);
+                        }
+                            break;
+
+                        default: break;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 // render the ui elements to the screen
 void ui_render (Renderer *renderer) {
 

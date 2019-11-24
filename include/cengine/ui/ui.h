@@ -8,8 +8,10 @@
 #include "cengine/types/types.h"
 #include "cengine/collections/dlist.h"
 
+#include "cengine/window.h"
 #include "cengine/renderer.h"
 
+struct _Window;
 struct _Renderer;
 struct _UI;
 
@@ -81,6 +83,9 @@ extern void ui_delete (void *ui_ptr);
 extern UI *ui_create (void);
 
 /*** Public ui funcs ***/
+
+// resize the ui elements to fit new window
+extern void ui_resize (struct _Window *window);
 
 // renders all the current active ui to the screen
 extern void ui_render (struct _Renderer *renderer);

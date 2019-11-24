@@ -16,6 +16,7 @@
 
 #include "cengine/threads/thread.h"
 
+#include "cengine/video.h"
 #include "cengine/graphics.h"
 #include "cengine/window.h"
 

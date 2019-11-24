@@ -210,6 +210,9 @@ Panel *ui_panel_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *re
 
             panel->outline_scale_x = 1;
             panel->outline_scale_y = 1;
+
+            panel->original_width = w;
+            panel->original_height = h;
         }
     }
 
