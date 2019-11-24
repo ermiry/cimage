@@ -3,6 +3,7 @@
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
+#include "cengine/video.h"
 #include "cengine/renderer.h"
 
 #include "cengine/ui/ui.h"
@@ -28,10 +29,8 @@ static TextBox *open_folder_text = NULL;
 
 static SDL_Texture *overlay_texture = NULL;
 
-// FIXME: set actions
 static void sidebar_init (u32 screen_height) {
 
-    // FIXME:
     Renderer *main_renderer = renderer_get_by_name ("main");
 
     RGBA_Color blue_night = { 53, 59, 72, 255 };
@@ -72,7 +71,6 @@ static void sidebar_end (void) {
 
 void app_ui_init (void) {
 
-    // FIXME:
     Renderer *main_renderer = renderer_get_by_name ("main");
 
     Font *font = ui_font_get_default ();
@@ -171,7 +169,6 @@ void app_ui_images_move_down (u32 movement) {
 // prepare the ui for the images to be displayed
 void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 
-    // FIXME:
     Renderer *main_renderer = renderer_get_by_name ("main");
 
     u32 screen_width = main_renderer->window->window_size.width;
@@ -204,17 +201,44 @@ void app_ui_image_display_in_window (void *img_ptr) {
     if (img_ptr) {
         Image *image = (Image *) img_ptr;
 
-        // FIXME: check if this size if possible
-        // TODO: also we dont want to cover the full screen, we need to constraint to, lets say, max 80% of the full screen
-        WindowSize window_size = { .width = image->sprite->img_data->w, .height =  image->sprite->img_data->h };
-        Renderer *renderer = renderer_create_with_window ("test", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
+        // first we calculate the size of the window
+        SDL_DisplayMode display_mode = { 0 };
+        video_get_display_mode (0, &display_mode);
+
+        u32 max_width = display_mode.w * 0.80;
+        u32 max_height = display_mode.h * 0.80;
+
+        WindowSize window_size = { 0 };
+
+        float ratio = 0;
+        u32 width = image->sprite->img_data->w; 
+        u32 height = image->sprite->img_data->h;
+
+        if (width > max_width){
+            ratio = (float) max_width / width;
+            window_size.width = max_width;
+            window_size.height *= ratio;
+            height = height * ratio;
+            width = width * ratio;
+        }
+
+        if (height > max_height){
+            ratio = (float) max_height / height;
+            window_size.height = max_height; 
+            window_size.width *= ratio;
+            width = width * ratio;
+            height = height * ratio;
+        }
+
+        Renderer *renderer = renderer_create_with_window (image->sprite->img_data->filename->str, 
+            0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
             image->sprite->img_data->filename->str, window_size, 0);
 
         // load a new image
         Image *new_image = ui_image_create_static (0, 0, renderer);
         ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
         ui_image_set_sprite (new_image, renderer, image->sprite->img_data->filename->str);
-        // ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
+        ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
     }
 
 }
@@ -223,7 +247,6 @@ void app_ui_image_display_in_window (void *img_ptr) {
 void app_ui_image_display (const char *filename) {
 
     if (filename) {
-        // FIXME:
         Renderer *main_renderer = renderer_get_by_name ("main");
 
         Image *image = ui_image_create_static (0, 0, main_renderer);
