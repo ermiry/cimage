@@ -42,6 +42,11 @@ struct _Window {
 
     // events
     bool shown;
+    bool mouse;
+    bool keyboard;
+    bool mini;
+
+    void (*input)(void *);
 
 };
 

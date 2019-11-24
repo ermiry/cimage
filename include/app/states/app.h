@@ -10,4 +10,6 @@ extern State *app_state_new (void);
 
 extern void images_folder_select (void *args);
 
+extern void main_screen_input (void *win_ptr);
+
 #endif

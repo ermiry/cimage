@@ -308,7 +308,6 @@ static void input_handle_text_input (SDL_Event event) {
 
 }
 
-// FIXME: how do we handle input and render in diffrent windows?
 void input_handle (SDL_Event event) {
 
     while (SDL_PollEvent (&event)) {

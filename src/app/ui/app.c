@@ -29,6 +29,7 @@ static TextBox *open_folder_text = NULL;
 
 static SDL_Texture *overlay_texture = NULL;
 
+// FIXME: set actions
 static void sidebar_init (u32 screen_height) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -208,13 +209,13 @@ void app_ui_image_display_in_window (void *img_ptr) {
         u32 max_width = display_mode.w * 0.80;
         u32 max_height = display_mode.h * 0.80;
 
-        WindowSize window_size = { 0 };
-
         float ratio = 0;
-        u32 width = image->sprite->img_data->w; 
-        u32 height = image->sprite->img_data->h;
+        u32 width = image->sprite->img_data->w;
+        u32 height = image->sprite->img_data->h; 
 
-        if (width > max_width){
+        WindowSize window_size = { .width = width, .height = height };
+
+        if (width > max_width) {
             ratio = (float) max_width / width;
             window_size.width = max_width;
             window_size.height *= ratio;
@@ -224,8 +225,8 @@ void app_ui_image_display_in_window (void *img_ptr) {
 
         if (height > max_height){
             ratio = (float) max_height / height;
-            window_size.height = max_height; 
-            window_size.width *= ratio;
+            window_size.height = max_height;
+            window_size.width *= ratio; 
             width = width * ratio;
             height = height * ratio;
         }

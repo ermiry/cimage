@@ -34,6 +34,10 @@ static Window *window_new (void) {
         window->window_title = NULL;
 
         window->icon = NULL;
+
+        window->renderer = NULL;
+
+        window->input = NULL;
     }
 
     return window;
@@ -227,41 +231,37 @@ void windows_handle_events (SDL_Event event) {
 
                 // Mouse enter
                 case SDL_WINDOWEVENT_ENTER:
-                    // mMouseFocus = true;
-                    // updateCaption = true;
+                    win->mouse = true;
                     break;
 
                 // Mouse exit
                 case SDL_WINDOWEVENT_LEAVE:
-                    // mMouseFocus = false;
-                    // updateCaption = true;
+                    win->mouse = false;
                     break;
 
                 // Keyboard focus gained
                 case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    // mKeyboardFocus = true;
-                    // updateCaption = true;
+                    win->keyboard = true;
                     break;
 
                 // Keyboard focus lost
                 case SDL_WINDOWEVENT_FOCUS_LOST:
-                    // mKeyboardFocus = false;
-                    // updateCaption = true;
+                    win->keyboard = false;
                     break;
 
                 // Window minimized
                 case SDL_WINDOWEVENT_MINIMIZED:
-                    // mMinimized = true;
+                    win->mini = true;
                     break;
 
                 // Window maximized
                 case SDL_WINDOWEVENT_MAXIMIZED:
-                    // mMinimized = false;
+                    win->mini = false;
                     break;
 
                 // Window restored
                 case SDL_WINDOWEVENT_RESTORED:
-                    // mMinimized = false;
+                    win->mini = false;
                     break;
 
                 // Hide on close
@@ -276,7 +276,6 @@ void windows_handle_events (SDL_Event event) {
         }
     }
 
-    // 23/11/2019 -- we do this because our dlist is not yet therad safe
     if (window_to_remove) {
         // printf ("%s\n", (window_to_remove)->renderer->name->str);
         renderer_delete (dlist_remove (renderers, (window_to_remove)->renderer));

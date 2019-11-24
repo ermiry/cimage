@@ -212,21 +212,35 @@ void images_folder_select (void *args) {
 
 #pragma endregion
 
+#pragma region main screen
+
+void main_screen_input (void *win_ptr) {
+
+    if (win_ptr) {
+        Window *win = (Window *) win_ptr;
+
+        if (win->keyboard) {
+            if (input_is_key_down (SDL_SCANCODE_UP)) {
+                // move images up
+                app_ui_images_move_down (10);
+            }
+
+            else if (input_is_key_down (SDL_SCANCODE_DOWN)) {
+                // move images down
+                app_ui_images_move_up (10);
+            }
+        }
+    }
+
+}
+
+#pragma endregion
+
 State *app_state = NULL;
 
 static void app_update (void) {
 
     // game_object_update_all ();
-
-    if (input_is_key_down (SDL_SCANCODE_UP)) {
-        // move images up
-        app_ui_images_move_down (10);
-    }
-
-    else if (input_is_key_down (SDL_SCANCODE_DOWN)) {
-        // move images down
-        app_ui_images_move_up (10);
-    }
 
 }
 

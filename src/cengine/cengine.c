@@ -181,8 +181,14 @@ static void cengine_run (void) {
 
         input_handle (event);
 
-        // TODO: maybe create a new thread for every renderer
-        for (ListElement *le = dlist_start (renderers); le; le = le->next) render ((Renderer *) le->data);
+        // TODO: maybe create a new thread for every window
+        // update input and renderer for each window
+        Window *win = NULL;
+        for (ListElement *le = dlist_start (windows); le; le = le->next) {
+            win = (Window *) le->data;
+            if (win->input) win->input (win);
+            render (win->renderer);
+        }
 
         // limit the FPS
         sleep_time = time_per_frame - (SDL_GetTicks () - frame_start);
