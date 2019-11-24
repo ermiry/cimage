@@ -26,6 +26,9 @@
 
 #include "app/ui/app.h"
 
+#define DEFAULT_N_COLS          5
+#define DEFAULT_N_ROWS          4
+
 // general information of the things we are working on
 typedef struct Cimage {
 
@@ -139,7 +142,7 @@ static void *images_load (void *folder_name_ptr) {
         if (cimage->images) {
             if (dlist_size (cimage->images) > 0) {
                 // prepare ui for images
-                app_ui_images_set_ui_elements ();
+                app_ui_images_set_ui_elements (dlist_size (cimage->images), DEFAULT_N_COLS, DEFAULT_N_ROWS);
 
                 for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
                     printf ("%s\n", ((String *) le->data)->str);

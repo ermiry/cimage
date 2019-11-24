@@ -172,7 +172,7 @@ void app_ui_images_move_down (u32 movement) {
 }
 
 // prepare the ui for the images to be displayed
-void app_ui_images_set_ui_elements (void) {
+void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 
     // FIXME:
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -184,10 +184,21 @@ void app_ui_images_set_ui_elements (void) {
     open_folder_button->ui_element->active = false;
     open_folder_text->ui_element->active = false;
 
-    images_panel = ui_panel_create (100, 0, screen_width - 100, screen_height, UI_POS_FREE, main_renderer);
+    u32 n_actual_rows = n_images / n_cols;         // total rows for the layout
+    n_actual_rows += 1;
+
+    u32 panel_width = (screen_width - 100);
+    u32 panel_height = (screen_height / n_rows) * n_actual_rows;
+
+    images_panel = ui_panel_create (100, 0, panel_width, panel_height, UI_POS_FREE, main_renderer);
     ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID);
+
+    u32 cell_width = (screen_width - 100) / n_cols;
+    u32 cell_height = (screen_height / n_rows);
+
     GridLayout *grid = (GridLayout *) images_panel->layout;
-    ui_layout_grid_set_grid (grid, 5, 4);
+    ui_layout_grid_set_grid (grid, n_cols, n_actual_rows);
+    ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
 
 }
 

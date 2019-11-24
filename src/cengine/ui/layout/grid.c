@@ -65,12 +65,23 @@ void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows) {
 
 }
 
+// TODO: update layout
+// sets the preferred size of the cells, the layout must be of the correct size
+void ui_layout_grid_set_cell_size (GridLayout *grid, u32 width, u32 height) {
+
+    if (grid) {
+        grid->cell_width = width;
+        grid->cell_height = height;
+    }
+
+}
+
 // creates a new grid layout
 // x and y for position, w and h for dimensions
 GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h) {
 
     GridLayout *grid = ui_layout_grid_new ();
-    
+
     grid->transform = ui_transform_component_create (x, y, w, h);
 
     return grid;
