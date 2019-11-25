@@ -655,6 +655,8 @@ void render_complex_transparent_rect (Renderer *renderer, SDL_Texture **texture,
 void render (Renderer *renderer) {
 
     if (renderer) {
+        renderer->render_count = 0;
+
         // load any texture in background queue
         if (renderer->textures_queue->num_els > 0) {
             u32 count = 0;
@@ -711,6 +713,10 @@ void render (Renderer *renderer) {
         ui_render (renderer);       // render ui elements
 
         SDL_RenderPresent (renderer->renderer);
+
+        #ifdef CENGINE_DEBUG
+        printf ("Renderer: %s render count: %d\n", renderer->name->str, renderer->render_count);
+        #endif
     }
 
 }

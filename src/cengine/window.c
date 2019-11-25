@@ -104,6 +104,9 @@ Window *window_create (const char *title, WindowSize window_size, Uint32 window_
                 // sets the actual window size in the correct places
                 window_get_size (window, &window->window_size);
                 window_get_size (window, &window->window_original_size);
+                SDL_Rect screen_rect = { .x = 0, .y = 0, 
+                    .w = window->window_size.width, window->window_size.height };
+                window->screen_rect = screen_rect;
 
                 window->window_title = title ? str_new (title) : NULL;
                 window->window_flags = window_flags;
@@ -171,6 +174,9 @@ void window_toggle_full_screen (Window *window) {
         window->fullscreen = SDL_GetWindowFlags (window->window) & SDL_WINDOW_FULLSCREEN;
 
         window_get_size (window, &window->window_size);
+        SDL_Rect screen_rect = { .x = 0, .y = 0, 
+            .w = window->window_size.width, window->window_size.height };
+        window->screen_rect = screen_rect;
 
         // int w, h;
         // SDL_RenderGetLogicalSize (window->renderer->renderer, &w, & h);
@@ -212,6 +218,10 @@ void window_toggle_fullscreen_soft (Window *window) {
         SDL_RenderSetLogicalSize (window->renderer->renderer, new_width, new_height);
 
         window_get_size (window, &window->window_size);
+        SDL_Rect screen_rect = { .x = 0, .y = 0, 
+            .w = window->window_size.width, window->window_size.height };
+        window->screen_rect = screen_rect;
+
         SDL_SetWindowPosition (window->window, 
             ((window->display_mode.w / 2) - (window->window_size.width / 2)),
             ((window->display_mode.h / 2) - (window->window_size.height / 2)));

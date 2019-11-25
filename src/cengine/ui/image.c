@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_rwops.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_image.h>
@@ -373,60 +374,64 @@ Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h, Renderer *renderer) 
 void ui_image_draw (Image *image, Renderer *renderer) {
 
     if (image && renderer) {
-        if (image->texture) {
-            SDL_RenderCopyEx (renderer->renderer, image->texture, 
-                NULL, &image->transform->rect, 
-                0, 0, image->flip);
-        }
-
-        else {
-            if (image->sprite) {
-                SDL_RenderCopyEx (renderer->renderer, image->sprite->texture, 
-                    &image->sprite->src_rect, &image->transform->rect, 
+        if (SDL_HasIntersection (&image->transform->rect, &renderer->window->screen_rect)) {
+            if (image->texture) {
+                SDL_RenderCopyEx (renderer->renderer, image->texture, 
+                    NULL, &image->transform->rect, 
                     0, 0, image->flip);
             }
-            
-            else if (image->sprite_sheet) {
-                image->sprite_sheet->src_rect.x = image->sprite_sheet->sprite_w * image->x_sprite_offset;
-                image->sprite_sheet->src_rect.y = image->sprite_sheet->sprite_h * image->y_sprite_offset;
 
-                SDL_RenderCopyEx (renderer->renderer, image->sprite_sheet->texture, 
-                    &image->sprite_sheet->src_rect, &image->transform->rect, 
-                    0, 0, image->flip);
-            }
-        }
-
-        // render the outline border
-        if (image->outline) 
-            render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour, 
-                image->outline_scale_x, image->outline_scale_y);
-
-        // check for action listener
-        if (image->active) {
-            // check if the mouse is in the image
-            if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
-                mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
-                if (image->overlay_texture) {
-                    SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
-                        NULL, &image->transform->rect, 
+            else {
+                if (image->sprite) {
+                    SDL_RenderCopyEx (renderer->renderer, image->sprite->texture, 
+                        &image->sprite->src_rect, &image->transform->rect, 
                         0, 0, image->flip);
                 }
-
-                // check if the user pressed the left button over the image
-                if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                    image->pressed = true;
-                }
                 
-                else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                    if (image->pressed) {
-                        image->pressed = false;
-                        if (image->action) image->action (image->args);
-                        // printf ("Pressed!\n");
-                    }
+                else if (image->sprite_sheet) {
+                    image->sprite_sheet->src_rect.x = image->sprite_sheet->sprite_w * image->x_sprite_offset;
+                    image->sprite_sheet->src_rect.y = image->sprite_sheet->sprite_h * image->y_sprite_offset;
+
+                    SDL_RenderCopyEx (renderer->renderer, image->sprite_sheet->texture, 
+                        &image->sprite_sheet->src_rect, &image->transform->rect, 
+                        0, 0, image->flip);
                 }
             }
-        
-            else image->pressed = false;
+
+            // render the outline border
+            if (image->outline) 
+                render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour, 
+                    image->outline_scale_x, image->outline_scale_y);
+
+            // check for action listener
+            if (image->active) {
+                // check if the mouse is in the image
+                if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
+                    mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
+                    if (image->overlay_texture) {
+                        SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
+                            NULL, &image->transform->rect, 
+                            0, 0, image->flip);
+                    }
+
+                    // check if the user pressed the left button over the image
+                    if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                        image->pressed = true;
+                    }
+                    
+                    else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                        if (image->pressed) {
+                            image->pressed = false;
+                            if (image->action) image->action (image->args);
+                            // printf ("Pressed!\n");
+                        }
+                    }
+                }
+            
+                else image->pressed = false;
+            }
+
+            renderer->render_count += 1;
         }
     }
 

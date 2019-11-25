@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_surface.h>
 
@@ -29,6 +30,8 @@ struct _Window {
     String *window_title;
     WindowSize window_size;
     WindowSize window_original_size;
+
+    SDL_Rect screen_rect;
 
     bool fullscreen;
     bool borders;

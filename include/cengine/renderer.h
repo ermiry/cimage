@@ -50,6 +50,7 @@ struct _Renderer {
 
     SDL_Renderer *renderer;
     Uint32 render_flags;
+    u32 render_count;
 
     queue_t *textures_queue;
     u32 bg_loading_factor;

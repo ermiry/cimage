@@ -80,7 +80,7 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
             ui->ui_elements[spot] = new_element;
             ui->new_ui_element_id++;
             ui->curr_max_ui_elements++;
-            printf ("curr max ui: %d\n", ui->curr_max_ui_elements);
+            // printf ("curr max ui: %d\n", ui->curr_max_ui_elements);
         }
     // }
 

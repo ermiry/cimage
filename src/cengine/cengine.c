@@ -191,7 +191,10 @@ static void cengine_run (void) {
         }
 
         // limit the FPS
+        // u32 ticks = (SDL_GetTicks () - frame_start);
+        // printf ("ticks: %d\n", ticks);
         sleep_time = time_per_frame - (SDL_GetTicks () - frame_start);
+        printf ("sleep: %d\n", sleep_time);
         if (sleep_time > 0) SDL_Delay (sleep_time);
 
         // count fps
