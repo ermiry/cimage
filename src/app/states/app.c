@@ -143,6 +143,7 @@ static void *images_load (void *folder_name_ptr) {
             if (dlist_size (cimage->images) > 0) {
                 // prepare ui for images
                 app_ui_images_set_ui_elements (dlist_size (cimage->images), DEFAULT_N_COLS, DEFAULT_N_ROWS);
+                app_ui_statusbar_show (folder_name->str, cimage->images->size);
 
                 for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
                     printf ("%s\n", ((String *) le->data)->str);

@@ -14,6 +14,8 @@
 #include "cengine/ui/panel.h"
 #include "cengine/ui/layout/grid.h"
 
+#include "cengine/utils/utils.h"
+
 #include "app/states/app.h"
 
 static Panel *background_panel = NULL;
@@ -95,7 +97,7 @@ static void statusbar_init (void) {
     statusbar_foldername = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_foldername, &statusbar->transform->rect, UI_POS_LEFT_CENTER, NULL);
     statusbar_foldername->transform->rect.x += 20;
-    ui_textbox_set_text (statusbar_foldername, main_renderer, "/home/ermiry/Pictures/M", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text (statusbar_foldername, main_renderer, "", font, 24, RGBA_WHITE, false);
     ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_foldername, RGBA_WHITE);
     ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
@@ -104,7 +106,7 @@ static void statusbar_init (void) {
     statusbar_selected = ui_textbox_create (0, 0, 400, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_selected, &statusbar->transform->rect, UI_POS_MIDDLE_CENTER, NULL);
     statusbar_selected->transform->rect.x -= sidebar->transform->rect.w / 2;
-    ui_textbox_set_text (statusbar_selected, main_renderer, "IMG_0194 (1).jpg", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text (statusbar_selected, main_renderer, "", font, 24, RGBA_WHITE, false);
     ui_textbox_set_text_pos (statusbar_selected, UI_POS_MIDDLE_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_selected, RGBA_WHITE);
     ui_element_set_layer (main_renderer->ui, statusbar_selected->ui_element, "top");
@@ -113,7 +115,7 @@ static void statusbar_init (void) {
     statusbar_total = ui_textbox_create (0, 0, 200, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_total, &statusbar->transform->rect, UI_POS_RIGHT_CENTER, NULL);
     statusbar_total->transform->rect.x -= 20;
-    ui_textbox_set_text (statusbar_total, main_renderer, "Total: 1923", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text (statusbar_total, main_renderer, "", font, 24, RGBA_WHITE, false);
     ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
     ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
@@ -121,9 +123,26 @@ static void statusbar_init (void) {
 
 }
 
+void app_ui_statusbar_show (const char *foldername, u32 total) {
+
+    Renderer *main_renderer = renderer_get_by_name ("main");
+    Font *font = ui_font_get_default ();
+
+    ui_textbox_set_text (statusbar_foldername, main_renderer, foldername, font, 24, RGBA_WHITE, false);
+    ui_element_toggle_active (statusbar_foldername->ui_element);
+
+    ui_textbox_set_text (statusbar_total, main_renderer, 
+        c_string_create ("Total: %d", total), 
+        font, 24, RGBA_WHITE, false);
+    ui_element_toggle_active (statusbar_total->ui_element);
+
+    ui_element_toggle_active (statusbar->ui_element);
+
+}
+
 static void statusbar_end (void) {
 
-    if (statusbar) ui_element_destroy (statusbar);
+    if (statusbar) ui_element_destroy (statusbar->ui_element);
 
     if (statusbar_foldername) ui_element_destroy (statusbar_foldername->ui_element);
     if (statusbar_selected) ui_element_destroy (statusbar_selected->ui_element);
