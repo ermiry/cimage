@@ -66,7 +66,12 @@ extern Window *window_create (const char *title, WindowSize window_size, Uint32 
 extern int window_get_size (Window *window, WindowSize *window_size);
 
 // toggles window full screen on and off
+// fullscreen with a videomode change
 extern void window_toggle_full_screen (Window *window);
+
+// toggles window soft fullscreen
+// first removes border from window, and the scales to max resolution
+extern void window_toggle_fullscreen_soft (Window *window);
 
 // resizes the window asscoaited with a renderer
 extern int window_resize (Window *window, u32 new_width, u32 new_height);

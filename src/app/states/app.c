@@ -214,6 +214,8 @@ void images_folder_select (void *args) {
 
 #pragma region main screen
 
+static bool once = false;
+
 void main_screen_input (void *win_ptr) {
 
     if (win_ptr) {
@@ -222,7 +224,10 @@ void main_screen_input (void *win_ptr) {
         if (win->keyboard) {
             if (input_is_key_down (SDL_SCANCODE_F11)) {
                 // make window fullscreen
-                window_toggle_full_screen (win);
+                if (!once) {
+                window_toggle_fullscreen_soft (win);
+                once = true;
+                }
             }
 
             else if (input_is_key_down (SDL_SCANCODE_UP)) {

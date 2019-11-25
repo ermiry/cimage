@@ -24,6 +24,7 @@ DoubleList *windows = NULL;
 Window *window_to_remove = NULL;
 
 int window_get_size (Window *window, WindowSize *window_size);
+void window_toggle_borders (Window *window);
 
 static Window *window_new (void) {
 
@@ -142,6 +143,7 @@ int window_get_size (Window *window, WindowSize *window_size) {
 
 
 // toggles window full screen on and off
+// fullscreen with a videomode change
 void window_toggle_full_screen (Window *window) {
 
     if (window) {
@@ -174,6 +176,45 @@ void window_toggle_full_screen (Window *window) {
         // SDL_RenderGetLogicalSize (window->renderer->renderer, &w, & h);
         // SDL_RenderPresent (window->renderer->renderer);
         // printf ("logical size: %d - %d\n", w, h);
+
+        ui_resize (window);
+    }
+
+}
+
+// toggles window soft fullscreen
+// first removes border from window, and the scales to max resolution
+void window_toggle_fullscreen_soft (Window *window) {
+
+    if (window) {
+        u32 new_width = 0;
+        u32 new_height = 0;
+
+        // return window to original size before the fullscreen
+        if (window->fullscreen) {
+            new_width = window->window_original_size.width;
+            new_height = window->window_original_size.height;
+        }
+
+        else {
+            new_width = window->display_mode.w;
+            new_height = window->display_mode.h;
+        }
+
+        window_toggle_borders (window);
+        // SDL_MaximizeWindow (window->window);
+        // SDL_SetWindowMaximumSize (window->window, &new_width, &new_height)
+        SDL_SetWindowFullscreen (window->window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+        // SDL_SetWindowSize (window->window, new_width, new_height);
+        SDL_Rect viewport = { .x = 0, .y = 0, .w = new_width, .h = new_height };
+        SDL_RenderSetViewport (window->renderer->renderer, &viewport);
+        SDL_RenderSetLogicalSize (window->renderer->renderer, new_width, new_height);
+
+        window_get_size (window, &window->window_size);
+        SDL_SetWindowPosition (window->window, 
+            ((window->display_mode.w / 2) - (window->window_size.width / 2)),
+            ((window->display_mode.h / 2) - (window->window_size.height / 2)));
 
         ui_resize (window);
     }
