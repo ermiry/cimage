@@ -80,6 +80,7 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
             ui->ui_elements[spot] = new_element;
             ui->new_ui_element_id++;
             ui->curr_max_ui_elements++;
+            printf ("curr max ui: %d\n", ui->curr_max_ui_elements);
         }
     // }
 
@@ -229,7 +230,8 @@ void ui_delete (void *ui_ptr) {
 
         if (ui->ui_elements) {
             for (u32 i = 0; i < ui->curr_max_ui_elements; i++)
-                ui_element_delete (ui->ui_elements[i]);
+                if (ui->ui_elements[i])
+                    ui_element_delete (ui->ui_elements[i]);
 
             free (ui->ui_elements);
         }
@@ -262,16 +264,23 @@ UI *ui_create (void) {
 
 }
 
+// FIXME: 25/11/2019 -- 10:28 -- cant find seg fault when quitting program
+// only happens when we need to realloc ui elements
+// gdb gives sig abort in renderer :/
 static u8 ui_elements_realloc (UI *ui) {
 
     u8 retval = 1;
 
     if (ui) {
-        u32 new_max_ui_elements = ui->curr_max_ui_elements * 2;
+        u32 new_max_ui_elements = ui->max_ui_elements * 2;
 
-        ui->ui_elements = realloc (ui->ui_elements, new_max_ui_elements * sizeof (UIElement *));
+        ui->ui_elements = (UIElement **) realloc (ui->ui_elements, new_max_ui_elements * sizeof (UIElement *));
         if (ui->ui_elements) {
+            u32 start = ui->max_ui_elements;
+            for (u32 i = start; i < new_max_ui_elements; i++) ui->ui_elements[i] = NULL;
+
             ui->max_ui_elements = new_max_ui_elements;
+            // printf ("max: %d\n", ui->max_ui_elements);
             retval = 0;;
         }
     }

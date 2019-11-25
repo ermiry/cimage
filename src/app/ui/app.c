@@ -175,11 +175,12 @@ void app_ui_init (void) {
     ui_button_set_action (open_folder_button, images_folder_select, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
     ui_button_set_sprite (open_folder_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/folder.png");
-    ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "back");
+    ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "top");
 
     open_folder_text = ui_textbox_create (0, 100, 200, 50, UI_POS_MIDDLE_CENTER, main_renderer);
     ui_textbox_set_text (open_folder_text, main_renderer, "Open a photos folder", font, 24, RGBA_WHITE, false);
     ui_textbox_set_text_pos (open_folder_text, UI_POS_MIDDLE_CENTER);
+    ui_element_set_layer (main_renderer->ui, open_folder_text->ui_element, "top");
 
     SDL_Rect rect = { .x = 0, .y = 0, .w = screen_width, .h = screen_height };
     RGBA_Color overlay_colour = { 255, 255, 255, 70 };
