@@ -47,6 +47,13 @@ void ui_textbox_delete (void *textbox_ptr) {
 
 }
 
+// sets the textbox's UI position
+void ui_textbox_set_pos (TextBox *textbox, UIRect *ref_rect, UIPosition pos, Renderer *renderer) {
+
+    if (textbox) ui_transform_component_set_pos (textbox->transform, renderer, ref_rect, pos, false);
+
+}
+
 // returns the string representing the text in the textbox
 String *ui_textbox_get_text (TextBox *textbox) {
 

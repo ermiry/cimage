@@ -27,6 +27,11 @@ static Button *settings_button = NULL;
 static Button *open_folder_button = NULL;
 static TextBox *open_folder_text = NULL;
 
+static Panel *statusbar = NULL;
+static TextBox *statusbar_foldername = NULL;
+static TextBox *statusbar_selected = NULL;
+static TextBox *statusbar_total = NULL;
+
 static SDL_Texture *overlay_texture = NULL;
 
 // FIXME: set actions
@@ -70,6 +75,62 @@ static void sidebar_end (void) {
 
 }
 
+static void statusbar_init (void) {
+
+    Renderer *main_renderer = renderer_get_by_name ("main");
+
+    Font *font = ui_font_get_default ();
+
+    u32 screen_width = main_renderer->window->window_size.width;
+    u32 screen_height = main_renderer->window->window_size.height;
+
+    RGBA_Color statusbar_color = { .r = 25, .g = 25, .b = 25, .a = 150 };
+    statusbar = ui_panel_create (sidebar->transform->rect.w, 0, 
+        screen_width - sidebar->transform->rect.w, 50,
+        UI_POS_LEFT_BOTTOM_CORNER, main_renderer);
+    ui_panel_set_bg_colour (statusbar, main_renderer, statusbar_color);
+    ui_element_set_layer (main_renderer->ui, statusbar->ui_element, "top");
+    ui_element_toggle_active (statusbar->ui_element);
+
+    statusbar_foldername = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
+    ui_textbox_set_pos (statusbar_foldername, &statusbar->transform->rect, UI_POS_LEFT_CENTER, NULL);
+    statusbar_foldername->transform->rect.x += 20;
+    ui_textbox_set_text (statusbar_foldername, main_renderer, "/home/ermiry/Pictures/M", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
+    // ui_textbox_set_ouline_colour (statusbar_foldername, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
+    ui_element_toggle_active (statusbar_foldername->ui_element);
+
+    statusbar_selected = ui_textbox_create (0, 0, 400, 50, UI_POS_FREE, main_renderer);
+    ui_textbox_set_pos (statusbar_selected, &statusbar->transform->rect, UI_POS_MIDDLE_CENTER, NULL);
+    statusbar_selected->transform->rect.x -= sidebar->transform->rect.w / 2;
+    ui_textbox_set_text (statusbar_selected, main_renderer, "IMG_0194 (1).jpg", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_selected, UI_POS_MIDDLE_CENTER);
+    // ui_textbox_set_ouline_colour (statusbar_selected, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, statusbar_selected->ui_element, "top");
+    ui_element_toggle_active (statusbar_selected->ui_element);
+
+    statusbar_total = ui_textbox_create (0, 0, 200, 50, UI_POS_FREE, main_renderer);
+    ui_textbox_set_pos (statusbar_total, &statusbar->transform->rect, UI_POS_RIGHT_CENTER, NULL);
+    statusbar_total->transform->rect.x -= 20;
+    ui_textbox_set_text (statusbar_total, main_renderer, "Total: 1923", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
+    // ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
+    ui_element_toggle_active (statusbar_total->ui_element);
+
+}
+
+static void statusbar_end (void) {
+
+    if (statusbar) ui_element_destroy (statusbar);
+
+    if (statusbar_foldername) ui_element_destroy (statusbar_foldername->ui_element);
+    if (statusbar_selected) ui_element_destroy (statusbar_selected->ui_element);
+    if (statusbar_total) ui_element_destroy (statusbar_total->ui_element);
+
+}
+
 void app_ui_init (void) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -101,10 +162,13 @@ void app_ui_init (void) {
     RGBA_Color overlay_colour = { 255, 255, 255, 70 };
     render_complex_transparent_rect (main_renderer, &overlay_texture, &rect, overlay_colour); 
 
+    statusbar_init ();
+
 }
 
 void app_ui_end (void) {
 
+    statusbar_end ();
     sidebar_end ();
 
     ui_element_destroy (background_panel->ui_element);

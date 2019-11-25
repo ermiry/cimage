@@ -43,6 +43,9 @@ extern void ui_textbox_delete (void *textbox_ptr);
 // returns the string representing the text in the textbox
 extern String *ui_textbox_get_text (TextBox *textbox);
 
+// sets the textbox's UI position
+extern void ui_textbox_set_pos (TextBox *textbox, UIRect *ref_rect, UIPosition pos, Renderer *renderer);
+
 // sets the textbox's text
 extern void ui_textbox_set_text (TextBox *textbox, Renderer *renderer, const char *text, 
     Font *font, u32 size, RGBA_Color color, bool adjust_to_text);
