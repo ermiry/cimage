@@ -547,31 +547,31 @@ void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer) {
                 for (ListElement *le = dlist_start (dropdown->options); le; le = le->next) {
                     option = (DropdownOption *) le->data;
 
-                    if (mousePos.x >= option->transform->rect.x && mousePos.x <= (option->transform->rect.x + option->transform->rect.w) && 
-                    mousePos.y >= option->transform->rect.y && mousePos.y <= (option->transform->rect.y + option->transform->rect.h)) {
-                        // FIXME: create a colour ptr to check for colour!
-                        ui_dropdown_option_render (option, renderer, &dropdown->option_hover_colour, dropdown->option_hover_texture);
+                    if (renderer->window->mouse) {
+                        if (mousePos.x >= option->transform->rect.x && mousePos.x <= (option->transform->rect.x + option->transform->rect.w) && 
+                            mousePos.y >= option->transform->rect.y && mousePos.y <= (option->transform->rect.y + option->transform->rect.h)) {
+                            // FIXME: create a colour ptr to check for colour!
+                            ui_dropdown_option_render (option, renderer, &dropdown->option_hover_colour, dropdown->option_hover_texture);
 
-                        // check if the user pressed the left button over the mouse
-                        if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                            option->pressed = true;
-                        }
-                        
-                        else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                            if (option->pressed) {
-                                option->pressed = false;
-                                dropdown->option_selected = option;
-                                ui_dropdown_set_placeholder (dropdown, renderer,
-                                    option->option->text->str, 
-                                    dropdown->placeholder->font, dropdown->placeholder->size, dropdown->placeholder->text_color);
-                                ui_dropdown_set_placeholder_pos (dropdown, renderer, UI_POS_MIDDLE_CENTER);
+                            // check if the user pressed the left button over the mouse
+                            if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                                option->pressed = true;
+                            }
+                            
+                            else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                                if (option->pressed) {
+                                    option->pressed = false;
+                                    dropdown->option_selected = option;
+                                    ui_dropdown_set_placeholder (dropdown, renderer,
+                                        option->option->text->str, 
+                                        dropdown->placeholder->font, dropdown->placeholder->size, dropdown->placeholder->text_color);
+                                    ui_dropdown_set_placeholder_pos (dropdown, renderer, UI_POS_MIDDLE_CENTER);
+                                }
                             }
                         }
-                    }
 
-                    else {
-                        ui_dropdown_option_render (option, renderer, NULL, NULL);
-                    } 
+                        else ui_dropdown_option_render (option, renderer, NULL, NULL); 
+                    }
                 }
             }
 

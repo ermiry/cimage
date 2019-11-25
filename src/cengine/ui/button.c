@@ -365,26 +365,30 @@ void ui_button_draw (Button *button, Renderer *renderer) {
             Sprite *selected_sprite = NULL;
 
             if (button->active) {
-                // check if the mouse is in the button
-                if (mousePos.x >= button->transform->rect.x && mousePos.x <= (button->transform->rect.x + button->transform->rect.w) && 
-                    mousePos.y >= button->transform->rect.y && mousePos.y <= (button->transform->rect.y + button->transform->rect.h)) {
-                    // check if the user pressed the left button over the mouse
-                    if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                        button->pressed = true;
-                        selected_sprite = button->sprites[BUTTON_STATE_MOUSE_DOWN];
-                    }
-                    
-                    else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                        if (button->pressed) {
-                            button->pressed = false;
-                            selected_sprite = button->sprites[BUTTON_STATE_MOUSE_UP];
-                            if (button->action) button->action (button->args);
-                            // printf ("Pressed!\n");
+                if (renderer->window->mouse) {
+                    // check if the mouse is in the button
+                    if (mousePos.x >= button->transform->rect.x && mousePos.x <= (button->transform->rect.x + button->transform->rect.w) && 
+                        mousePos.y >= button->transform->rect.y && mousePos.y <= (button->transform->rect.y + button->transform->rect.h)) {
+                        // check if the user pressed the left button over the mouse
+                        if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                            button->pressed = true;
+                            selected_sprite = button->sprites[BUTTON_STATE_MOUSE_DOWN];
                         }
+                        
+                        else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                            if (button->pressed) {
+                                button->pressed = false;
+                                selected_sprite = button->sprites[BUTTON_STATE_MOUSE_UP];
+                                if (button->action) button->action (button->args);
+                                // printf ("Pressed!\n");
+                            }
+                        }
+
+                        // if not, the user is hovering the mouse over the button
+                        else selected_sprite = button->sprites[BUTTON_STATE_MOUSE_OVER_MOTION];
                     }
 
-                    // if not, the user is hovering the mouse over the button
-                    else selected_sprite = button->sprites[BUTTON_STATE_MOUSE_OVER_MOTION];
+                    else button->pressed = false;
                 }
             
                 else button->pressed = false;

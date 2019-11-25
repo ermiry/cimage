@@ -405,30 +405,33 @@ void ui_image_draw (Image *image, Renderer *renderer) {
 
             // check for action listener
             if (image->active) {
-                // FIXME: check if there is focus in the window we are in
-                // check if the mouse is in the image
-                if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
-                    mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
-                    if (image->overlay_texture) {
-                        SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
-                            NULL, &image->transform->rect, 
-                            0, 0, image->flip);
-                    }
+                if (renderer->window->mouse) {
+                    // check if the mouse is in the image
+                    if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
+                        mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
+                        if (image->overlay_texture) {
+                            SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
+                                NULL, &image->transform->rect, 
+                                0, 0, image->flip);
+                        }
 
-                    // check if the user pressed the left button over the image
-                    if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                        image->pressed = true;
-                    }
-                    
-                    else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                        if (image->pressed) {
-                            image->pressed = false;
-                            if (image->action) image->action (image->args);
-                            // printf ("Pressed!\n");
+                        // check if the user pressed the left button over the image
+                        if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                            image->pressed = true;
+                        }
+                        
+                        else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                            if (image->pressed) {
+                                image->pressed = false;
+                                if (image->action) image->action (image->args);
+                                // printf ("Pressed!\n");
+                            }
                         }
                     }
+                
+                    else image->pressed = false;
                 }
-            
+                
                 else image->pressed = false;
             }
 
