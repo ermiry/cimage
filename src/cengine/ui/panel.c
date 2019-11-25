@@ -244,23 +244,27 @@ void ui_panel_resize (Panel *panel, WindowSize window_original_size, WindowSize 
 void ui_panel_draw (Panel *panel, Renderer *renderer) {
 
     if (panel && renderer) {
-        // render the background
-        if (panel->colour) {
-            if (panel->bg_texture) {
-                SDL_RenderCopyEx (renderer->renderer, panel->bg_texture, 
-                    &panel->bg_texture_rect, &panel->transform->rect, 
-                    0, 0, SDL_FLIP_NONE);
+        if (SDL_HasIntersection (&panel->transform->rect, &renderer->window->screen_rect)) {
+            // render the background
+            if (panel->colour) {
+                if (panel->bg_texture) {
+                    SDL_RenderCopyEx (renderer->renderer, panel->bg_texture, 
+                        &panel->bg_texture_rect, &panel->transform->rect, 
+                        0, 0, SDL_FLIP_NONE);
+                }
+
+                else {
+                    render_basic_filled_rect (renderer, &panel->transform->rect, panel->bg_colour);
+                }
             }
 
-            else {
-                render_basic_filled_rect (renderer, &panel->transform->rect, panel->bg_colour);
-            }
+            // render the outline
+            if (panel->outline) 
+                render_basic_outline_rect (renderer, &panel->transform->rect, panel->outline_colour,
+                    panel->outline_scale_x, panel->outline_scale_y);\
+
+            renderer->render_count += 1;
         }
-
-        // render the outline
-        if (panel->outline) 
-            render_basic_outline_rect (renderer, &panel->transform->rect, panel->outline_colour,
-                panel->outline_scale_x, panel->outline_scale_y);
     }
 
 }

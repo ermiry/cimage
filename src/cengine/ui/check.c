@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <SDL2/SDL_rect.h>
+
 #include "cengine/types/types.h"
 
 #include "cengine/ui/ui.h"
@@ -57,7 +59,10 @@ Check *ui_check_create (UI *ui, u32 x, u32 y) {
 void ui_check_draw (Check *check, Renderer *renderer) {
 
     if (check && renderer) {
-        
+        if (SDL_HasIntersection (&check->transform->rect, &renderer->window->screen_rect)) {
+
+            renderer->render_count += 1;
+        }
     }
 
 }

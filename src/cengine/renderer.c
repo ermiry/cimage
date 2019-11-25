@@ -715,7 +715,7 @@ void render (Renderer *renderer) {
         SDL_RenderPresent (renderer->renderer);
 
         #ifdef CENGINE_DEBUG
-        printf ("Renderer: %s render count: %d\n", renderer->name->str, renderer->render_count);
+        // printf ("Renderer: %s render count: %d\n", renderer->name->str, renderer->render_count);
         #endif
     }
 

@@ -247,23 +247,27 @@ void ui_textbox_resize (TextBox *textbox, WindowSize window_original_size, Windo
 void ui_textbox_draw (TextBox *textbox, Renderer *renderer) {
 
     if (textbox && renderer) {
-        // render the background
-        if (textbox->bg_texture) {
-            SDL_RenderCopyEx (renderer->renderer, textbox->bg_texture, 
-                &textbox->bg_texture_rect, &textbox->transform->rect, 
-                0, 0, SDL_FLIP_NONE);
+        if (SDL_HasIntersection (&textbox->transform->rect, &renderer->window->screen_rect)) {
+            // render the background
+            if (textbox->bg_texture) {
+                SDL_RenderCopyEx (renderer->renderer, textbox->bg_texture, 
+                    &textbox->bg_texture_rect, &textbox->transform->rect, 
+                    0, 0, SDL_FLIP_NONE);
+            }
+
+            else if (textbox->colour) 
+                render_basic_filled_rect (renderer, &textbox->transform->rect, textbox->bg_colour);
+
+            // render the outline border
+            if (textbox->outline) 
+                render_basic_outline_rect (renderer, &textbox->transform->rect, textbox->outline_colour,
+                    textbox->outline_scale_x, textbox->outline_scale_y);
+
+            // render the text
+            ui_text_component_render (textbox->text, renderer);
+
+            renderer->render_count += 1;
         }
-
-        else if (textbox->colour) 
-            render_basic_filled_rect (renderer, &textbox->transform->rect, textbox->bg_colour);
-
-        // render the outline border
-        if (textbox->outline) 
-            render_basic_outline_rect (renderer, &textbox->transform->rect, textbox->outline_colour,
-                textbox->outline_scale_x, textbox->outline_scale_y);
-
-        // render the text
-        ui_text_component_render (textbox->text, renderer);
     }
 
 }

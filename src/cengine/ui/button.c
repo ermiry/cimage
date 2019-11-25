@@ -351,67 +351,71 @@ void ui_button_resize (Button *button, WindowSize window_original_size, WindowSi
 void ui_button_draw (Button *button, Renderer *renderer) {
 
     if (button && renderer) {
-        // draw the background
-         if (button->bg_texture) {
-            SDL_RenderCopyEx (renderer->renderer, button->bg_texture, 
-                &button->bg_texture_rect, &button->transform->rect, 
-                0, 0, SDL_FLIP_NONE);
-        }
-
-        else if (button->colour) 
-            render_basic_filled_rect (renderer, &button->transform->rect, button->bg_colour);
-
-        Sprite *selected_sprite = NULL;
-
-        if (button->active) {
-            // check if the mouse is in the button
-            if (mousePos.x >= button->transform->rect.x && mousePos.x <= (button->transform->rect.x + button->transform->rect.w) && 
-                mousePos.y >= button->transform->rect.y && mousePos.y <= (button->transform->rect.y + button->transform->rect.h)) {
-                // check if the user pressed the left button over the mouse
-                if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                    button->pressed = true;
-                    selected_sprite = button->sprites[BUTTON_STATE_MOUSE_DOWN];
-                }
-                
-                else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                    if (button->pressed) {
-                        button->pressed = false;
-                        selected_sprite = button->sprites[BUTTON_STATE_MOUSE_UP];
-                        if (button->action) button->action (button->args);
-                        // printf ("Pressed!\n");
-                    }
-                }
-
-                // if not, the user is hovering the mouse over the button
-                else selected_sprite = button->sprites[BUTTON_STATE_MOUSE_OVER_MOTION];
+        if (SDL_HasIntersection (&button->transform->rect, &renderer->window->screen_rect)) {
+            // draw the background
+            if (button->bg_texture) {
+                SDL_RenderCopyEx (renderer->renderer, button->bg_texture, 
+                    &button->bg_texture_rect, &button->transform->rect, 
+                    0, 0, SDL_FLIP_NONE);
             }
-        
-            else button->pressed = false;
+
+            else if (button->colour) 
+                render_basic_filled_rect (renderer, &button->transform->rect, button->bg_colour);
+
+            Sprite *selected_sprite = NULL;
+
+            if (button->active) {
+                // check if the mouse is in the button
+                if (mousePos.x >= button->transform->rect.x && mousePos.x <= (button->transform->rect.x + button->transform->rect.w) && 
+                    mousePos.y >= button->transform->rect.y && mousePos.y <= (button->transform->rect.y + button->transform->rect.h)) {
+                    // check if the user pressed the left button over the mouse
+                    if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                        button->pressed = true;
+                        selected_sprite = button->sprites[BUTTON_STATE_MOUSE_DOWN];
+                    }
+                    
+                    else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                        if (button->pressed) {
+                            button->pressed = false;
+                            selected_sprite = button->sprites[BUTTON_STATE_MOUSE_UP];
+                            if (button->action) button->action (button->args);
+                            // printf ("Pressed!\n");
+                        }
+                    }
+
+                    // if not, the user is hovering the mouse over the button
+                    else selected_sprite = button->sprites[BUTTON_STATE_MOUSE_OVER_MOTION];
+                }
+            
+                else button->pressed = false;
+            }
+
+            else selected_sprite = button->sprites[BUTTON_STATE_DISABLE];
+
+            // the mouse is NOT hovering over the button OR we dont have any other sprite available
+            if (!selected_sprite)
+                selected_sprite = button->sprites[BUTTON_STATE_MOUSE_OUT];
+
+            if (selected_sprite) {
+                selected_sprite->dest_rect.x = button->transform->rect.x;
+                selected_sprite->dest_rect.y = button->transform->rect.y;
+
+                SDL_RenderCopyEx (renderer->renderer, selected_sprite->texture, 
+                    &selected_sprite->src_rect, 
+                    &button->transform->rect, 
+                    0, 0, NO_FLIP);
+            } 
+
+            // draw button text
+            ui_text_component_render (button->text, renderer);
+
+            // render the outline border
+            if (button->outline) 
+                render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour,
+                    button->outline_scale_x, button->outline_scale_y);
+
+            renderer->render_count += 1;
         }
-
-        else selected_sprite = button->sprites[BUTTON_STATE_DISABLE];
-
-        // the mouse is NOT hovering over the button OR we dont have any other sprite available
-        if (!selected_sprite)
-            selected_sprite = button->sprites[BUTTON_STATE_MOUSE_OUT];
-
-        if (selected_sprite) {
-            selected_sprite->dest_rect.x = button->transform->rect.x;
-            selected_sprite->dest_rect.y = button->transform->rect.y;
-
-            SDL_RenderCopyEx (renderer->renderer, selected_sprite->texture, 
-                &selected_sprite->src_rect, 
-                &button->transform->rect, 
-                0, 0, NO_FLIP);
-        } 
-
-        // draw button text
-        ui_text_component_render (button->text, renderer);
-
-        // render the outline border
-        if (button->outline) 
-            render_basic_outline_rect (renderer, &button->transform->rect, button->outline_colour,
-                button->outline_scale_x, button->outline_scale_y);
     }
 
 }

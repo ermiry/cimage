@@ -405,6 +405,7 @@ void ui_image_draw (Image *image, Renderer *renderer) {
 
             // check for action listener
             if (image->active) {
+                // FIXME: check if there is focus in the window we are in
                 // check if the mouse is in the image
                 if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
                     mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {

@@ -496,82 +496,86 @@ void ui_dropdown_option_set_hover_color (Dropdown *dropdown, Renderer *renderer,
 void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer) {
 
     if (dropdown && renderer) {
-        // render the background
-        if (dropdown->bg_texture) {
-            SDL_RenderCopyEx (renderer->renderer, dropdown->bg_texture, 
-                &dropdown->bg_texture_rect, &dropdown->transform->rect, 
-                0, 0, SDL_FLIP_NONE);
-        }
-
-        else if (dropdown->colour) 
-            render_basic_filled_rect (renderer, &dropdown->transform->rect, dropdown->bg_colour);
-
-        // check if the mouse is in the dropdown
-        if (dropdown->active) {
-            if (mousePos.x >= dropdown->transform->rect.x && mousePos.x <= (dropdown->transform->rect.x + dropdown->transform->rect.w) && 
-                mousePos.y >= dropdown->transform->rect.y && mousePos.y <= (dropdown->transform->rect.y + dropdown->transform->rect.h)) {
-                // the mouse is over use
-                render_basic_filled_rect (renderer, &dropdown->transform->rect, RGBA_BLACK);
-
-                // check if the user pressed the left dropdown over the mouse
-                if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                    dropdown->pressed = true;
-                }
-                
-                else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                    if (dropdown->pressed) {
-                        dropdown->pressed = false;
-                        // extend and show options
-                        // printf ("Pressed!\n");
-                        dropdown->extended = !dropdown->extended;
-                        // dropdown->extended_panel->ui_element->active = !dropdown->extended_panel->ui_element->active;
-                    }
-                }
+        if (SDL_HasIntersection (&dropdown->transform->rect, &renderer->window->screen_rect)) {
+            // render the background
+            if (dropdown->bg_texture) {
+                SDL_RenderCopyEx (renderer->renderer, dropdown->bg_texture, 
+                    &dropdown->bg_texture_rect, &dropdown->transform->rect, 
+                    0, 0, SDL_FLIP_NONE);
             }
-        
-            else dropdown->pressed = false;
-        }
 
-        // render the outline rect
-        if (dropdown->outline) 
-            render_basic_outline_rect (renderer, &dropdown->transform->rect, dropdown->outline_colour, 
-                dropdown->outline_scale_x, dropdown->outline_scale_y);
+            else if (dropdown->colour) 
+                render_basic_filled_rect (renderer, &dropdown->transform->rect, dropdown->bg_colour);
 
-        // render the placeholder text (also the selected option text)
-        ui_text_component_render (dropdown->placeholder, renderer);
+            // check if the mouse is in the dropdown
+            if (dropdown->active) {
+                if (mousePos.x >= dropdown->transform->rect.x && mousePos.x <= (dropdown->transform->rect.x + dropdown->transform->rect.w) && 
+                    mousePos.y >= dropdown->transform->rect.y && mousePos.y <= (dropdown->transform->rect.y + dropdown->transform->rect.h)) {
+                    // the mouse is over use
+                    render_basic_filled_rect (renderer, &dropdown->transform->rect, RGBA_BLACK);
 
-        // render the extended section (options)
-        if (dropdown->extended) {
-            DropdownOption *option = NULL;
-            for (ListElement *le = dlist_start (dropdown->options); le; le = le->next) {
-                option = (DropdownOption *) le->data;
-
-                if (mousePos.x >= option->transform->rect.x && mousePos.x <= (option->transform->rect.x + option->transform->rect.w) && 
-                mousePos.y >= option->transform->rect.y && mousePos.y <= (option->transform->rect.y + option->transform->rect.h)) {
-                    // FIXME: create a colour ptr to check for colour!
-                    ui_dropdown_option_render (option, renderer, &dropdown->option_hover_colour, dropdown->option_hover_texture);
-
-                    // check if the user pressed the left button over the mouse
+                    // check if the user pressed the left dropdown over the mouse
                     if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                        option->pressed = true;
+                        dropdown->pressed = true;
                     }
                     
                     else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                        if (option->pressed) {
-                            option->pressed = false;
-                            dropdown->option_selected = option;
-                            ui_dropdown_set_placeholder (dropdown, renderer,
-                                option->option->text->str, 
-                                dropdown->placeholder->font, dropdown->placeholder->size, dropdown->placeholder->text_color);
-                            ui_dropdown_set_placeholder_pos (dropdown, renderer, UI_POS_MIDDLE_CENTER);
+                        if (dropdown->pressed) {
+                            dropdown->pressed = false;
+                            // extend and show options
+                            // printf ("Pressed!\n");
+                            dropdown->extended = !dropdown->extended;
+                            // dropdown->extended_panel->ui_element->active = !dropdown->extended_panel->ui_element->active;
                         }
                     }
                 }
-
-                else {
-                    ui_dropdown_option_render (option, renderer, NULL, NULL);
-                } 
+            
+                else dropdown->pressed = false;
             }
+
+            // render the outline rect
+            if (dropdown->outline) 
+                render_basic_outline_rect (renderer, &dropdown->transform->rect, dropdown->outline_colour, 
+                    dropdown->outline_scale_x, dropdown->outline_scale_y);
+
+            // render the placeholder text (also the selected option text)
+            ui_text_component_render (dropdown->placeholder, renderer);
+
+            // render the extended section (options)
+            if (dropdown->extended) {
+                DropdownOption *option = NULL;
+                for (ListElement *le = dlist_start (dropdown->options); le; le = le->next) {
+                    option = (DropdownOption *) le->data;
+
+                    if (mousePos.x >= option->transform->rect.x && mousePos.x <= (option->transform->rect.x + option->transform->rect.w) && 
+                    mousePos.y >= option->transform->rect.y && mousePos.y <= (option->transform->rect.y + option->transform->rect.h)) {
+                        // FIXME: create a colour ptr to check for colour!
+                        ui_dropdown_option_render (option, renderer, &dropdown->option_hover_colour, dropdown->option_hover_texture);
+
+                        // check if the user pressed the left button over the mouse
+                        if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                            option->pressed = true;
+                        }
+                        
+                        else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                            if (option->pressed) {
+                                option->pressed = false;
+                                dropdown->option_selected = option;
+                                ui_dropdown_set_placeholder (dropdown, renderer,
+                                    option->option->text->str, 
+                                    dropdown->placeholder->font, dropdown->placeholder->size, dropdown->placeholder->text_color);
+                                ui_dropdown_set_placeholder_pos (dropdown, renderer, UI_POS_MIDDLE_CENTER);
+                            }
+                        }
+                    }
+
+                    else {
+                        ui_dropdown_option_render (option, renderer, NULL, NULL);
+                    } 
+                }
+            }
+
+            renderer->render_count += 1;
         }
     }
 

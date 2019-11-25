@@ -300,56 +300,60 @@ InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, R
 void ui_input_field_draw (InputField *input, Renderer *renderer) {
 
     if (input && renderer) {
-        // render the background
-        if (input->bg_texture) {
-            SDL_RenderCopyEx (renderer->renderer, input->bg_texture, 
-                &input->bg_texture_rect, &input->transform->rect, 
-                0, 0, SDL_FLIP_NONE);
-        }
+        if (SDL_HasIntersection (&input->transform->rect, &renderer->window->screen_rect)) {
+            // render the background
+            if (input->bg_texture) {
+                SDL_RenderCopyEx (renderer->renderer, input->bg_texture, 
+                    &input->bg_texture_rect, &input->transform->rect, 
+                    0, 0, SDL_FLIP_NONE);
+            }
 
-        else if (input->colour) 
-            render_basic_filled_rect (renderer, &input->transform->rect, input->bg_colour);
+            else if (input->colour) 
+                render_basic_filled_rect (renderer, &input->transform->rect, input->bg_colour);
 
-        // check if the mouse is in the input
-        if (input->active) {
-            if (mousePos.x >= input->transform->rect.x && mousePos.x <= (input->transform->rect.x + input->transform->rect.w) && 
-                mousePos.y >= input->transform->rect.y && mousePos.y <= (input->transform->rect.y + input->transform->rect.h)) {
-                // check if the user pressed the left input over the mouse
-                if (input_get_mouse_button_state (MOUSE_LEFT)) {
-                    input->pressed = true;
-                }
-                
-                else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
-                    if (input->pressed) {
-                        input->pressed = false;
-                        // make this text active
-                        input_set_active_text (input);
-                        // printf ("Pressed!\n");
+            // check if the mouse is in the input
+            if (input->active) {
+                if (mousePos.x >= input->transform->rect.x && mousePos.x <= (input->transform->rect.x + input->transform->rect.w) && 
+                    mousePos.y >= input->transform->rect.y && mousePos.y <= (input->transform->rect.y + input->transform->rect.h)) {
+                    // check if the user pressed the left input over the mouse
+                    if (input_get_mouse_button_state (MOUSE_LEFT)) {
+                        input->pressed = true;
+                    }
+                    
+                    else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
+                        if (input->pressed) {
+                            input->pressed = false;
+                            // make this text active
+                            input_set_active_text (input);
+                            // printf ("Pressed!\n");
+                        }
                     }
                 }
+            
+                else input->pressed = false;
             }
-        
-            else input->pressed = false;
-        }
 
-        if (input->pressed) {
-            if (input->draw_selected) 
-                render_basic_outline_rect (renderer, &input->transform->rect, input->selected_color,
-                    input->outline_scale_x, input->outline_scale_y);
-        }
+            if (input->pressed) {
+                if (input->draw_selected) 
+                    render_basic_outline_rect (renderer, &input->transform->rect, input->selected_color,
+                        input->outline_scale_x, input->outline_scale_y);
+            }
 
-        else if (input->outline) render_basic_outline_rect (renderer, &input->transform->rect, input->outline_colour, 
-            input->outline_scale_x, input->outline_scale_y);
-        
-        // draw the correct text
-        if (input->empty_text) {
-            // draw the placeholder text
-            ui_text_component_render (input->placeholder, renderer);
-        }
+            else if (input->outline) render_basic_outline_rect (renderer, &input->transform->rect, input->outline_colour, 
+                input->outline_scale_x, input->outline_scale_y);
+            
+            // draw the correct text
+            if (input->empty_text) {
+                // draw the placeholder text
+                ui_text_component_render (input->placeholder, renderer);
+            }
 
-        else {
-            // draw the input text
-            ui_text_component_render (input->text, renderer);
+            else {
+                // draw the input text
+                ui_text_component_render (input->text, renderer);
+            }
+
+            renderer->render_count += 1;
         }
     }
 
