@@ -13,6 +13,9 @@
 struct _Sprite;
 struct _SpriteSheet;
 
+// solves issue of loading texture in a different thread, see texture load
+extern void texture_create_from_surface (Renderer *renderer, SDL_Texture **texture, SDL_Surface *surface);
+
 // loads an image file into a texture
 // NOTE: uses the renderer to create a new texture from a surface
 // but only works from the thread where you created the renderer, you can call this method from 

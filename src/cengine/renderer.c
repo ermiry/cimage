@@ -359,7 +359,10 @@ int layer_add_element (Layer *layer, void *ptr) {
     int retval = 1;
 
     if (layer && ptr) {
-        dlist_insert_after (layer->elements, dlist_end (layer->elements), ptr);
+        if (!dlist_insert_after (layer->elements, dlist_end (layer->elements), ptr)) {
+            printf ("Added element to layer %s\n", layer->name->str);
+        }
+
         retval = 0;
     }
 
@@ -390,6 +393,7 @@ int layer_remove_element (Layer *layer, void *ptr) {
 
     if (layer && ptr) {
         void *element = dlist_remove_element (layer->elements, dlist_get_element (layer->elements, ptr));
+        // void *element = dlist_remove (layer->elements, ptr);
         retval = element ? 0 : 1;
     }
 

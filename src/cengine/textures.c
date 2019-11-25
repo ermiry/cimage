@@ -16,6 +16,25 @@
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
+void texture_create_from_surface (Renderer *renderer, SDL_Texture **texture, SDL_Surface *surface) {
+
+    if (renderer && texture && surface) {
+        pthread_t thread_id = pthread_self ();
+        // printf ("Loading texture in thread: %ld\n", thread_id);
+        if (thread_id == renderer->thread_id) {
+            // load texture as always
+            *texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
+            SDL_FreeSurface (surface);
+        }
+
+        else {
+            // send image to renderer queue
+            renderer_queue_push (renderer, surface_texture_new (surface, texture));
+        }
+    }
+
+}
+
 ImageData *texture_load (Renderer *renderer, const char *filename, SDL_Texture **texture) {
 
     ImageData *image_data = NULL;

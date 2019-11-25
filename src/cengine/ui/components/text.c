@@ -8,6 +8,7 @@
 #include "cengine/types/string.h"
 
 #include "cengine/renderer.h"
+#include "cengine/textures.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
@@ -117,9 +118,10 @@ void ui_text_component_draw (Text *text, Renderer *renderer) {
 
             text->transform->rect.w = surface->w;
             text->transform->rect.h = surface->h;
-            text->texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
 
-            SDL_FreeSurface (surface);
+            // text->texture = SDL_CreateTextureFromSurface (renderer->renderer, surface);
+            texture_create_from_surface (renderer, &text->texture, surface);
+            // SDL_FreeSurface (surface);
         }
     }
 

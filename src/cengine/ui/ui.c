@@ -70,12 +70,14 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
 
         new_element = ui_element_new ();
         if (new_element) {
-            new_element->id = ui->new_ui_element_id;
+            // new_element->id = ui->new_ui_element_id;
+            // printf ("spot: %d\n", spot);
+            new_element->id = spot;
             new_element->type = type;
             new_element->active = true;
             // new_element->element = NULL;
 
-            ui->ui_elements[new_element->id] = new_element;
+            ui->ui_elements[spot] = new_element;
             ui->new_ui_element_id++;
             ui->curr_max_ui_elements++;
         }
@@ -84,8 +86,11 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
     // by default, add the ui element to the middle layer
     if (new_element) {
         Layer *layer = layer_get_by_name (ui->ui_elements_layers, "middle");
-        layer_add_element (layer, new_element);
-        new_element->id = layer->pos;
+        // printf ("layer name: %s\n", layer->name->str);
+        // layer_add_element (layer, new_element);
+        dlist_insert_after (layer->elements, dlist_end (layer->elements), new_element);
+        // printf ("layer size: %ld\n", layer->elements->size);
+        new_element->layer_id = layer->pos;
     }
 
     return new_element;
@@ -167,10 +172,27 @@ int ui_element_set_layer (UI *ui, UIElement *ui_element, const char *layer_name)
     if (ui_element && layer_name) {
         Layer *layer = layer_get_by_name (ui->ui_elements_layers, layer_name);
         if (layer) {
-            Layer *curr_layer = layer_get_by_pos (ui->ui_elements_layers, ui_element->layer_id);
-            layer_remove_element (curr_layer, ui_element);
+            if (ui_element->layer_id >= 0) {
+                Layer *curr_layer = layer_get_by_pos (ui->ui_elements_layers, ui_element->layer_id);
+                // printf ("curr layer: %s\n", curr_layer->name->str);
+                // printf ("curr layer size: %ld\n", curr_layer->elements->size);
+                int ret = layer_remove_element (curr_layer, ui_element);
+                // void *element = dlist_remove (curr_layer->elements, ui_element);
+                if (!ret) {
+                    // UIElement *e = (UIElement *) element;
+                    // printf ("type: %d", e->type);
 
-            retval = layer_add_element (layer, ui_element);
+                    retval = dlist_insert_after (layer->elements, dlist_end (layer->elements), ui_element);
+                    ui_element->layer_id = layer->pos;
+                }
+            }
+
+            else {
+                retval = dlist_insert_after (layer->elements, dlist_end (layer->elements), ui_element);
+                ui_element->layer_id = layer->pos;
+            }
+
+            // retval = layer_add_element (layer, ui_element);
         }
     }
 
@@ -261,9 +283,13 @@ static u8 ui_elements_realloc (UI *ui) {
 static i32 ui_elements_get_free_spot (UI *ui) {
 
     if (ui) {
-        for (u32 i = 0; i < ui->curr_max_ui_elements; i++) 
-            if (ui->ui_elements[i]->id == -1)
-                return (i32) i;
+        for (u32 i = 0; i < ui->max_ui_elements; i++) {
+            if (ui->ui_elements[i]) {
+                if (ui->ui_elements[i]->id == -1) return (i32) i;
+            } 
+
+            else return (i32) i;
+        }
     }
 
     return -1;

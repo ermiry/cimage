@@ -86,7 +86,7 @@ static void statusbar_init (void) {
     u32 screen_width = main_renderer->window->window_size.width;
     u32 screen_height = main_renderer->window->window_size.height;
 
-    RGBA_Color statusbar_color = { .r = 25, .g = 25, .b = 25, .a = 150 };
+    RGBA_Color statusbar_color = { .r = 37, .g = 44, .b = 54, .a = 245 };
     statusbar = ui_panel_create (sidebar->transform->rect.w, 0, 
         screen_width - sidebar->transform->rect.w, 50,
         UI_POS_LEFT_BOTTOM_CORNER, main_renderer);
@@ -98,9 +98,9 @@ static void statusbar_init (void) {
     ui_textbox_set_pos (statusbar_foldername, &statusbar->transform->rect, UI_POS_LEFT_CENTER, NULL);
     statusbar_foldername->transform->rect.x += 20;
     ui_textbox_set_text (statusbar_foldername, main_renderer, "", font, 24, RGBA_WHITE, false);
-    ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
+    // ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_foldername, RGBA_WHITE);
-    ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
+    // ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
     ui_element_toggle_active (statusbar_foldername->ui_element);
 
     statusbar_selected = ui_textbox_create (0, 0, 400, 50, UI_POS_FREE, main_renderer);
@@ -115,10 +115,10 @@ static void statusbar_init (void) {
     statusbar_total = ui_textbox_create (0, 0, 200, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_total, &statusbar->transform->rect, UI_POS_RIGHT_CENTER, NULL);
     statusbar_total->transform->rect.x -= 20;
-    ui_textbox_set_text (statusbar_total, main_renderer, "", font, 24, RGBA_WHITE, false);
-    ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
+    // ui_textbox_set_text (statusbar_total, main_renderer, "", font, 24, RGBA_WHITE, false);
+    // ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
-    ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
+    // ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
     ui_element_toggle_active (statusbar_total->ui_element);
 
 }
@@ -129,11 +129,15 @@ void app_ui_statusbar_show (const char *foldername, u32 total) {
     Font *font = ui_font_get_default ();
 
     ui_textbox_set_text (statusbar_foldername, main_renderer, foldername, font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
+    ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
     ui_element_toggle_active (statusbar_foldername->ui_element);
 
     ui_textbox_set_text (statusbar_total, main_renderer, 
         c_string_create ("Total: %d", total), 
         font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
+    ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
     ui_element_toggle_active (statusbar_total->ui_element);
 
     ui_element_toggle_active (statusbar->ui_element);
@@ -171,7 +175,7 @@ void app_ui_init (void) {
     ui_button_set_action (open_folder_button, images_folder_select, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
     ui_button_set_sprite (open_folder_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/folder.png");
-    ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "top");
+    ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "back");
 
     open_folder_text = ui_textbox_create (0, 100, 200, 50, UI_POS_MIDDLE_CENTER, main_renderer);
     ui_textbox_set_text (open_folder_text, main_renderer, "Open a photos folder", font, 24, RGBA_WHITE, false);
@@ -341,6 +345,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_toggle_active (image);
         ui_image_set_overlay_ref (image, overlay_texture);
         ui_image_set_action (image, app_ui_image_display_in_window, image);
+        // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
 
         ui_panel_layout_add_element (images_panel, image->transform);
     }
