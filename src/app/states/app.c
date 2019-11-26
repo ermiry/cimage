@@ -33,13 +33,7 @@
 #define DEFAULT_N_COLS          5
 #define DEFAULT_N_ROWS          4
 
-// general information of the things we are working on
-typedef struct Cimage {
-
-    String *opened_folder_name;
-    DoubleList *images;
-
-} Cimage;
+static void image_item_delete_dummy (void *img_ptr);
 
 Cimage *cimage = NULL;
 
@@ -49,6 +43,7 @@ static Cimage *cimage_new (void) {
     if (cimage) {
         cimage->opened_folder_name = NULL;
         cimage->images = NULL;
+        cimage->selected_images = NULL;
     }
 
     return cimage;
@@ -62,9 +57,19 @@ static void cimage_delete (void *cimage_ptr) {
 
         str_delete (cimage->opened_folder_name);
         dlist_delete (cimage->images);
+        // FIXME: segfault if list is empty
+        // dlist_delete (cimage->selected_images);
 
         free (cimage_ptr);
     }
+
+}
+
+static Cimage *cimage_create (void) {
+
+    Cimage *cimage = cimage_new ();
+    if (cimage) cimage->selected_images = dlist_init (image_item_delete_dummy, NULL);
+    return cimage;
 
 }
 
@@ -76,6 +81,8 @@ static ImageItem *image_item_new (void) {
     if (img) {
         img->image = NULL;
         img->filename = NULL;
+        img->path = NULL;
+        img->selected = false;
     }
 
     return img;
@@ -87,10 +94,23 @@ static void image_item_delete (void *img_ptr) {
     if (img_ptr) {
         ImageItem *img = (ImageItem *) img_ptr;
 
-        // ui_image_delete (img->image);
         str_delete (img->filename);
+        str_delete (img->path);
 
         free (img);
+    }
+
+}
+
+static void image_item_delete_dummy (void *img_ptr) {}
+
+static int image_item_comparator (const void *a, const void *b) {
+
+    if (a && b) {
+        ImageItem *img_a = (ImageItem *) a;
+        ImageItem *img_b = (ImageItem *) b;
+
+        return strcmp (img_a->filename->str, img_b->filename->str);
     }
 
 }
@@ -121,7 +141,7 @@ static DoubleList *images_folder_read (const char *images_dir) {
     DoubleList *images = NULL;
 
     if (images_dir) {
-        images = dlist_init (image_item_delete, NULL);
+        images = dlist_init (image_item_delete, image_item_comparator);
         
         struct dirent *ep = NULL;
         DIR *dp = opendir (images_dir);
@@ -291,7 +311,7 @@ static void app_update (void) {
 
 static void app_on_enter (void) { 
 
-    cimage = cimage_new ();
+    cimage = cimage_create ();
 
     app_state->update = app_update;
 

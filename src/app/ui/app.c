@@ -311,7 +311,33 @@ void app_ui_image_select (void *img_item_ptr) {
 
     if (img_item_ptr) {
         ImageItem *img = (ImageItem *) img_item_ptr;
-        app_ui_statusbar_set_selected_text (img->filename->str);
+
+        // if (img->selected) dlist_remove (cimage->selected_images, img);
+        if (img->selected) {
+            dlist_remove_element (cimage->selected_images, dlist_get_element (cimage->selected_images, img));
+            img->selected = false;
+        } 
+        
+        else {
+            dlist_insert_after (cimage->selected_images, dlist_end (cimage->selected_images), img);
+            img->selected = true;
+        } 
+
+        if (!cimage->selected_images->size) app_ui_statusbar_set_selected_text (NULL);
+
+        else if (cimage->selected_images->size == 1) {
+            ImageItem *image_item = (ImageItem *) (dlist_start (cimage->selected_images)->data);
+            if (image_item) 
+                app_ui_statusbar_set_selected_text (image_item->filename->str);
+        }
+
+        else {
+            char *status = c_string_create ("%ld images selected", cimage->selected_images->size);
+            if (status) {
+                app_ui_statusbar_set_selected_text (status);
+                free (status);
+            }
+        }
     }
 
 }

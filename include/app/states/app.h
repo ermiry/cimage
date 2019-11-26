@@ -11,11 +11,25 @@
 extern State *app_state;
 extern State *app_state_new (void);
 
+// general information of the things we are working on
+struct _Cimage {
+
+    String *opened_folder_name;
+    DoubleList *images;
+    DoubleList *selected_images;
+
+};
+
+typedef struct _Cimage Cimage;
+
+extern Cimage *cimage;
+
 struct _ImageItem {
 
     Image *image;
     String *filename;
     String *path;
+    bool selected;
 
 };
 
