@@ -27,6 +27,7 @@
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
+#include "app/states/app.h"
 #include "app/ui/app.h"
 
 #define DEFAULT_N_COLS          5
@@ -69,13 +70,6 @@ static void cimage_delete (void *cimage_ptr) {
 
 #pragma region images
 
-typedef struct ImageItem {
-
-    Image *image;
-    String *filename;
-
-} ImageItem;
-
 static ImageItem *image_item_new (void) {
 
     ImageItem *img = (ImageItem *) malloc (sizeof (ImageItem));
@@ -93,7 +87,7 @@ static void image_item_delete (void *img_ptr) {
     if (img_ptr) {
         ImageItem *img = (ImageItem *) img_ptr;
 
-        ui_image_delete (img->image);
+        // ui_image_delete (img->image);
         str_delete (img->filename);
 
         free (img);
@@ -101,28 +95,20 @@ static void image_item_delete (void *img_ptr) {
 
 }
 
-// FIXME: also read jpeg images
+// TODO: better file type check!!
 static bool is_image_file (const char *filename) {
 
     int result;
     bool retval = false;
 
     if (filename) {
-        char temp[3];
-        unsigned int len = strlen (filename);
-
         char *ext = files_get_file_extension (filename);
         if (ext) {
-            printf ("%s\n", ext);
+            if (!strcmp (ext, "png") || !strcmp (ext, "jpg") || !strcmp (ext, "jpeg"))
+                retval = true;
+
             free (ext);
         }
-
-        temp[2] = filename[len - 1];
-        temp[1] = filename[len - 2];
-        temp[0] = filename[len - 3];
-
-        if (!strcmp (temp, "jpg")) retval = true;
-        else if (!strcmp (temp, "png")) retval = true;
     }
 
     return retval;
@@ -135,7 +121,7 @@ static DoubleList *images_folder_read (const char *images_dir) {
     DoubleList *images = NULL;
 
     if (images_dir) {
-        images = dlist_init (str_delete, str_comparator);
+        images = dlist_init (image_item_delete, NULL);
         
         struct dirent *ep = NULL;
         DIR *dp = opendir (images_dir);
@@ -147,13 +133,20 @@ static DoubleList *images_folder_read (const char *images_dir) {
             while ((ep = readdir (dp)) != NULL) {
                 if (strcmp (ep->d_name, ".") && strcmp (ep->d_name, "..")) {
                     if (is_image_file (ep->d_name)) {
-                        String *filename = str_create ("%s/%s", images_dir, ep->d_name);
-                        dlist_insert_after (images, dlist_end (images), filename);
+                        ImageItem *img = image_item_new ();
+                        img->filename = str_new (ep->d_name);
+                        img->path = str_create ("%s/%s", images_dir, ep->d_name);
+
+                        dlist_insert_after (images, dlist_end (images), img);
                     }
                 }
             }
 
             (void) closedir (dp);
+
+            #ifdef CIMAGE_DEBUG
+            cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done reading images!");
+            #endif
         }
 
         else {
@@ -187,8 +180,8 @@ static void *images_load (void *folder_name_ptr) {
                 app_ui_statusbar_show (folder_name->str, cimage->images->size);
 
                 for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
-                    printf ("%s\n", ((String *) le->data)->str);
-                    app_ui_image_display (((String *) le->data)->str);
+                    // printf ("%s\n", ((String *) le->data)->str);
+                    app_ui_image_display (((ImageItem *) le->data));
                 }
             }
             

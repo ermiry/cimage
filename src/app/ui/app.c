@@ -203,7 +203,7 @@ void app_ui_init (void) {
     RGBA_Color overlay_colour = { 255, 255, 255, 70 };
     render_complex_transparent_rect (main_renderer, &overlay_texture, &rect, overlay_colour); 
 
-    RGBA_Color selected_colour = { 210, 77, 87, 200 };
+    RGBA_Color selected_colour = { 210, 77, 87, 180 };
     render_complex_transparent_rect (main_renderer, &selected_texture, &rect, selected_colour); 
 
     statusbar_init ();
@@ -307,11 +307,11 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 }
 
 // add image to selected list and sets selected text in status bar
-void app_ui_image_select (void *img_ptr) {
+void app_ui_image_select (void *img_item_ptr) {
 
-    if (img_ptr) {
-        Image *image = (Image *) img_ptr;
-        app_ui_statusbar_set_selected_text (image->sprite->img_data->filename->str);
+    if (img_item_ptr) {
+        ImageItem *img = (ImageItem *) img_item_ptr;
+        app_ui_statusbar_set_selected_text (img->filename->str);
     }
 
 }
@@ -379,23 +379,25 @@ void app_ui_image_display_in_window (void *img_ptr) {
 }
 
 // TODO: first reduce the image and then render what we want
-void app_ui_image_display (const char *filename) {
+void app_ui_image_display (ImageItem *image_item) {
 
-    if (filename) {
+    if (image_item) {
         Renderer *main_renderer = renderer_get_by_name ("main");
 
         Image *image = ui_image_create_static (0, 0, main_renderer);
         ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER, main_renderer);
-        ui_image_set_sprite (image, main_renderer, filename);
+        ui_image_set_sprite (image, main_renderer, image_item->path->str);
         ui_image_set_ouline_colour (image, RGBA_WHITE);
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
         ui_image_set_overlay_ref (image, overlay_texture);
         ui_image_set_selected_ref (image, selected_texture);
-        ui_image_set_action (image, app_ui_image_select, image);
+        ui_image_set_action (image, app_ui_image_select, image_item);
         // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
 
         ui_panel_layout_add_element (images_panel, image->transform);
+
+        image_item->image = image;
     }
 
 }
