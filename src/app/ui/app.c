@@ -35,6 +35,7 @@ static TextBox *statusbar_selected = NULL;
 static TextBox *statusbar_total = NULL;
 
 static SDL_Texture *overlay_texture = NULL;
+static SDL_Texture *selected_texture = NULL;
 
 // FIXME: set actions
 static void sidebar_init (u32 screen_height) {
@@ -186,6 +187,9 @@ void app_ui_init (void) {
     RGBA_Color overlay_colour = { 255, 255, 255, 70 };
     render_complex_transparent_rect (main_renderer, &overlay_texture, &rect, overlay_colour); 
 
+    RGBA_Color selected_colour = { 210, 77, 87, 200 };
+    render_complex_transparent_rect (main_renderer, &selected_texture, &rect, selected_colour); 
+
     statusbar_init ();
 
 }
@@ -198,6 +202,7 @@ void app_ui_end (void) {
     ui_element_destroy (background_panel->ui_element);
 
     if (overlay_texture) SDL_DestroyTexture (overlay_texture);
+    if (selected_texture) SDL_DestroyTexture (selected_texture);
 
 }
 
@@ -285,6 +290,15 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 
 }
 
+void app_ui_image_select (void *img_ptr) {
+
+    if (img_ptr) {
+        // Image *image = (Image *) img_ptr;
+
+    }
+
+}
+
 void app_ui_image_display_in_window (void *img_ptr) {
 
     if (img_ptr) {
@@ -360,7 +374,8 @@ void app_ui_image_display (const char *filename) {
         ui_image_set_outline_scale (image, 2, 2);
         ui_image_toggle_active (image);
         ui_image_set_overlay_ref (image, overlay_texture);
-        ui_image_set_action (image, app_ui_image_display_in_window, image);
+        ui_image_set_selected_ref (image, selected_texture);
+        // ui_image_set_action (image, app_ui_image_display_in_window, image);
         // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
 
         ui_panel_layout_add_element (images_panel, image->transform);

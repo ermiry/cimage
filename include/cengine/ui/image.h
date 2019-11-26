@@ -35,11 +35,15 @@ typedef struct Image {
     // event listener
     bool active;
     bool pressed;
+    bool selected;
     Action action;
     void *args;
 
     bool overlay_reference;
     SDL_Texture *overlay_texture;
+
+    bool selected_reference;
+    SDL_Texture *selected_texture;
 
 } Image;
 
@@ -100,6 +104,16 @@ extern void ui_image_set_overlay_ref (Image *image, SDL_Texture *overlay_ref);
 
 // removes the overlay from the image
 extern void ui_image_remove_overlay (Image *image);
+
+// sets an overlay to the image that only renders when you select the image (1 left click)
+extern void ui_image_set_selected (Image *image, Renderer *renderer, RGBA_Color color);
+
+// sets an overlay to the image that only renders when you select the image
+// you need to pass a reference to the texture
+extern void ui_image_set_selected_ref (Image *image, SDL_Texture *selected_ref);
+
+// removes the select overlay from the image
+extern void ui_image_remove_selected (Image *image);
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position

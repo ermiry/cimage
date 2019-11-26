@@ -34,6 +34,7 @@ static Image *ui_image_new (void) {
         image->args = NULL;
 
         image->overlay_texture = NULL;
+        image->selected_texture = NULL;
     }
 
     return image;
@@ -60,7 +61,11 @@ void ui_image_delete (void *image_ptr) {
 
         if (image->texture) SDL_DestroyTexture (image->texture);
 
-        if (image->overlay_texture) SDL_DestroyTexture (image->overlay_texture);
+        if (image->overlay_texture && !image->overlay_reference) 
+            SDL_DestroyTexture (image->overlay_texture);
+
+        if (image->selected_texture && !image->selected_reference)
+            SDL_DestroyTexture (image->selected_texture);
 
         free (image);
     }
@@ -243,7 +248,7 @@ void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color) {
 }
 
 // sets an overlay to the image that only renders when you hover the image
-// you need to pass a refrence to the texture
+// you need to pass a reference to the texture
 void ui_image_set_overlay_ref (Image *image, SDL_Texture *overlay_ref) {
 
     if (image && overlay_ref) {
@@ -267,8 +272,61 @@ void ui_image_remove_overlay (Image *image) {
         if (image->overlay_texture) {
             if (!image->overlay_reference) {
                 SDL_DestroyTexture (image->overlay_texture);
-                image->overlay_texture = NULL;
             }
+
+            image->overlay_texture = NULL;
+            image->overlay_reference = false;
+        }
+    }
+
+}
+
+// sets an overlay to the image that only renders when you select the image (1 left click)
+void ui_image_set_selected (Image *image, Renderer *renderer, RGBA_Color color) {
+
+    if (image) {
+        if (image->selected_texture) {
+            if (!image->selected_reference) {
+                SDL_DestroyTexture (image->selected_texture);
+                image->selected_texture = NULL;
+            }
+        }
+
+        render_complex_transparent_rect (renderer, &image->selected_texture, &image->transform->rect, color); 
+        image->selected_reference = false;   
+    }
+
+}
+
+// sets an overlay to the image that only renders when you select the image
+// you need to pass a reference to the texture
+void ui_image_set_selected_ref (Image *image, SDL_Texture *selected_ref) {
+
+    if (image && selected_ref) {
+        if (image->selected_texture) {
+            if (!image->selected_reference) {
+                SDL_DestroyTexture (image->selected_texture);
+                image->selected_texture = NULL;
+            }
+        }
+
+        image->selected_texture = selected_ref;
+        image->selected_reference = true;
+    }
+
+}
+
+// removes the select overlay from the image
+void ui_image_remove_selected (Image *image) {
+
+    if (image) {
+        if (image->selected_texture) {
+            if (!image->selected_reference) {
+                SDL_DestroyTexture (image->selected_texture);
+            }
+
+            image->selected_texture = NULL;
+            image->selected_reference = false;
         }
     }
 
@@ -422,9 +480,10 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                         
                         else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
                             if (image->pressed) {
-                                image->pressed = false;
-                                if (image->action) image->action (image->args);
                                 // printf ("Pressed!\n");
+                                image->selected = !image->selected;
+                                if (image->action) image->action (image->args);
+                                image->pressed = false;
                             }
                         }
                     }
@@ -433,6 +492,12 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                 }
                 
                 else image->pressed = false;
+            }
+
+            if (image->selected && image->selected_texture) {
+                SDL_RenderCopyEx (renderer->renderer, image->selected_texture, 
+                    NULL, &image->transform->rect, 
+                    0, 0, image->flip);
             }
 
             renderer->render_count += 1;
