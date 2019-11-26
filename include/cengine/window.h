@@ -82,6 +82,9 @@ extern int window_resize (Window *window, u32 new_width, u32 new_height);
 // sets the window's icon, the surface gets destroyed when the window is destroyed
 extern void window_set_icon (Window *window, SDL_Surface *icon_surface);
 
+// sets the focus to the window
+extern void window_focus (Window *window);
+
 // handle windows events
 extern void windows_handle_events (SDL_Event event);
 

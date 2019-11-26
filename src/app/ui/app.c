@@ -290,44 +290,59 @@ void app_ui_image_display_in_window (void *img_ptr) {
     if (img_ptr) {
         Image *image = (Image *) img_ptr;
 
-        // first we calculate the size of the window
-        SDL_DisplayMode display_mode = { 0 };
-        video_get_display_mode (0, &display_mode);
+        // check if we already displaying the image
+        bool found = false;
+        Renderer *renderer = NULL;
+        for (ListElement *le = dlist_start (renderers); le; le = le->next) {
+            renderer = (Renderer *) le->data;
 
-        u32 max_width = display_mode.w * 0.80;
-        u32 max_height = display_mode.h * 0.80;
-
-        float ratio = 0;
-        u32 width = image->sprite->img_data->w;
-        u32 height = image->sprite->img_data->h; 
-
-        WindowSize window_size = { .width = width, .height = height };
-
-        if (width > max_width) {
-            ratio = (float) max_width / width;
-            window_size.width = max_width;
-            window_size.height *= ratio;
-            height = height * ratio;
-            width = width * ratio;
+            if (!strcmp (renderer->name->str, image->sprite->img_data->filename->str)) {
+                window_focus (renderer->window);
+                found = true;
+                break;
+            }
         }
 
-        if (height > max_height){
-            ratio = (float) max_height / height;
-            window_size.height = max_height;
-            window_size.width *= ratio; 
-            width = width * ratio;
-            height = height * ratio;
+        if (!found) {
+            // first we calculate the size of the window
+            SDL_DisplayMode display_mode = { 0 };
+            video_get_display_mode (0, &display_mode);
+
+            u32 max_width = display_mode.w * 0.80;
+            u32 max_height = display_mode.h * 0.80;
+
+            float ratio = 0;
+            u32 width = image->sprite->img_data->w;
+            u32 height = image->sprite->img_data->h; 
+
+            WindowSize window_size = { .width = width, .height = height };
+
+            if (width > max_width) {
+                ratio = (float) max_width / width;
+                window_size.width = max_width;
+                window_size.height *= ratio;
+                height = height * ratio;
+                width = width * ratio;
+            }
+
+            if (height > max_height){
+                ratio = (float) max_height / height;
+                window_size.height = max_height;
+                window_size.width *= ratio; 
+                width = width * ratio;
+                height = height * ratio;
+            }
+
+            Renderer *renderer = renderer_create_with_window (image->sprite->img_data->filename->str, 
+                0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
+                image->sprite->img_data->filename->str, window_size, 0);
+
+            // load a new image
+            Image *new_image = ui_image_create_static (0, 0, renderer);
+            ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
+            ui_image_set_sprite (new_image, renderer, image->sprite->img_data->filename->str);
+            ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
         }
-
-        Renderer *renderer = renderer_create_with_window (image->sprite->img_data->filename->str, 
-            0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
-            image->sprite->img_data->filename->str, window_size, 0);
-
-        // load a new image
-        Image *new_image = ui_image_create_static (0, 0, renderer);
-        ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
-        ui_image_set_sprite (new_image, renderer, image->sprite->img_data->filename->str);
-        ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
     }
 
 }

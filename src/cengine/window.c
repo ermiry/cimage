@@ -280,6 +280,13 @@ void window_set_icon (Window *window, SDL_Surface *icon_surface) {
 
 }
 
+// sets the focus to the window
+void window_focus (Window *window) {
+
+    if (window) SDL_RaiseWindow (window->window);
+
+}
+
 // TODO: maybe close program completely when main window is closed
 // handle windows events
 void windows_handle_events (SDL_Event event) {
