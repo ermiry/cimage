@@ -16,10 +16,13 @@
 #include "cengine/collections/dlist.h"
 
 #include "cengine/input.h"
+#include "cengine/files.h"
 
 #include "cengine/threads/thread.h"
 #include "cengine/manager/manager.h"
 // #include "cengine/game/go.h"
+
+#include "cengine/ui/image.h"
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
@@ -66,6 +69,38 @@ static void cimage_delete (void *cimage_ptr) {
 
 #pragma region images
 
+typedef struct ImageItem {
+
+    Image *image;
+    String *filename;
+
+} ImageItem;
+
+static ImageItem *image_item_new (void) {
+
+    ImageItem *img = (ImageItem *) malloc (sizeof (ImageItem));
+    if (img) {
+        img->image = NULL;
+        img->filename = NULL;
+    }
+
+    return img;
+
+}
+
+static void image_item_delete (void *img_ptr) {
+
+    if (img_ptr) {
+        ImageItem *img = (ImageItem *) img_ptr;
+
+        ui_image_delete (img->image);
+        str_delete (img->filename);
+
+        free (img);
+    }
+
+}
+
 // FIXME: also read jpeg images
 static bool is_image_file (const char *filename) {
 
@@ -75,6 +110,12 @@ static bool is_image_file (const char *filename) {
     if (filename) {
         char temp[3];
         unsigned int len = strlen (filename);
+
+        char *ext = files_get_file_extension (filename);
+        if (ext) {
+            printf ("%s\n", ext);
+            free (ext);
+        }
 
         temp[2] = filename[len - 1];
         temp[1] = filename[len - 2];
