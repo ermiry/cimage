@@ -104,11 +104,11 @@ static void statusbar_init (void) {
     // ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
     ui_element_toggle_active (statusbar_foldername->ui_element);
 
-    statusbar_selected = ui_textbox_create (0, 0, 400, 50, UI_POS_FREE, main_renderer);
+    statusbar_selected = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_selected, &statusbar->transform->rect, UI_POS_MIDDLE_CENTER, NULL);
     statusbar_selected->transform->rect.x -= sidebar->transform->rect.w / 2;
-    ui_textbox_set_text (statusbar_selected, main_renderer, "", font, 24, RGBA_WHITE, false);
-    ui_textbox_set_text_pos (statusbar_selected, UI_POS_MIDDLE_CENTER);
+    // ui_textbox_set_text (statusbar_selected, main_renderer, "", font, 24, RGBA_WHITE, false);
+    // ui_textbox_set_text_pos (statusbar_selected, UI_POS_MIDDLE_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_selected, RGBA_WHITE);
     ui_element_set_layer (main_renderer->ui, statusbar_selected->ui_element, "top");
     ui_element_toggle_active (statusbar_selected->ui_element);
@@ -142,6 +142,22 @@ void app_ui_statusbar_show (const char *foldername, u32 total) {
     ui_element_toggle_active (statusbar_total->ui_element);
 
     ui_element_toggle_active (statusbar->ui_element);
+
+}
+
+static void app_ui_statusbar_set_selected_text (const char *text) {
+
+    if (text) {
+        Renderer *main_renderer = renderer_get_by_name ("main");
+        Font *font = ui_font_get_default ();
+
+        ui_textbox_set_text (statusbar_selected, main_renderer, text, font, 24, RGBA_WHITE, false);
+        // ui_textbox_update_text (statusbar_selected, main_renderer, text);
+        ui_textbox_set_text_pos (statusbar_selected, UI_POS_MIDDLE_CENTER);
+        ui_element_set_active (statusbar_selected->ui_element, true);
+    }
+
+    else ui_element_set_active (statusbar_selected->ui_element, false);
 
 }
 
@@ -290,11 +306,12 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 
 }
 
+// add image to selected list and sets selected text in status bar
 void app_ui_image_select (void *img_ptr) {
 
     if (img_ptr) {
-        // Image *image = (Image *) img_ptr;
-
+        Image *image = (Image *) img_ptr;
+        app_ui_statusbar_set_selected_text (image->sprite->img_data->filename->str);
     }
 
 }
@@ -375,7 +392,7 @@ void app_ui_image_display (const char *filename) {
         ui_image_toggle_active (image);
         ui_image_set_overlay_ref (image, overlay_texture);
         ui_image_set_selected_ref (image, selected_texture);
-        // ui_image_set_action (image, app_ui_image_display_in_window, image);
+        ui_image_set_action (image, app_ui_image_select, image);
         // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
 
         ui_panel_layout_add_element (images_panel, image->transform);

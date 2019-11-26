@@ -207,6 +207,12 @@ void ui_element_toggle_active (UIElement *ui_element) {
 
 }
 
+void ui_element_set_active (UIElement *ui_element, bool active) {
+
+    if (ui_element) ui_element->active = active;
+
+}
+
 static UI *ui_new (void) {
 
     UI *ui = (UI *) malloc (sizeof (UI));

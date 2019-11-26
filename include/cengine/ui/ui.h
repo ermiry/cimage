@@ -64,6 +64,8 @@ extern int ui_element_set_layer (struct _UI *ui, UIElement *ui_element, const ch
 
 extern void ui_element_toggle_active (UIElement *ui_element);
 
+extern void ui_element_set_active (UIElement *ui_element, bool active);
+
 struct _UI {
 
     UIElement **ui_elements;
