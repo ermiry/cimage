@@ -345,7 +345,7 @@ void app_ui_image_select (void *img_item_ptr) {
 void app_ui_image_display_in_window (void *img_ptr) {
 
     if (img_ptr) {
-        Image *image = (Image *) img_ptr;
+        ImageItem *image = (ImageItem *) img_ptr;
 
         // check if we already displaying the image
         bool found = false;
@@ -353,7 +353,7 @@ void app_ui_image_display_in_window (void *img_ptr) {
         for (ListElement *le = dlist_start (renderers); le; le = le->next) {
             renderer = (Renderer *) le->data;
 
-            if (!strcmp (renderer->name->str, image->sprite->img_data->filename->str)) {
+            if (!strcmp (renderer->name->str, image->filename->str)) {
                 window_focus (renderer->window);
                 found = true;
                 break;
@@ -369,8 +369,8 @@ void app_ui_image_display_in_window (void *img_ptr) {
             u32 max_height = display_mode.h * 0.80;
 
             float ratio = 0;
-            u32 width = image->sprite->img_data->w;
-            u32 height = image->sprite->img_data->h; 
+            u32 width = image->image->sprite->img_data->w;
+            u32 height = image->image->sprite->img_data->h; 
 
             WindowSize window_size = { .width = width, .height = height };
 
@@ -390,14 +390,14 @@ void app_ui_image_display_in_window (void *img_ptr) {
                 height = height * ratio;
             }
 
-            Renderer *renderer = renderer_create_with_window (image->sprite->img_data->filename->str, 
+            Renderer *renderer = renderer_create_with_window (image->filename->str, 
                 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
-                image->sprite->img_data->filename->str, window_size, 0);
+                image->filename->str, window_size, 0);
 
             // load a new image
             Image *new_image = ui_image_create_static (0, 0, renderer);
             ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
-            ui_image_set_sprite (new_image, renderer, image->sprite->img_data->filename->str);
+            ui_image_set_sprite (new_image, renderer, image->image->sprite->img_data->filename->str);
             ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
         }
     }

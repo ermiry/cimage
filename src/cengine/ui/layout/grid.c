@@ -76,6 +76,8 @@ void ui_layout_grid_set_cell_size (GridLayout *grid, u32 width, u32 height) {
 
 }
 
+
+
 // creates a new grid layout
 // x and y for position, w and h for dimensions
 GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h) {

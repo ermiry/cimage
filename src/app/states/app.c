@@ -267,6 +267,48 @@ void images_folder_select (void *args) {
 
 #pragma endregion
 
+#pragma region global input
+
+void zoom_more (void *args) {
+
+    // get window with keyboard focus
+    Window *window = NULL;
+    for (ListElement *le = dlist_start (windows); le; le = le->next) {
+        window = (Window *) le->data;
+        if (window->keyboard) break;
+    }
+
+    if (!strcmp (window->renderer->name->str, "main")) {
+        printf ("+\n");
+    }
+
+    else {
+
+    }
+
+}
+
+void zoom_less (void *args) {
+
+    // get window with keyboard focus
+    Window *window = NULL;
+    for (ListElement *le = dlist_start (windows); le; le = le->next) {
+        window = (Window *) le->data;
+        if (window->keyboard) break;
+    }
+
+    if (!strcmp (window->renderer->name->str, "main")) {
+        printf ("-\n");
+    }
+
+    else {
+        
+    }
+
+}
+
+#pragma endregion
+
 #pragma region main screen
 
 static bool once = false;
@@ -310,6 +352,9 @@ static void app_update (void) {
 }
 
 static void app_on_enter (void) { 
+
+    input_command_register (SDLK_EQUALS, zoom_more, NULL);
+    input_command_register (SDLK_MINUS, zoom_less, NULL);
 
     cimage = cimage_create ();
 
