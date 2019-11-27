@@ -29,6 +29,10 @@ extern void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows);
 // sets the preferred size of the cells, the layout must be of the correct size
 extern void ui_layout_grid_set_cell_size (GridLayout *grid, u32 width, u32 height);
 
+// updates the grid with a new size
+// returns 0 on success update, 1 on failure
+extern int ui_layout_grid_update_dimensions (GridLayout *grid, u32 cols, u32 rows);
+
 // creates a new grid layout
 // x and y for position, w and h for dimensions
 extern GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h);

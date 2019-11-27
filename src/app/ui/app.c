@@ -20,7 +20,7 @@
 
 static Panel *background_panel = NULL;
 static Panel *sidebar = NULL;
-static Panel *images_panel = NULL;
+Panel *images_panel = NULL;
 
 static Button *photos_button = NULL;
 static Button *presentation_button = NULL;
