@@ -10,13 +10,13 @@
 #include "cengine/ui/layout/grid.h"
 #include "cengine/ui/image.h"
 
-static GridElement *grid_element_new (UITransform *trans, u32 x, u32 y) {
+static GridElement *grid_element_new (UITransform *trans, u32 width, u32 height) {
 
     GridElement *element = (GridElement *) malloc (sizeof (GridElement));
     if (element) {
         element->trans = trans;
-        element->x = x;
-        element->y = y;
+        element->original_width = width;
+        element->original_height = height;
     }
 
     return element;
@@ -72,6 +72,9 @@ void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows) {
 
         grid->cell_width = grid->transform->rect.w / grid->cols;
         grid->cell_height = grid->transform->rect.h / grid->rows;
+        printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
+        grid->cell_padding_x = grid->cell_width * 0.1;
+        grid->cell_padding_y = grid->cell_height * 0.1;
     }
 
 }
@@ -83,37 +86,48 @@ void ui_layout_grid_set_cell_size (GridLayout *grid, u32 width, u32 height) {
     if (grid) {
         grid->cell_width = width;
         grid->cell_height = height;
+        printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
+
+        grid->cell_padding_x = grid->cell_width * 0.1;
+        grid->cell_padding_y = grid->cell_height * 0.1;
     }
 
 }
 
-static void ui_layout_grid_update_element_size (GridLayout *grid, UITransform *ui_element_trans) {
+static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *element) {
 
 
-    if (grid && ui_element_trans) {
-        u32 max_width = grid->cell_width - 40;      // Max width for the image
-        u32 max_height = grid->cell_height - 40;    // Max height for the image
+    if (grid && element) {
+        u32 max_width = grid->cell_width - grid->cell_padding_x;      // Max width for the image
+        u32 max_height = grid->cell_height - grid->cell_padding_y;    // Max height for the image
         float ratio = 0;                            // Used for aspect ratio
-        u32 width = ui_element_trans->rect.w;       // Current image width
-        u32 height = ui_element_trans->rect.h;      // Current image height
+        u32 width = element->original_width;        // Current image width
+        u32 height = element->original_height;      // Current image height
+
+        u32 new_width = element->original_width;
+        u32 new_height = element->original_height;
 
         // Check if the current width is larger than the max
-        if (width > max_width){
+        if (width > max_width) {
             ratio = (float) max_width / width;      // get ratio for scaling image
-            ui_element_trans->rect.w = max_width;   // Set new width
-            ui_element_trans->rect.h *= ratio;      // Scale height based on ratio
+            new_width = max_width;                  // Set new width
+            new_height *= ratio;                    // Scale height based on ratio
             height = height * ratio;                // Reset height to match scaled image
             width = width * ratio;                  // Reset width to match scaled image
         }
 
         // Check if current height is larger than max
-        if (height > max_height){
+        if (height > max_height) {
             ratio = (float) max_height / height;    // get ratio for scaling image
-            ui_element_trans->rect.h = max_height;  // Set new height
-            ui_element_trans->rect.w *= ratio;      // Scale width based on ratio
+            new_height = max_height;                // Set new height
+            new_width *= ratio;                     // Scale width based on ratio
             width = width * ratio;                  // Reset width to match scaled image
             height = height * ratio;                // Reset height to match scaled image
         }
+
+        // printf ("new: %d x %d\n", element->trans->rect.w, element->trans->rect.h);
+        element->trans->rect.w = new_width;
+        element->trans->rect.h = new_height;
     }
 
 }
@@ -130,6 +144,7 @@ static void ui_layout_grid_update_element_pos (GridLayout *grid, UITransform *ui
 
 }
 
+// FIXME: we need to update the panel size
 // updates the grid with a new size
 // returns 0 on success update, 1 on failure
 int ui_layout_grid_update_dimensions (GridLayout *grid, u32 cols, u32 rows) {
@@ -138,37 +153,45 @@ int ui_layout_grid_update_dimensions (GridLayout *grid, u32 cols, u32 rows) {
 
     if (grid) {
         if (grid->elements) {
-            grid->cols = cols;
-            grid->rows = rows;
-            grid->curr_n_ui_elements = 0;
-            grid->next_x = 0;
-            grid->next_y = 0;
-            grid->max_n_ui_elements = grid->cols * grid->rows;
+            if (cols > 0 && rows > 0) {
+                grid->cols = cols;
+                grid->rows = rows;
+                grid->curr_n_ui_elements = 0;
+                grid->next_x = 0;
+                grid->next_y = 0;
+                grid->max_n_ui_elements = grid->cols * grid->rows;
 
-            grid->cell_width = grid->transform->rect.w / grid->cols;
-            grid->cell_height = grid->transform->rect.h / grid->rows;
+                // grid->cell_width = (cols * grid->cell_width) / grid->cols;
+                // grid->cell_height = (cols * grid->cell_height) / grid->rows;
 
-            GridElement *grid_element = NULL;
-            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-                grid_element = (GridElement *) le->data;
+                grid->cell_width = grid->transform->rect.w / cols;
+                grid->cell_height = grid->transform->rect.h / rows;
+                // printf ("cell height: %d / %d\n", grid->transform->rect.h, rows);
+                // printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
+                grid->cell_padding_x = grid->cell_width * 0.1;
+                grid->cell_padding_y = grid->cell_height * 0.1;
 
-                grid_element->x = grid->next_x;
-                grid_element->y = grid->next_y;
+                GridElement *grid_element = NULL;
+                for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                    grid_element = (GridElement *) le->data;
 
-                ui_layout_grid_update_element_size (grid, grid_element->trans);
-                ui_layout_grid_update_element_pos (grid, grid_element->trans);
+                    grid_element->x = grid->next_x;
+                    grid_element->y = grid->next_y;
 
-                grid->curr_n_ui_elements += 1;
+                    ui_layout_grid_update_element_size (grid, grid_element);
+                    ui_layout_grid_update_element_pos (grid, grid_element->trans);
 
-                if (grid->next_x < (grid->cols - 1)) grid->next_x += 1;
-                else {
-                    grid->next_x = 0;
-                    if (grid->curr_n_ui_elements >= grid->max_n_ui_elements) grid->next_y = 0;
-                    else grid->next_y += 1;
-                } 
+                    grid->curr_n_ui_elements += 1;
+
+                    if (grid->next_x < (grid->cols - 1)) grid->next_x += 1;
+                    else {
+                        grid->next_x = 0;
+                        grid->next_y += 1;
+                    } 
+                }
+
+                retval = 0;
             }
-
-            retval = 0;
         }
     }
 
@@ -197,10 +220,13 @@ u8 ui_layout_grid_add_element (GridLayout *grid, UITransform *ui_element_trans) 
     if (grid && ui_element_trans) {
         if (grid->elements && (grid->curr_n_ui_elements < grid->max_n_ui_elements)) {
             // add element in next available idx -> at the end for now
-            GridElement *grid_element = grid_element_new (ui_element_trans, grid->next_x, grid->next_y);
+            GridElement *grid_element = grid_element_new (ui_element_trans, 
+                ui_element_trans->rect.w, ui_element_trans->rect.h);
+            grid_element->x = grid->next_x;
+            grid_element->y = grid->next_y;
             dlist_insert_after (grid->elements, dlist_end (grid->elements), grid_element);
 
-            ui_layout_grid_update_element_size (grid, ui_element_trans);
+            ui_layout_grid_update_element_size (grid, grid_element);
             ui_layout_grid_update_element_pos (grid, ui_element_trans);
 
             grid->curr_n_ui_elements += 1;
@@ -208,8 +234,7 @@ u8 ui_layout_grid_add_element (GridLayout *grid, UITransform *ui_element_trans) 
             if (grid->next_x < (grid->cols - 1)) grid->next_x += 1;
             else {
                 grid->next_x = 0;
-                if (grid->curr_n_ui_elements >= grid->max_n_ui_elements) grid->next_y = 0;
-                else grid->next_y += 1;
+                grid->next_y += 1;
             } 
 
             retval = 0;

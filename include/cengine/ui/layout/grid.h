@@ -10,6 +10,7 @@
 typedef struct GridElement {
 
     UITransform *trans;
+    u32 original_width, original_height;
     u32 x, y;
 
 } GridElement;
@@ -26,6 +27,8 @@ typedef struct GridLayout {
 
     u32 cell_width;
     u32 cell_height;
+    u32 cell_padding_x;
+    u32 cell_padding_y;
 
 } GridLayout;
 
