@@ -235,14 +235,11 @@ void app_ui_images_move_up (u32 movement) {
             images_panel->transform->rect.y -= movement;
             grid->transform->rect.y -= movement;
 
-            // FIXME:
-            // for (u32 i = 0; i < grid->cols; i++) {
-            //     for (u32 j = 0; j < grid->rows; j++) {
-            //         if (grid->ui_elements_trans[i][j]) {
-            //             grid->ui_elements_trans[i][j]->rect.y -= movement;
-            //         }
-            //     }
-            // }
+            GridElement *grid_element = NULL;
+            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                grid_element = (GridElement *) le->data;
+                grid_element->trans->rect.y -= movement;
+            }
         }
     }
 
@@ -259,14 +256,11 @@ void app_ui_images_move_down (u32 movement) {
             GridLayout *grid = (GridLayout *) images_panel->layout;
             grid->transform->rect.y += movement;
 
-            // FIXME:
-            // for (u32 i = 0; i < grid->cols; i++) {
-            //     for (u32 j = 0; j < grid->rows; j++) {
-            //         if (grid->ui_elements_trans[i][j]) {
-            //             grid->ui_elements_trans[i][j]->rect.y += movement;
-            //         }
-            //     }
-            // }
+            GridElement *grid_element = NULL;
+            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                grid_element = (GridElement *) le->data;
+                grid_element->trans->rect.y += movement;
+            }
         }
 
         else {

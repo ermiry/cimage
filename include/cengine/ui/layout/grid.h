@@ -7,12 +7,18 @@
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
 
+typedef struct GridElement {
+
+    UITransform *trans;
+    u32 x, y;
+
+} GridElement;
+
 typedef struct GridLayout {
 
     UITransform *transform;
 
-    // UITransform ***ui_elements_trans;
-    DoubleList *ui_transforms;
+    DoubleList *elements;
     u32 cols, rows;
     u32 max_n_ui_elements;
     u32 curr_n_ui_elements;

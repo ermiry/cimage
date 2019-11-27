@@ -286,7 +286,7 @@ void zoom_more (void *args) {
     if (!strcmp (window->renderer->name->str, "main")) {
         GridLayout *grid =  (GridLayout *) images_panel->layout;
         ui_layout_grid_update_dimensions (grid, grid->cols - 1, grid->rows - 1);
-        printf ("+\n");
+        // printf ("+\n");
     }
 
     else {
@@ -307,7 +307,7 @@ void zoom_less (void *args) {
     if (!strcmp (window->renderer->name->str, "main")) {
         GridLayout *grid =  (GridLayout *) images_panel->layout;
         ui_layout_grid_update_dimensions (grid, grid->cols + 1, grid->rows + 1);
-        printf ("-\n");
+        // printf ("-\n");
     }
 
     else {
