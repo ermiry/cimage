@@ -2,6 +2,7 @@
 #define _CENGINE_UI_LAYOUT_GRID_H_
 
 #include "cengine/types/types.h"
+#include "cengine/collections/dlist.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
@@ -10,7 +11,8 @@ typedef struct GridLayout {
 
     UITransform *transform;
 
-    UITransform ***ui_elements_trans;
+    // UITransform ***ui_elements_trans;
+    DoubleList *ui_transforms;
     u32 cols, rows;
     u32 max_n_ui_elements;
     u32 curr_n_ui_elements;
