@@ -15,6 +15,7 @@
 #include "cengine/input.h"
 #include "cengine/timer.h"
 
+#include "cengine/ui/types/types.h"
 #include "cengine/ui/ui.h"
 #include "cengine/ui/image.h"
 

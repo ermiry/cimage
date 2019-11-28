@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
@@ -22,6 +23,7 @@
 #include "cengine/ui/check.h"
 #include "cengine/ui/notification.h"
 #include "cengine/ui/dropdown.h"
+#include "cengine/ui/components/transform.h"
 
 #include "cengine/utils/log.h"
 
@@ -36,7 +38,9 @@ static UIElement *ui_element_new (void) {
         ui_element->id = -1;
         ui_element->active = false;
         ui_element->layer_id = -1;
+        ui_element->transform = UI_NONE;
         ui_element->element = NULL;
+        ui_element->transform = NULL;
     }
 
     return ui_element;
@@ -57,20 +61,20 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
             new_element = ui->ui_elements[spot];
             layer_remove_element (layer_get_by_pos (ui->ui_elements_layers, new_element->layer_id), new_element);
             ui_element_delete_element (new_element);
+            memset (new_element->transform, 0, sizeof (UITransform));
         }
 
-        else new_element = ui_element_new ();
+        else {
+            new_element = ui_element_new ();
+            if (new_element) new_element->transform = ui_transform_component_new ();
+        } 
     }
 
     else {
         if (ui->new_ui_element_id >= ui->max_ui_elements) ui_elements_realloc (ui);
 
         new_element = ui_element_new ();
-        if (new_element) {
-            new_element->id = spot;
-            new_element->type = type;
-            new_element->active = true;
-        }
+        if (new_element) new_element->transform = ui_transform_component_new ();
     }
 
     new_element->id = spot;
@@ -138,6 +142,8 @@ void ui_element_delete (UIElement *ui_element) {
     if (ui_element) {
         ui_element_destroy (ui_element);
         ui_element_delete_element (ui_element);
+        ui_transform_component_delete (ui_element->transform);
+        
         free (ui_element);
     }
 

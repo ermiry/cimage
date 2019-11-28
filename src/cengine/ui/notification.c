@@ -13,6 +13,7 @@
 #include "cengine/renderer.h"
 #include "cengine/timer.h"
 
+#include "cengine/ui/types/types.h"
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
 #include "cengine/ui/notification.h"

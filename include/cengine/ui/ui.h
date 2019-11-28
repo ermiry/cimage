@@ -3,30 +3,31 @@
 
 #include <stdbool.h>
 
-#include <SDL2/SDL_rect.h>
-
 #include "cengine/types/types.h"
 #include "cengine/collections/dlist.h"
 
 #include "cengine/window.h"
 #include "cengine/renderer.h"
 
+#include "cengine/ui/components/transform.h"
+
 struct _Window;
 struct _Renderer;
 struct _UI;
-
-typedef SDL_Rect UIRect;
+// struct _UITransform;
 
 typedef enum UIElementType {
 
-    UI_TEXTBOX,
-    UI_IMAGE,
-    UI_PANEL,
-    UI_BUTTON,
-    UI_INPUT,
-    UI_CHECK,
-    UI_NOTI_CENTER,
-    UI_DROPDOWN
+    UI_NONE             = 0,
+
+    UI_TEXTBOX          = 1,
+    UI_IMAGE            = 2,
+    UI_PANEL            = 3,
+    UI_BUTTON           = 4,
+    UI_INPUT            = 5,
+    UI_CHECK            = 6,
+    UI_NOTI_CENTER      = 7,
+    UI_DROPDOWN         = 8
 
 } UIElementType;
 
@@ -35,10 +36,13 @@ typedef enum UIElementType {
 typedef struct UIElement {
 
     i32 id;
+
     bool active;
-    UIElementType type;
     int layer_id;
+
+    UIElementType type;
     void *element;
+    struct _UITransform *transform;
 
 } UIElement;
 
