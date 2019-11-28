@@ -11,6 +11,10 @@ extern void app_ui_init (void);
 
 extern void app_ui_end (void);
 
+/*** actionsbar ***/
+
+extern void app_ui_actionsbar_show (void);
+
 /*** statusbar ***/
 
 extern void app_ui_statusbar_show (const char *foldername, u32 total);

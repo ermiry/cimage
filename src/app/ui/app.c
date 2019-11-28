@@ -29,6 +29,8 @@ static Button *settings_button = NULL;
 static Button *open_folder_button = NULL;
 static TextBox *open_folder_text = NULL;
 
+static Panel *actionsbar_panel = NULL;
+
 static Panel *statusbar = NULL;
 static TextBox *statusbar_foldername = NULL;
 static TextBox *statusbar_selected = NULL;
@@ -75,6 +77,38 @@ static void sidebar_end (void) {
     if (photos_button) ui_element_destroy (photos_button->ui_element);
     if (presentation_button) ui_element_destroy (presentation_button->ui_element);
     if (settings_button) ui_element_destroy (settings_button->ui_element);
+
+}
+
+static void actionsbar_init (void) {
+
+    Renderer *main_renderer = renderer_get_by_name ("main");
+
+    Font *font = ui_font_get_default ();
+
+    u32 screen_width = main_renderer->window->window_size.width;
+    u32 screen_height = main_renderer->window->window_size.height;
+
+    RGBA_Color statusbar_color = { .r = 37, .g = 44, .b = 54, .a = 245 };
+
+    actionsbar_panel = ui_panel_create (sidebar->transform->rect.w, 0, 
+        screen_width - sidebar->transform->rect.w, 70,
+        UI_POS_LEFT_UPPER_CORNER, main_renderer);
+    ui_panel_set_bg_colour (actionsbar_panel, main_renderer, statusbar_color);
+    ui_element_set_layer (main_renderer->ui, actionsbar_panel->ui_element, "top");
+    ui_element_toggle_active (actionsbar_panel->ui_element);
+
+}
+
+void app_ui_actionsbar_show (void) {
+
+    ui_element_toggle_active (actionsbar_panel->ui_element);
+
+}
+
+static void actionsbar_end (void) {
+
+    if (actionsbar_panel) ui_element_destroy (actionsbar_panel->ui_element);    
 
 }
 
@@ -206,12 +240,14 @@ void app_ui_init (void) {
     RGBA_Color selected_colour = { 210, 77, 87, 180 };
     render_complex_transparent_rect (main_renderer, &selected_texture, &rect, selected_colour); 
 
+    actionsbar_init ();
     statusbar_init ();
 
 }
 
 void app_ui_end (void) {
 
+    actionsbar_end ();
     statusbar_end ();
     sidebar_end ();
 
