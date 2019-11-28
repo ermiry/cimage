@@ -13,6 +13,7 @@
 #include "cengine/sprites.h"
 #include "cengine/renderer.h"
 #include "cengine/input.h"
+#include "cengine/timer.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/image.h"
@@ -358,6 +359,7 @@ Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer) {
     Image *image = ui_image_create_common (renderer);
     if (image) {
         image->transform = ui_transform_component_create (x, y, 0, 0);
+        image->double_click_timer = timer_new ();
     }
 
     return image;
@@ -467,7 +469,7 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                     // check if the mouse is in the image
                     if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
                         mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
-                        if (image->overlay_texture) {
+                        if (image->overlay_texture && !image->selected) {
                             SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
                                 NULL, &image->transform->rect, 
                                 0, 0, image->flip);
@@ -480,9 +482,33 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                         
                         else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
                             if (image->pressed) {
-                                // printf ("Pressed!\n");
-                                image->selected = !image->selected;
-                                if (image->action) image->action (image->args);
+                                if (!image->one_click) {
+                                    image->one_click = true;
+                                    timer_start (image->double_click_timer);
+                                    printf ("One click!\n");
+                                    image->selected = !image->selected;
+                                    if (image->action) image->action (image->args);
+                                }
+
+                                else {
+                                    u32 ticks = timer_get_ticks (image->double_click_timer);
+                                    if (ticks <= 500) {
+                                        printf ("Double click!\n");
+                                        image->one_click = false;
+                                    }
+
+                                    else {
+                                        printf ("One click again!\n");
+                                        image->one_click = true;
+                                        timer_start (image->double_click_timer);
+                                        image->selected = !image->selected;
+                                        if (image->action) image->action (image->args);
+                                    }
+
+                                    
+                                }
+                                
+                                
                                 image->pressed = false;
                             }
                         }

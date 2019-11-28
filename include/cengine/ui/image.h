@@ -9,6 +9,7 @@
 
 #include "cengine/renderer.h"
 #include "cengine/sprites.h"
+#include "cengine/timer.h"
 
 #include "cengine/ui/components/transform.h"
 
@@ -44,6 +45,9 @@ typedef struct Image {
 
     bool selected_reference;
     SDL_Texture *selected_texture;
+
+    Timer *double_click_timer;
+    bool one_click;
 
 } Image;
 
