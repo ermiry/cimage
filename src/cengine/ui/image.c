@@ -36,6 +36,10 @@ static Image *ui_image_new (void) {
 
         image->overlay_texture = NULL;
         image->selected_texture = NULL;
+
+        image->double_click_timer = NULL;
+        image->double_click_action = NULL;
+        image->double_click_args = NULL;
     }
 
     return image;
@@ -67,6 +71,8 @@ void ui_image_delete (void *image_ptr) {
 
         if (image->selected_texture && !image->selected_reference)
             SDL_DestroyTexture (image->selected_texture);
+
+        timer_destroy (image->double_click_timer);
 
         free (image);
     }
@@ -231,6 +237,16 @@ void ui_image_set_action (Image *image, Action action, void *args) {
 
 }
 
+// sets an action to be executed if double click is dected
+void ui_image_set_double_click_action (Image *image, Action action, void *args) {
+
+    if (image) {
+        image->double_click_action = action;
+        image->double_click_args = args;
+    }
+
+}
+
 // sets an overlay to the image that only renders when you hover the image
 void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color) {
 
@@ -345,6 +361,8 @@ static Image *ui_image_create_common (Renderer *renderer) {
             ui_element->element = image;
 
             image->outline_scale_x = image->outline_scale_y = 1;
+
+            image->double_click_timer = timer_new ();
         }
     }
 
@@ -359,7 +377,6 @@ Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer) {
     Image *image = ui_image_create_common (renderer);
     if (image) {
         image->transform = ui_transform_component_create (x, y, 0, 0);
-        image->double_click_timer = timer_new ();
     }
 
     return image;
@@ -485,29 +502,30 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                                 if (!image->one_click) {
                                     image->one_click = true;
                                     timer_start (image->double_click_timer);
-                                    printf ("One click!\n");
                                     image->selected = !image->selected;
                                     if (image->action) image->action (image->args);
+                                    // printf ("One click!\n");
                                 }
 
                                 else {
                                     u32 ticks = timer_get_ticks (image->double_click_timer);
                                     if (ticks <= 500) {
-                                        printf ("Double click!\n");
                                         image->one_click = false;
+                                        if (image->double_click_action) 
+                                            image->double_click_action (image->double_click_args);
+
+                                        // image->selected = !image->selected;
+                                        // printf ("Double click!\n");
                                     }
 
                                     else {
-                                        printf ("One click again!\n");
                                         image->one_click = true;
                                         timer_start (image->double_click_timer);
                                         image->selected = !image->selected;
                                         if (image->action) image->action (image->args);
+                                        // printf ("One click again!\n");
                                     }
-
-                                    
                                 }
-                                
                                 
                                 image->pressed = false;
                             }

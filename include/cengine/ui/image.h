@@ -40,14 +40,17 @@ typedef struct Image {
     Action action;
     void *args;
 
+    // double click
+    bool one_click;
+    Timer *double_click_timer;
+    Action double_click_action;
+    void *double_click_args;
+
     bool overlay_reference;
     SDL_Texture *overlay_texture;
 
     bool selected_reference;
     SDL_Texture *selected_texture;
-
-    Timer *double_click_timer;
-    bool one_click;
 
 } Image;
 
@@ -98,6 +101,9 @@ extern void ui_image_toggle_active (Image *image);
 
 // sets an action to be triggered when the image is clicked
 extern void ui_image_set_action (Image *image, Action action, void *args);
+
+// sets an action to be executed if double click is dected
+extern void ui_image_set_double_click_action (Image *image, Action action, void *args);
 
 // sets an overlay to the image that only renders when you hover the image
 extern void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color);

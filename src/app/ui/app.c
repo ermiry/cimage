@@ -415,6 +415,7 @@ void app_ui_image_display (ImageItem *image_item) {
         ui_image_set_overlay_ref (image, overlay_texture);
         ui_image_set_selected_ref (image, selected_texture);
         ui_image_set_action (image, app_ui_image_select, image_item);
+        ui_image_set_double_click_action (image, app_ui_image_display_in_window, image_item);
         // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
 
         ui_panel_layout_add_element (images_panel, image->transform);
