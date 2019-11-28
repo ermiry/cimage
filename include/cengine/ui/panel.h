@@ -16,7 +16,6 @@
 typedef struct Panel {
 
     UIElement *ui_element;
-    UITransform *transform;
 
     // background
     bool colour;

@@ -376,7 +376,8 @@ Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer) {
 
     Image *image = ui_image_create_common (renderer);
     if (image) {
-        image->ui_element->transform = ui_transform_component_create (x, y, 0, 0);
+        image->ui_element->transform->rect.x = x;
+        image->ui_element->transform->rect.y = y;
     }
 
     return image;
@@ -438,7 +439,10 @@ u8 ui_image_update_streaming_texture_mem (Image *image, void *mem, int mem_size)
 // w and h for dimensions
 Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h, Renderer *renderer) {
 
-    return ui_image_create_common (renderer);
+    Image *image = ui_image_create_common (renderer);
+    if (image) ui_transform_component_set_values (image->ui_element->transform, x, y, w, h);
+
+    return image;
 
 }
 

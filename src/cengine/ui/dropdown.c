@@ -297,10 +297,10 @@ void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
 
         // create the extened panel 
         dropdown->extended_panel = ui_panel_create (x, y, options_width, options_max_height, UI_POS_FREE, renderer);
-        ui_transform_component_set_pos (dropdown->extended_panel->transform, NULL, &dropdown->transform->rect, pos, false);
-        dropdown->extended_panel->transform->rect.y += options_max_height;
-        dropdown->extended_panel->transform->rect.x += x;
-        dropdown->extended_panel->transform->rect.y += y;
+        ui_transform_component_set_pos (dropdown->extended_panel->ui_element->transform, NULL, &dropdown->transform->rect, pos, false);
+        dropdown->extended_panel->ui_element->transform->rect.y += options_max_height;
+        dropdown->extended_panel->ui_element->transform->rect.x += x;
+        dropdown->extended_panel->ui_element->transform->rect.y += y;
         dropdown->extended_panel->ui_element->active = false;
 
         // the layout group contains the transforms of the options that render on top of the extended panel
