@@ -30,6 +30,7 @@ static Button *open_folder_button = NULL;
 static TextBox *open_folder_text = NULL;
 
 static Panel *actionsbar_panel = NULL;
+static Button *actionsbar_close_button = NULL;
 
 static Panel *statusbar = NULL;
 static TextBox *statusbar_foldername = NULL;
@@ -98,17 +99,29 @@ static void actionsbar_init (void) {
     ui_element_set_layer (main_renderer->ui, actionsbar_panel->ui_element, "top");
     ui_element_toggle_active (actionsbar_panel->ui_element);
 
+    actionsbar_close_button = ui_button_create (0, 0, 64, 64, UI_POS_FREE, main_renderer);
+    ui_button_set_pos (actionsbar_close_button, &actionsbar_panel->transform->rect, UI_POS_RIGHT_CENTER, main_renderer);
+    actionsbar_close_button->transform->rect.x -= 20;
+    // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
+    ui_button_set_sprite (actionsbar_close_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/close.png");
+    ui_element_set_layer (main_renderer->ui, actionsbar_close_button->ui_element, "top");
+    // ui_button_set_action (actionsbar_close_button, images_folder_select, NULL);
+    ui_element_toggle_active (actionsbar_close_button->ui_element);
+
 }
 
 void app_ui_actionsbar_show (void) {
 
     ui_element_toggle_active (actionsbar_panel->ui_element);
+    ui_element_toggle_active (actionsbar_close_button->ui_element);
 
 }
 
 static void actionsbar_end (void) {
 
-    if (actionsbar_panel) ui_element_destroy (actionsbar_panel->ui_element);    
+    if (actionsbar_panel) ui_element_destroy (actionsbar_panel->ui_element);   
+
+    if (actionsbar_close_button)  ui_element_destroy (actionsbar_close_button->ui_element);
 
 }
 
