@@ -25,7 +25,7 @@ static Image *ui_image_new (void) {
     if (image) {
         memset (image, 0, sizeof (Image));
         image->ui_element = NULL;
-        image->transform = NULL;
+
         image->sprite = NULL;
         image->texture = NULL;
         image->sprite_sheet = NULL;
@@ -53,7 +53,6 @@ void ui_image_delete (void *image_ptr) {
         Image *image = (Image *) image_ptr;
 
         image->ui_element = NULL;
-        ui_transform_component_delete (image->transform);
 
         if (image->ref_sprite) {
             image->sprite = NULL;
@@ -83,7 +82,7 @@ void ui_image_delete (void *image_ptr) {
 // sets the image's UI position
 void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos, Renderer *renderer) {
 
-    if (image) ui_transform_component_set_pos (image->transform, renderer, ref_rect, pos, false);
+    if (image) ui_transform_component_set_pos (image->ui_element->transform, renderer, ref_rect, pos, false);
 
 }
 
@@ -91,8 +90,8 @@ void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos, Renderer 
 void ui_image_set_dimensions (Image *image, unsigned int width, unsigned int height) {
 
     if (image) {
-        image->transform->rect.w = width;
-        image->transform->rect.h = height;
+        image->ui_element->transform->rect.w = width;
+        image->ui_element->transform->rect.h = height;
     }
 
 }
@@ -101,11 +100,11 @@ void ui_image_set_dimensions (Image *image, unsigned int width, unsigned int hei
 void ui_image_set_scale (Image *image, int x_scale, int y_scale) {
 
     if (image) {
-        image->transform->x_scale = x_scale;
-        image->transform->y_scale = y_scale;
+        image->ui_element->transform->x_scale = x_scale;
+        image->ui_element->transform->y_scale = y_scale;
 
-        image->transform->rect.w *= image->transform->x_scale;
-        image->transform->rect.h *= image->transform->y_scale;
+        image->ui_element->transform->rect.w *= image->ui_element->transform->x_scale;
+        image->ui_element->transform->rect.h *= image->ui_element->transform->y_scale;
     }
 
 }
@@ -121,8 +120,8 @@ u8 ui_image_set_sprite (Image *image, Renderer *renderer, const char *filename) 
 
         image->sprite = sprite_load (filename, renderer);
         if (image->sprite) {
-            image->transform->rect.w = image->sprite->w;
-            image->transform->rect.h = image->sprite->h;
+            image->ui_element->transform->rect.w = image->sprite->w;
+            image->ui_element->transform->rect.h = image->sprite->h;
             retval = 0;
         }
     }
@@ -259,7 +258,7 @@ void ui_image_set_overlay (Image *image, Renderer *renderer, RGBA_Color color) {
             }
         }
 
-        render_complex_transparent_rect (renderer, &image->overlay_texture, &image->transform->rect, color); 
+        render_complex_transparent_rect (renderer, &image->overlay_texture, &image->ui_element->transform->rect, color); 
         image->overlay_reference = false;   
     }
 
@@ -310,7 +309,7 @@ void ui_image_set_selected (Image *image, Renderer *renderer, RGBA_Color color) 
             }
         }
 
-        render_complex_transparent_rect (renderer, &image->selected_texture, &image->transform->rect, color); 
+        render_complex_transparent_rect (renderer, &image->selected_texture, &image->ui_element->transform->rect, color); 
         image->selected_reference = false;   
     }
 
@@ -377,7 +376,7 @@ Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer) {
 
     Image *image = ui_image_create_common (renderer);
     if (image) {
-        image->transform = ui_transform_component_create (x, y, 0, 0);
+        image->ui_element->transform = ui_transform_component_create (x, y, 0, 0);
     }
 
     return image;
@@ -391,7 +390,7 @@ u8 ui_image_create_streaming_texture (Image *image, Renderer *renderer, Uint32 s
 
     if (image && renderer) {
         image->texture = SDL_CreateTexture (renderer->renderer, sdl_pixel_format,
-            SDL_TEXTUREACCESS_STREAMING, image->transform->rect.w, image->transform->rect.h);
+            SDL_TEXTUREACCESS_STREAMING, image->ui_element->transform->rect.w, image->ui_element->transform->rect.h);
         if (image->texture) retval = 0;
     }
 
@@ -439,12 +438,7 @@ u8 ui_image_update_streaming_texture_mem (Image *image, void *mem, int mem_size)
 // w and h for dimensions
 Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h, Renderer *renderer) {
 
-    Image *image = ui_image_create_common (renderer);
-    if (image) {
-        image->transform = ui_transform_component_create (x, y, w, h);
-    }
-
-    return image;
+    return ui_image_create_common (renderer);
 
 }
 
@@ -452,17 +446,17 @@ Image *ui_image_create_dynamic (u32 x, u32 y, u32 w, u32 h, Renderer *renderer) 
 void ui_image_draw (Image *image, Renderer *renderer) {
 
     if (image && renderer) {
-        if (SDL_HasIntersection (&image->transform->rect, &renderer->window->screen_rect)) {
+        if (SDL_HasIntersection (&image->ui_element->transform->rect, &renderer->window->screen_rect)) {
             if (image->texture) {
                 SDL_RenderCopyEx (renderer->renderer, image->texture, 
-                    NULL, &image->transform->rect, 
+                    NULL, &image->ui_element->transform->rect, 
                     0, 0, image->flip);
             }
 
             else {
                 if (image->sprite) {
                     SDL_RenderCopyEx (renderer->renderer, image->sprite->texture, 
-                        &image->sprite->src_rect, &image->transform->rect, 
+                        &image->sprite->src_rect, &image->ui_element->transform->rect, 
                         0, 0, image->flip);
                 }
                 
@@ -471,25 +465,25 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                     image->sprite_sheet->src_rect.y = image->sprite_sheet->sprite_h * image->y_sprite_offset;
 
                     SDL_RenderCopyEx (renderer->renderer, image->sprite_sheet->texture, 
-                        &image->sprite_sheet->src_rect, &image->transform->rect, 
+                        &image->sprite_sheet->src_rect, &image->ui_element->transform->rect, 
                         0, 0, image->flip);
                 }
             }
 
             // render the outline border
             if (image->outline) 
-                render_basic_outline_rect (renderer, &image->transform->rect, image->outline_colour, 
+                render_basic_outline_rect (renderer, &image->ui_element->transform->rect, image->outline_colour, 
                     image->outline_scale_x, image->outline_scale_y);
 
             // check for action listener
             if (image->active) {
                 if (renderer->window->mouse) {
                     // check if the mouse is in the image
-                    if (mousePos.x >= image->transform->rect.x && mousePos.x <= (image->transform->rect.x + image->transform->rect.w) && 
-                        mousePos.y >= image->transform->rect.y && mousePos.y <= (image->transform->rect.y + image->transform->rect.h)) {
+                    if (mousePos.x >= image->ui_element->transform->rect.x && mousePos.x <= (image->ui_element->transform->rect.x + image->ui_element->transform->rect.w) && 
+                        mousePos.y >= image->ui_element->transform->rect.y && mousePos.y <= (image->ui_element->transform->rect.y + image->ui_element->transform->rect.h)) {
                         if (image->overlay_texture && !image->selected) {
                             SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
-                                NULL, &image->transform->rect, 
+                                NULL, &image->ui_element->transform->rect, 
                                 0, 0, image->flip);
                         }
 
@@ -541,7 +535,7 @@ void ui_image_draw (Image *image, Renderer *renderer) {
 
             if (image->selected && image->selected_texture) {
                 SDL_RenderCopyEx (renderer->renderer, image->selected_texture, 
-                    NULL, &image->transform->rect, 
+                    NULL, &image->ui_element->transform->rect, 
                     0, 0, image->flip);
             }
 

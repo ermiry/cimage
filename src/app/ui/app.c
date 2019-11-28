@@ -303,7 +303,7 @@ void app_ui_images_move_up (u32 movement) {
             GridElement *grid_element = NULL;
             for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
                 grid_element = (GridElement *) le->data;
-                grid_element->trans->rect.y -= movement;
+                grid_element->ui_element->transform->rect.y -= movement;
             }
         }
     }
@@ -324,7 +324,7 @@ void app_ui_images_move_down (u32 movement) {
             GridElement *grid_element = NULL;
             for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
                 grid_element = (GridElement *) le->data;
-                grid_element->trans->rect.y += movement;
+                grid_element->ui_element->transform->rect.y += movement;
             }
         }
 
@@ -372,8 +372,7 @@ void app_ui_images_remove_ui_elements (void) {
 
     // remove the panel and the layout
     GridLayout *grid = (GridLayout *) images_panel->layout;
-    // FIXME: maybe we will need to refcator to use ui elements
-    // for (ListElement *le = dlist_start ())
+    ui_layout_grid_remove_ui_elements (grid);
 
     if (images_panel) ui_element_destroy (images_panel->ui_element);
 
@@ -501,7 +500,7 @@ void app_ui_image_display (ImageItem *image_item) {
         ui_image_set_double_click_action (image, app_ui_image_display_in_window, image_item);
         // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
 
-        ui_panel_layout_add_element (images_panel, image->transform);
+        ui_panel_layout_add_element (images_panel, image->ui_element);
 
         image_item->image = image;
     }

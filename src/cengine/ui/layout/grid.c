@@ -10,11 +10,11 @@
 #include "cengine/ui/layout/grid.h"
 #include "cengine/ui/image.h"
 
-static GridElement *grid_element_new (UITransform *trans, u32 width, u32 height) {
+static GridElement *grid_element_new (UIElement *ui_element, u32 width, u32 height) {
 
     GridElement *element = (GridElement *) malloc (sizeof (GridElement));
     if (element) {
-        element->trans = trans;
+        element->ui_element = ui_element;
         element->original_width = width;
         element->original_height = height;
     }
@@ -23,9 +23,18 @@ static GridElement *grid_element_new (UITransform *trans, u32 width, u32 height)
 
 }
 
-static inline void grid_element_delete (void *grid_element_ptr) {
+static void grid_element_delete (void *grid_element_ptr) {
 
     if (grid_element_ptr) free (grid_element_ptr);
+
+}
+
+static void grid_element_delete_full (void *grid_element_ptr) {
+
+    if (grid_element_ptr) {
+        ui_element_destroy (((GridElement *) grid_element_ptr)->ui_element);
+        free (grid_element_ptr);
+    } 
 
 }
 
@@ -126,8 +135,8 @@ static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *e
         }
 
         // printf ("new: %d x %d\n", element->trans->rect.w, element->trans->rect.h);
-        element->trans->rect.w = new_width;
-        element->trans->rect.h = new_height;
+        element->ui_element->transform->rect.w = new_width;
+        element->ui_element->transform->rect.h = new_height;
     }
 
 }
@@ -179,7 +188,7 @@ int ui_layout_grid_update_dimensions (GridLayout *grid, u32 cols, u32 rows) {
                     grid_element->y = grid->next_y;
 
                     ui_layout_grid_update_element_size (grid, grid_element);
-                    ui_layout_grid_update_element_pos (grid, grid_element->trans);
+                    ui_layout_grid_update_element_pos (grid, grid_element->ui_element->transform);
 
                     grid->curr_n_ui_elements += 1;
 
@@ -213,21 +222,21 @@ GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h) {
 
 // adds a new element to the grid
 // returns 0 on success, 1 if failed to add
-u8 ui_layout_grid_add_element (GridLayout *grid, UITransform *ui_element_trans) {
+u8 ui_layout_grid_add_element (GridLayout *grid, UIElement *ui_element) {
 
     u8 retval = 1;
 
-    if (grid && ui_element_trans) {
+    if (grid && ui_element) {
         if (grid->elements && (grid->curr_n_ui_elements < grid->max_n_ui_elements)) {
             // add element in next available idx -> at the end for now
-            GridElement *grid_element = grid_element_new (ui_element_trans, 
-                ui_element_trans->rect.w, ui_element_trans->rect.h);
+            GridElement *grid_element = grid_element_new (ui_element, 
+                ui_element->transform->rect.w, ui_element->transform->rect.h);
             grid_element->x = grid->next_x;
             grid_element->y = grid->next_y;
             dlist_insert_after (grid->elements, dlist_end (grid->elements), grid_element);
 
             ui_layout_grid_update_element_size (grid, grid_element);
-            ui_layout_grid_update_element_pos (grid, ui_element_trans);
+            ui_layout_grid_update_element_pos (grid, ui_element->transform);
 
             grid->curr_n_ui_elements += 1;
 
@@ -246,10 +255,21 @@ u8 ui_layout_grid_add_element (GridLayout *grid, UITransform *ui_element_trans) 
 }
 
 // removes an element from the grid
-void ui_layout_grid_remove_element (GridLayout *grid, UITransform *ui_element_trans) {
+void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element) {
 
     if (grid) {
 
+    }
+
+}
+
+// removes (destroys) all ui elements from the grid layout
+void ui_layout_grid_remove_ui_elements (GridLayout *grid) {
+
+    if (grid) {
+        dlist_set_destroy (grid->elements, grid_element_delete_full);
+        dlist_delete (grid->elements);
+        grid->elements = dlist_init (grid_element_delete, NULL);
     }
 
 }

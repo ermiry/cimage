@@ -9,7 +9,7 @@
 
 typedef struct GridElement {
 
-    UITransform *trans;
+    UIElement *ui_element;
     u32 original_width, original_height;
     u32 x, y;
 
@@ -50,9 +50,12 @@ extern GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h);
 
 // adds a new element to the grid
 // returns 0 on success, 1 if failed to add
-extern u8 ui_layout_grid_add_element (GridLayout *grid, UITransform *ui_element_trans);
+extern u8 ui_layout_grid_add_element (GridLayout *grid, UIElement *ui_element);
 
 // removes an element from the grid
-extern void ui_layout_grid_remove_element (GridLayout *grid, UITransform *ui_element_trans);
+extern void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element);
+
+// removes (destroys) all ui elements from the grid layout
+extern void ui_layout_grid_remove_ui_elements (GridLayout *grid);
 
 #endif

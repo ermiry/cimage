@@ -17,8 +17,6 @@ typedef struct Image {
 
     UIElement *ui_element;
 
-    UITransform *transform;
-
     Sprite *sprite;
     SDL_Texture *texture;
 
