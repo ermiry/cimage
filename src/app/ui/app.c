@@ -279,7 +279,8 @@ void app_ui_end (void) {
     statusbar_end ();
     sidebar_end ();
 
-    ui_element_destroy (background_panel->ui_element);
+    // 28/11/2019 -- gives segfault 
+    // if (background_panel) ui_element_destroy (background_panel->ui_element);
 
     if (overlay_texture) SDL_DestroyTexture (overlay_texture);
     if (selected_texture) SDL_DestroyTexture (selected_texture);

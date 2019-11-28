@@ -27,6 +27,7 @@
 
 static u8 ui_elements_realloc (UI *ui);
 static i32 ui_elements_get_free_spot (UI *ui);
+static void ui_element_delete_element (UIElement *ui_element);
 
 static UIElement *ui_element_new (void) {
 
@@ -49,40 +50,38 @@ UIElement *ui_element_create (UI *ui, UIElementType type) {
 
     // first check if we have a reusable ui element
     i32 spot = ui_elements_get_free_spot (ui);
+    // printf ("spot: %d\n", spot);
 
-    // if (spot >= 0) {
-    //     // FIXME: are we correctly removing all past elements from the layers??
-    //     if (ui_elements[spot]) {
-    //         new_element = ui_elements[spot];
-    //         layer_remove_element (layer_get_by_pos (ui_elements_layers, new_element->layer_id), new_element);
-    //         ui_element_delete_element (new_element);
-    //     }
+    if (spot >= 0) {
+        if (ui->ui_elements[spot]) {
+            new_element = ui->ui_elements[spot];
+            layer_remove_element (layer_get_by_pos (ui->ui_elements_layers, new_element->layer_id), new_element);
+            ui_element_delete_element (new_element);
+        }
 
-    //     else new_element = (UIElement *) malloc (sizeof (UIElement));
-        
-    //     new_element->id = spot;
-    //     new_element->active = true;
-    //     new_element->type = type;
-    // }
+        else new_element = ui_element_new ();
+    }
 
-    // else {
+    else {
         if (ui->new_ui_element_id >= ui->max_ui_elements) ui_elements_realloc (ui);
 
         new_element = ui_element_new ();
         if (new_element) {
-            // new_element->id = ui->new_ui_element_id;
-            // printf ("spot: %d\n", spot);
             new_element->id = spot;
             new_element->type = type;
             new_element->active = true;
-            // new_element->element = NULL;
-
-            ui->ui_elements[spot] = new_element;
-            ui->new_ui_element_id++;
-            ui->curr_max_ui_elements++;
-            // printf ("curr max ui: %d\n", ui->curr_max_ui_elements);
         }
-    // }
+    }
+
+    new_element->id = spot;
+    new_element->active = true;
+    new_element->type = type;
+    new_element->element = NULL;
+
+    ui->ui_elements[spot] = new_element;
+    ui->new_ui_element_id++;
+    ui->curr_max_ui_elements++;
+    // printf ("curr max ui: %d\n", ui->curr_max_ui_elements);
 
     // by default, add the ui element to the middle layer
     if (new_element) {
@@ -102,22 +101,20 @@ static void ui_element_delete_element (UIElement *ui_element) {
 
     if (ui_element) {
         if (ui_element->element) {
-            if (ui_element->element) {
-                switch (ui_element->type) {
-                    case UI_TEXTBOX: ui_textbox_delete (ui_element->element); break;
-                    case UI_IMAGE: ui_image_delete (ui_element->element); break;
-                    case UI_PANEL: ui_panel_delete (ui_element->element); break;
-                    case UI_BUTTON: ui_button_delete (ui_element->element); break;
-                    case UI_INPUT: ui_input_field_delete (ui_element->element); break;
-                    case UI_CHECK: ui_check_delete (ui_element->element); break;
-                    case UI_NOTI_CENTER: ui_noti_center_delete (ui_element->element); break;
-                    case UI_DROPDOWN: ui_dropdown_delete (ui_element->element); break;
+            switch (ui_element->type) {
+                case UI_TEXTBOX: ui_textbox_delete (ui_element->element); break;
+                case UI_IMAGE: ui_image_delete (ui_element->element); break;
+                case UI_PANEL: ui_panel_delete (ui_element->element); break;
+                case UI_BUTTON: ui_button_delete (ui_element->element); break;
+                case UI_INPUT: ui_input_field_delete (ui_element->element); break;
+                case UI_CHECK: ui_check_delete (ui_element->element); break;
+                case UI_NOTI_CENTER: ui_noti_center_delete (ui_element->element); break;
+                case UI_DROPDOWN: ui_dropdown_delete (ui_element->element); break;
 
-                    default: break;
-                }
-
-                ui_element->element = NULL;
+                default: break;
             }
+
+            ui_element->element = NULL;
         }
     }
 
@@ -127,10 +124,10 @@ static void ui_element_delete_element (UIElement *ui_element) {
 void ui_element_destroy (UIElement *ui_element) {
 
     if (ui_element) {
+        // ui_element_delete_element (ui_element);
+
         ui_element->id = -1;
         ui_element->active = false;
-        ui_element_delete_element (ui_element);
-        ui_element->element = NULL;
     }
 
 }
@@ -401,7 +398,7 @@ u8 ui_end (void) {
 
     ui_cursor_delete (main_cursor);     // cursor
 
-    ui_font_end ();     // fonts
+    // ui_font_end ();     // fonts
 
     #ifdef CENGINE_DEBUG
     cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done cleaning cengine ui.");
