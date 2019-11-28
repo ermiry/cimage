@@ -232,6 +232,8 @@ static void *images_load (void *folder_name_ptr) {
 // TODO: implement cross-platform code
 void images_folder_select (void *args) {
 
+    cimage = cimage_create ();
+
     #ifdef OS_LINUX
     char *command = NULL;
     char *username = getlogin ();
@@ -263,6 +265,16 @@ void images_folder_select (void *args) {
         free (command);
     }
     #endif
+
+}
+
+void images_folder_close (void *args) {
+
+    // remove UI
+    app_ui_images_remove_ui_elements ();
+
+    cimage_delete (cimage);
+    cimage = NULL;
 
 }
 
@@ -365,8 +377,6 @@ static void app_on_enter (void) {
 
     input_command_register (SDLK_EQUALS, zoom_more, NULL);
     input_command_register (SDLK_MINUS, zoom_less, NULL);
-
-    cimage = cimage_create ();
 
     app_state->update = app_update;
 

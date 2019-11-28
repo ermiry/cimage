@@ -37,6 +37,8 @@ typedef struct _ImageItem ImageItem;
 
 extern void images_folder_select (void *args);
 
+extern void images_folder_close (void *args);
+
 extern void main_screen_input (void *win_ptr);
 
 #endif

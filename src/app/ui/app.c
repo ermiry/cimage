@@ -102,15 +102,22 @@ static void actionsbar_init (void) {
     actionsbar_close_button = ui_button_create (0, 0, 64, 64, UI_POS_FREE, main_renderer);
     ui_button_set_pos (actionsbar_close_button, &actionsbar_panel->transform->rect, UI_POS_RIGHT_CENTER, main_renderer);
     actionsbar_close_button->transform->rect.x -= 20;
-    // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
+    // ui_button_set_ouline_colour (actionsbar_close_button, RGBA_WHITE);
     ui_button_set_sprite (actionsbar_close_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/close.png");
     ui_element_set_layer (main_renderer->ui, actionsbar_close_button->ui_element, "top");
-    // ui_button_set_action (actionsbar_close_button, images_folder_select, NULL);
+    ui_button_set_action (actionsbar_close_button, images_folder_close, NULL);
     ui_element_toggle_active (actionsbar_close_button->ui_element);
 
 }
 
 void app_ui_actionsbar_show (void) {
+
+    ui_element_toggle_active (actionsbar_panel->ui_element);
+    ui_element_toggle_active (actionsbar_close_button->ui_element);
+
+}
+
+void app_ui_actionsbar_hide (void) {
 
     ui_element_toggle_active (actionsbar_panel->ui_element);
     ui_element_toggle_active (actionsbar_close_button->ui_element);
@@ -188,6 +195,14 @@ void app_ui_statusbar_show (const char *foldername, u32 total) {
     ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
     ui_element_toggle_active (statusbar_total->ui_element);
 
+    ui_element_toggle_active (statusbar->ui_element);
+
+}
+
+void app_ui_statusbar_hide (void) {
+
+    ui_element_toggle_active (statusbar_foldername->ui_element);
+    ui_element_toggle_active (statusbar_total->ui_element);
     ui_element_toggle_active (statusbar->ui_element);
 
 }
@@ -348,6 +363,24 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
     GridLayout *grid = (GridLayout *) images_panel->layout;
     ui_layout_grid_set_grid (grid, n_cols, n_actual_rows);
     ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
+
+}
+
+// we have closed the images folde,r so hide images ui items
+void app_ui_images_remove_ui_elements (void) {
+
+    // remove the panel and the layout
+    GridLayout *grid = (GridLayout *) images_panel->layout;
+    // FIXME: maybe we will need to refcator to use ui elements
+    // for (ListElement *le = dlist_start ())
+
+    if (images_panel) ui_element_destroy (images_panel->ui_element);
+
+    app_ui_statusbar_hide ();
+    app_ui_actionsbar_hide ();
+
+    open_folder_button->ui_element->active = true;
+    open_folder_text->ui_element->active = true;
 
 }
 

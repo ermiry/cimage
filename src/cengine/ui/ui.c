@@ -129,11 +129,13 @@ void ui_element_destroy (UIElement *ui_element) {
     if (ui_element) {
         ui_element->id = -1;
         ui_element->active = false;
+        ui_element_delete_element (ui_element);
+        ui_element->element = NULL;
     }
 
 }
 
-// completely deletes the UI element (only called by dengine functions)
+// completely deletes the UI element (only called by cengine functions)
 void ui_element_delete (UIElement *ui_element) {
 
     if (ui_element) {

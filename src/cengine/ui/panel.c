@@ -40,9 +40,13 @@ void ui_panel_delete (void *panel_ptr) {
 
     if (panel_ptr) {
         Panel *panel = (Panel *) panel_ptr;
+
         panel->ui_element = NULL;
         ui_transform_component_delete (panel->transform);
         if (panel->bg_texture) SDL_DestroyTexture (panel->bg_texture);
+
+        ui_panel_layout_remove (panel);
+
         free (panel);
     }
 
