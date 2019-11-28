@@ -101,7 +101,7 @@ static void actionsbar_init (void) {
 
     actionsbar_close_button = ui_button_create (0, 0, 64, 64, UI_POS_FREE, main_renderer);
     ui_button_set_pos (actionsbar_close_button, &actionsbar_panel->ui_element->transform->rect, UI_POS_RIGHT_CENTER, main_renderer);
-    actionsbar_close_button->transform->rect.x -= 20;
+    actionsbar_close_button->ui_element->transform->rect.x -= 20;
     // ui_button_set_ouline_colour (actionsbar_close_button, RGBA_WHITE);
     ui_button_set_sprite (actionsbar_close_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/close.png");
     ui_element_set_layer (main_renderer->ui, actionsbar_close_button->ui_element, "top");
@@ -151,7 +151,7 @@ static void statusbar_init (void) {
 
     statusbar_foldername = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_foldername, &statusbar->ui_element->transform->rect, UI_POS_LEFT_CENTER, NULL);
-    statusbar_foldername->transform->rect.x += 20;
+    statusbar_foldername->ui_element->transform->rect.x += 20;
     ui_textbox_set_text (statusbar_foldername, main_renderer, "", font, 24, RGBA_WHITE, false);
     // ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_foldername, RGBA_WHITE);
@@ -160,7 +160,7 @@ static void statusbar_init (void) {
 
     statusbar_selected = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_selected, &statusbar->ui_element->transform->rect, UI_POS_MIDDLE_CENTER, NULL);
-    statusbar_selected->transform->rect.x -= sidebar->ui_element->transform->rect.w / 2;
+    statusbar_selected->ui_element->transform->rect.x -= sidebar->ui_element->transform->rect.w / 2;
     // ui_textbox_set_text (statusbar_selected, main_renderer, "", font, 24, RGBA_WHITE, false);
     // ui_textbox_set_text_pos (statusbar_selected, UI_POS_MIDDLE_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_selected, RGBA_WHITE);
@@ -169,7 +169,7 @@ static void statusbar_init (void) {
 
     statusbar_total = ui_textbox_create (0, 0, 200, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_total, &statusbar->ui_element->transform->rect, UI_POS_RIGHT_CENTER, NULL);
-    statusbar_total->transform->rect.x -= 20;
+    statusbar_total->ui_element->transform->rect.x -= 20;
     // ui_textbox_set_text (statusbar_total, main_renderer, "", font, 24, RGBA_WHITE, false);
     // ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
     // ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);

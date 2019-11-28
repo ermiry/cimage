@@ -15,7 +15,6 @@ static Check *ui_check_new (void) {
     if (check) {
         memset (check, 0, sizeof (Check));
         check->ui_element = NULL;
-        check->transform = NULL; 
     }
 
     return check;
@@ -28,7 +27,6 @@ void ui_check_delete (void *check_ptr) {
         Check *check = (Check *) check_ptr;
 
         check->ui_element = NULL;
-        ui_transform_component_delete (check->transform);
 
         free (check);
     }
@@ -46,7 +44,7 @@ Check *ui_check_create (UI *ui, u32 x, u32 y) {
         check = ui_check_new ();
         if (check) {
             check->ui_element = ui_element;
-            check->transform = ui_transform_component_create (x, y, 0, 0);
+            ui_transform_component_set_values (check->ui_element->transform, x, y, 0, 0);
             ui_element->element = check;
         }
     }
@@ -59,7 +57,7 @@ Check *ui_check_create (UI *ui, u32 x, u32 y) {
 void ui_check_draw (Check *check, Renderer *renderer) {
 
     if (check && renderer) {
-        if (SDL_HasIntersection (&check->transform->rect, &renderer->window->screen_rect)) {
+        if (SDL_HasIntersection (&check->ui_element->transform->rect, &renderer->window->screen_rect)) {
 
             renderer->render_count += 1;
         }

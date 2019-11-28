@@ -15,7 +15,6 @@
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
-#include "cengine/ui/components/transform.h"
 #include "cengine/ui/components/text.h"
 
 typedef enum ButtonState {
@@ -32,7 +31,6 @@ typedef enum ButtonState {
 typedef struct Button {
 
     UIElement *ui_element;
-    UITransform *transform;
 
     bool active;
 

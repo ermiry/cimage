@@ -214,7 +214,6 @@ static Dropdown *ui_dropdown_new (void) {
         memset (dropdown, 0, sizeof (dropdown));
 
         dropdown->ui_element = NULL;
-        dropdown->transform = NULL;
 
         dropdown->active = true;
         dropdown->pressed = false;
@@ -242,7 +241,6 @@ void ui_dropdown_delete (void *dropdown_ptr) {
         Dropdown *dropdown = (Dropdown *) dropdown_ptr;
 
         dropdown->ui_element = NULL;
-        ui_transform_component_delete (dropdown->transform);
         if (dropdown->bg_texture) SDL_DestroyTexture (dropdown->bg_texture);
         ui_text_component_delete (dropdown->placeholder);
 
@@ -268,8 +266,8 @@ Dropdown *ui_dropdown_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Render
         dropdown = ui_dropdown_new ();
         if (dropdown) {
             dropdown->ui_element = ui_element;
-            dropdown->transform = ui_transform_component_create (x, y, w, h);
-            ui_transform_component_set_pos (dropdown->transform, renderer, NULL, pos, true);
+            ui_transform_component_set_values (ui_element->transform, x, y, w, h);
+            ui_transform_component_set_pos (dropdown->ui_element->transform, renderer, NULL, pos, true);
 
             ui_element->element = dropdown;
             ui_element->active = true;
@@ -297,7 +295,7 @@ void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
 
         // create the extened panel 
         dropdown->extended_panel = ui_panel_create (x, y, options_width, options_max_height, UI_POS_FREE, renderer);
-        ui_transform_component_set_pos (dropdown->extended_panel->ui_element->transform, NULL, &dropdown->transform->rect, pos, false);
+        ui_transform_component_set_pos (dropdown->extended_panel->ui_element->transform, NULL, &dropdown->ui_element->transform->rect, pos, false);
         dropdown->extended_panel->ui_element->transform->rect.y += options_max_height;
         dropdown->extended_panel->ui_element->transform->rect.x += x;
         dropdown->extended_panel->ui_element->transform->rect.y += y;
@@ -305,7 +303,7 @@ void ui_dropdown_set_options (Dropdown *dropdown, i32 x, i32 y,
 
         // the layout group contains the transforms of the options that render on top of the extended panel
         dropdown->vertical_layout = ui_layout_vertical_create (x, y, options_width, options_max_height);
-        ui_transform_component_set_pos (dropdown->vertical_layout->transform, NULL, &dropdown->transform->rect, pos, false);
+        ui_transform_component_set_pos (dropdown->vertical_layout->transform, NULL, &dropdown->ui_element->transform->rect, pos, false);
         dropdown->vertical_layout->transform->rect.y += options_max_height;
     }
 
@@ -367,9 +365,9 @@ void ui_dropdown_set_bg_color (Dropdown *dropdown, Renderer *renderer, RGBA_Colo
     if (dropdown) {
         dropdown->bg_colour = color;
         if (color.a < 255) {
-            render_complex_transparent_rect (renderer, &dropdown->bg_texture, &dropdown->transform->rect, color);
-            dropdown->bg_texture_rect.w = dropdown->transform->rect.w;
-            dropdown->bg_texture_rect.h = dropdown->transform->rect.h;
+            render_complex_transparent_rect (renderer, &dropdown->bg_texture, &dropdown->ui_element->transform->rect, color);
+            dropdown->bg_texture_rect.w = dropdown->ui_element->transform->rect.w;
+            dropdown->bg_texture_rect.h = dropdown->ui_element->transform->rect.h;
         }
 
         dropdown->colour = true;
@@ -405,8 +403,8 @@ void ui_dropdown_set_placeholder (Dropdown *dropdown, Renderer *renderer,
                 font, size, colour, text);
 
             // set the text position inside the dropdown field
-            dropdown->placeholder->transform->rect.x = dropdown->transform->rect.x;
-            dropdown->placeholder->transform->rect.y = dropdown->transform->rect.y;
+            dropdown->placeholder->transform->rect.x = dropdown->ui_element->transform->rect.x;
+            dropdown->placeholder->transform->rect.y = dropdown->ui_element->transform->rect.y;
 
             ui_text_component_draw (dropdown->placeholder, renderer);
         }
@@ -419,7 +417,7 @@ void ui_dropdown_set_placeholder_pos (Dropdown *dropdown, Renderer *renderer, UI
 
     if (dropdown) {
         if (dropdown->placeholder) 
-            ui_transform_component_set_pos (dropdown->placeholder->transform, renderer, &dropdown->transform->rect, pos, true);
+            ui_transform_component_set_pos (dropdown->placeholder->transform, renderer, &dropdown->ui_element->transform->rect, pos, true);
     }
 
 }
@@ -437,7 +435,7 @@ void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option) {
     if (dropdown && option) {
         option->transform->pos = UI_POS_BOTTOM_CENTER;
         option->option->transform->pos = UI_POS_MIDDLE_CENTER;
-        ui_position_update (NULL, option->transform, &dropdown->transform->rect, false);
+        ui_position_update (NULL, option->transform, &dropdown->ui_element->transform->rect, false);
         dlist_insert_after (dropdown->options, dlist_end (dropdown->options), option);
 
         ui_layout_vertical_add (dropdown->vertical_layout, option->transform);
@@ -496,23 +494,23 @@ void ui_dropdown_option_set_hover_color (Dropdown *dropdown, Renderer *renderer,
 void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer) {
 
     if (dropdown && renderer) {
-        if (SDL_HasIntersection (&dropdown->transform->rect, &renderer->window->screen_rect)) {
+        if (SDL_HasIntersection (&dropdown->ui_element->transform->rect, &renderer->window->screen_rect)) {
             // render the background
             if (dropdown->bg_texture) {
                 SDL_RenderCopyEx (renderer->renderer, dropdown->bg_texture, 
-                    &dropdown->bg_texture_rect, &dropdown->transform->rect, 
+                    &dropdown->bg_texture_rect, &dropdown->ui_element->transform->rect, 
                     0, 0, SDL_FLIP_NONE);
             }
 
             else if (dropdown->colour) 
-                render_basic_filled_rect (renderer, &dropdown->transform->rect, dropdown->bg_colour);
+                render_basic_filled_rect (renderer, &dropdown->ui_element->transform->rect, dropdown->bg_colour);
 
             // check if the mouse is in the dropdown
             if (dropdown->active) {
-                if (mousePos.x >= dropdown->transform->rect.x && mousePos.x <= (dropdown->transform->rect.x + dropdown->transform->rect.w) && 
-                    mousePos.y >= dropdown->transform->rect.y && mousePos.y <= (dropdown->transform->rect.y + dropdown->transform->rect.h)) {
+                if (mousePos.x >= dropdown->ui_element->transform->rect.x && mousePos.x <= (dropdown->ui_element->transform->rect.x + dropdown->ui_element->transform->rect.w) && 
+                    mousePos.y >= dropdown->ui_element->transform->rect.y && mousePos.y <= (dropdown->ui_element->transform->rect.y + dropdown->ui_element->transform->rect.h)) {
                     // the mouse is over use
-                    render_basic_filled_rect (renderer, &dropdown->transform->rect, RGBA_BLACK);
+                    render_basic_filled_rect (renderer, &dropdown->ui_element->transform->rect, RGBA_BLACK);
 
                     // check if the user pressed the left dropdown over the mouse
                     if (input_get_mouse_button_state (MOUSE_LEFT)) {
@@ -535,7 +533,7 @@ void ui_dropdown_render (Dropdown *dropdown, Renderer *renderer) {
 
             // render the outline rect
             if (dropdown->outline) 
-                render_basic_outline_rect (renderer, &dropdown->transform->rect, dropdown->outline_colour, 
+                render_basic_outline_rect (renderer, &dropdown->ui_element->transform->rect, dropdown->outline_colour, 
                     dropdown->outline_scale_x, dropdown->outline_scale_y);
 
             // render the placeholder text (also the selected option text)

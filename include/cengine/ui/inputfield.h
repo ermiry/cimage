@@ -17,7 +17,6 @@
 typedef struct InputField {
 
     UIElement *ui_element;
-    UITransform *transform;
 
     // background
     bool colour;

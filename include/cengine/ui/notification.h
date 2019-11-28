@@ -133,7 +133,6 @@ extern void ui_notification_create_and_display (struct _NotiCenter *noti_center,
 struct _NotiCenter {
 
     UIElement *ui_element;
-    UITransform *transform;
 
     bool outline;
     RGBA_Color outline_colour;

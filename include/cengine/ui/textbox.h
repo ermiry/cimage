@@ -13,13 +13,11 @@
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
-#include "cengine/ui/components/transform.h"
 #include "cengine/ui/components/text.h"
 
 typedef struct TextBox {
 
     UIElement *ui_element;
-    UITransform *transform;
 
     bool outline;
     RGBA_Color outline_colour;

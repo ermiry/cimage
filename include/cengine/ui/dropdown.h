@@ -77,7 +77,6 @@ extern void ui_dropdown_option_remove_background (DropdownOption *option);
 typedef struct Dropdown {
 
     UIElement *ui_element;
-    UITransform *transform;
 
     bool active;
     bool pressed;
