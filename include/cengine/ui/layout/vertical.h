@@ -12,7 +12,7 @@ typedef struct VerticalLayout {
 
     UITransform *transform;
 
-    DoubleList *ui_elements_trans;  // ui elements transforms
+    DoubleList *ui_elements;
     u32 max_n_ui_elements;
     u32 curr_n_ui_elements;
 
@@ -41,9 +41,9 @@ extern VerticalLayout *ui_layout_vertical_create (i32 x, i32 y, u32 w, u32 h);
 extern void ui_layout_vertical_update (VerticalLayout *vertical);
 
 // adds a new element to the layout group
-extern void ui_layout_vertical_add (VerticalLayout *vertical, UITransform *element_trans);
+extern void ui_layout_vertical_add (VerticalLayout *vertical, UIElement *ui_element);
 
 // removes an element from the layout group
-extern void ui_layout_vertical_remove (VerticalLayout *vertical, UITransform *element_trans);
+extern void ui_layout_vertical_remove (VerticalLayout *vertical, UIElement *ui_element);
 
 #endif

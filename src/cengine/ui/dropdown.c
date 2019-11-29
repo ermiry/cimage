@@ -438,7 +438,8 @@ void ui_dropdown_option_add (Dropdown *dropdown, DropdownOption *option) {
         ui_position_update (NULL, option->transform, &dropdown->ui_element->transform->rect, false);
         dlist_insert_after (dropdown->options, dlist_end (dropdown->options), option);
 
-        ui_layout_vertical_add (dropdown->vertical_layout, option->transform);
+        // FIXME: 28/11/2019 -- refactor options to be ui elements
+        // ui_layout_vertical_add (dropdown->vertical_layout, option->transform);
 
         DropdownOption *op = NULL;
         for (ListElement *le = dlist_start (dropdown->options); le; le = le->next) {

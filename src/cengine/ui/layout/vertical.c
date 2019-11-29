@@ -14,7 +14,7 @@ static VerticalLayout *ui_layout_vertical_new (void) {
     if (vertical) {
         memset (vertical, 0, sizeof (VerticalLayout));
         vertical->transform = NULL;
-        vertical->ui_elements_trans = NULL;
+        vertical->ui_elements = NULL;
 
         vertical->bottom = false;
     }
@@ -29,7 +29,7 @@ void ui_layout_vertical_delete (void *vertical_ptr) {
         VerticalLayout *vertical = (VerticalLayout *) vertical_ptr;
 
         ui_transform_component_delete (vertical->transform);
-        dlist_delete (vertical->ui_elements_trans);
+        dlist_delete (vertical->ui_elements);
 
         free (vertical);
     }
@@ -56,7 +56,7 @@ VerticalLayout *ui_layout_vertical_create (i32 x, i32 y, u32 w, u32 h) {
 
     vertical->transform = ui_transform_component_create (x, y, w, h);
     // ui_transform_component_set_pos (vertical->transform, NULL, NULL, pos, false);
-    vertical->ui_elements_trans = dlist_init (ui_transform_component_delete_dummy, NULL);
+    vertical->ui_elements = dlist_init (ui_element_delete_dummy, NULL);
 
     return vertical;
 
@@ -67,13 +67,13 @@ VerticalLayout *ui_layout_vertical_create (i32 x, i32 y, u32 w, u32 h) {
 void ui_layout_vertical_update (VerticalLayout *vertical) {
 
     if (vertical) {
-        if (vertical->ui_elements_trans->size > 0) {
+        if (vertical->ui_elements->size > 0) {
             // get the height for every element
-            u32 height = vertical->transform->rect.h / vertical->ui_elements_trans->size;
+            u32 height = vertical->transform->rect.h / vertical->ui_elements->size;
 
             u32 offset = 0;
             UITransform *transform = NULL;
-            for (ListElement *le = dlist_start (vertical->ui_elements_trans); le; le = le->next) {
+            for (ListElement *le = dlist_start (vertical->ui_elements); le; le = le->next) {
                 transform = (UITransform *) le->data;
                 transform->rect.w = vertical->transform->rect.w;
                 transform->rect.h = height;
@@ -88,19 +88,19 @@ void ui_layout_vertical_update (VerticalLayout *vertical) {
 }
 
 // adds a new element to the layout group
-void ui_layout_vertical_add (VerticalLayout *vertical, UITransform *element_trans) {
+void ui_layout_vertical_add (VerticalLayout *vertical, UIElement *ui_element) {
     
-    if (vertical && element_trans) {
-        dlist_insert_after (vertical->ui_elements_trans, dlist_end (vertical->ui_elements_trans), element_trans);
+    if (vertical && ui_element) {
+        dlist_insert_after (vertical->ui_elements, dlist_end (vertical->ui_elements), ui_element);
         ui_layout_vertical_update (vertical);
     }
 
 }
 
 // removes an element from the layout group
-void ui_layout_vertical_remove (VerticalLayout *vertical, UITransform *element_trans) {
+void ui_layout_vertical_remove (VerticalLayout *vertical, UIElement *ui_element) {
 
-    if (vertical && element_trans) {
+    if (vertical && ui_element) {
         // FIXME: remove the element!
         ui_layout_vertical_update (vertical);
     }
