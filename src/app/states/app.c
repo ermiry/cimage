@@ -410,6 +410,30 @@ void main_screen_input (void *win_ptr) {
 
 #pragma endregion
 
+void up (void *amount_ptr) {
+
+    if (amount_ptr) printf ("up %d\n", *((int *) amount_ptr));
+
+}
+
+void down (void *amount_ptr) {
+
+    if (amount_ptr) printf ("down %d\n", *((int *) amount_ptr));
+
+}
+
+void right (void *amount_ptr) {
+
+    if (amount_ptr) printf ("right %d\n", *((int *) amount_ptr));
+
+}
+
+void left (void *amount_ptr) {
+
+    if (amount_ptr) printf ("left %d\n", *((int *) amount_ptr));
+
+}
+
 State *app_state = NULL;
 
 static void app_update (void) {
@@ -422,6 +446,11 @@ static void app_on_enter (void) {
 
     input_command_register (SDLK_EQUALS, zoom_more, NULL);
     input_command_register (SDLK_MINUS, zoom_less, NULL);
+
+    input_set_on_mouse_wheel_scroll_up (up);
+    input_set_on_mouse_wheel_scroll_down (down);
+    input_set_on_mouse_wheel_scroll_right (right);
+    input_set_on_mouse_wheel_scroll_left (left);
 
     app_state->update = app_update;
 

@@ -58,6 +58,67 @@ static void input_on_mouse_button_up (SDL_Event event) {
 
 }
 
+static Action on_mouse_wheel_scroll_up = NULL;
+static Action on_mouse_wheel_scroll_down = NULL;
+static Action on_mouse_wheel_scroll_right = NULL;
+static Action on_mouse_wheel_scroll_left = NULL;
+
+// sets and action to be performed when the mouse scrolls up
+// expect a refrence to a positive integer referencing the amount scrolled
+void input_set_on_mouse_wheel_scroll_up (Action action) {
+    
+    on_mouse_wheel_scroll_up = action;
+
+}
+
+// sets and action to be performed when the mouse scrolls down
+// expect a refrence to a negative integer referencing the amount scrolled
+void input_set_on_mouse_wheel_scroll_down (Action action) {
+    
+    on_mouse_wheel_scroll_down = action;
+
+}
+
+// sets and action to be performed when the mouse scrolls right
+// expect a refrence to a positive integer referencing the amount scrolled
+void input_set_on_mouse_wheel_scroll_right (Action action) {
+    
+    on_mouse_wheel_scroll_right = action;
+
+}
+
+// sets and action to be performed when the mouse scrolls left
+// expect a refrence to a negative integer referencing the amount scrolled
+void input_set_on_mouse_wheel_scroll_left (Action action) {
+    
+    on_mouse_wheel_scroll_left = action;
+
+}
+
+static void input_on_mouse_scroll (SDL_Event event) {
+
+    // scroll up
+    if (event.wheel.y > 0) {
+        if (on_mouse_wheel_scroll_up) on_mouse_wheel_scroll_up (&event.wheel.y);
+    }
+
+    // scroll down
+    else if (event.wheel.y < 0) {
+        if (on_mouse_wheel_scroll_down) on_mouse_wheel_scroll_down (&event.wheel.y);
+    }
+
+    // scroll right
+    if (event.wheel.x > 0) {
+        if (on_mouse_wheel_scroll_right) on_mouse_wheel_scroll_right (&event.wheel.x);
+    }
+
+    // scroll left
+    else if (event.wheel.x < 0) {
+        if (on_mouse_wheel_scroll_left) on_mouse_wheel_scroll_left (&event.wheel.x);
+    }
+
+}
+
 /*** Keyboard ***/
 
 // a custom action performed with a combination of ctl + key
@@ -324,6 +385,8 @@ void input_handle (SDL_Event event) {
 
             case SDL_MOUSEBUTTONDOWN: input_on_mouse_button_down (event); break;
             case SDL_MOUSEBUTTONUP: input_on_mouse_button_up (event); break;
+
+            case SDL_MOUSEWHEEL: input_on_mouse_scroll (event); break;
 
             case SDL_KEYDOWN: input_key_down (event); break;
             case SDL_KEYUP: input_key_up (); break;
