@@ -410,27 +410,57 @@ void main_screen_input (void *win_ptr) {
 
 #pragma endregion
 
-void up (void *amount_ptr) {
+// TODO: make this an option
+int mouse_sensitivity = 50;
 
-    if (amount_ptr) printf ("up %d\n", *((int *) amount_ptr));
+void images_move_up_scroll_wheel (void *amount_ptr) {
+
+    if (amount_ptr) {
+        int *amount = (int *) amount_ptr;
+
+        if (images_panel) {
+            Renderer *main_renderer = renderer_get_by_name ("main");
+            u32 screen_height = main_renderer->window->window_size.height;
+
+            GridLayout *grid = (GridLayout *) images_panel->layout;
+            if ((abs (images_panel->ui_element->transform->rect.y) + grid->cell_height) < (images_panel->ui_element->transform->rect.h)) {
+                // this is positive because when moving the scroll wheel down, we get negative numbers
+                images_panel->ui_element->transform->rect.y += (*amount * mouse_sensitivity);
+                grid->transform->rect.y += (*amount * mouse_sensitivity);
+
+                GridElement *grid_element = NULL;
+                for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                    grid_element = (GridElement *) le->data;
+                    grid_element->ui_element->transform->rect.y += (*amount * mouse_sensitivity);
+                }
+            }
+        }
+    }
 
 }
 
-void down (void *amount_ptr) {
+void images_move_down_scroll_wheel (void *amount_ptr) {
 
-    if (amount_ptr) printf ("down %d\n", *((int *) amount_ptr));
+    if (amount_ptr) {
+        int *amount = (int *) amount_ptr;
 
-}
+        if (images_panel) {
+            Renderer *main_renderer = renderer_get_by_name ("main");
+            u32 screen_height = main_renderer->window->window_size.height;
 
-void right (void *amount_ptr) {
+            GridLayout *grid = (GridLayout *) images_panel->layout;
+            if ((abs (images_panel->ui_element->transform->rect.y) + grid->cell_height) < (images_panel->ui_element->transform->rect.h)) {
+                images_panel->ui_element->transform->rect.y += (*amount * mouse_sensitivity);
+                grid->transform->rect.y += (*amount * mouse_sensitivity);
 
-    if (amount_ptr) printf ("right %d\n", *((int *) amount_ptr));
-
-}
-
-void left (void *amount_ptr) {
-
-    if (amount_ptr) printf ("left %d\n", *((int *) amount_ptr));
+                GridElement *grid_element = NULL;
+                for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                    grid_element = (GridElement *) le->data;
+                    grid_element->ui_element->transform->rect.y += (*amount * mouse_sensitivity);
+                }
+            }
+        }
+    }
 
 }
 
@@ -447,10 +477,8 @@ static void app_on_enter (void) {
     input_command_register (SDLK_EQUALS, zoom_more, NULL);
     input_command_register (SDLK_MINUS, zoom_less, NULL);
 
-    input_set_on_mouse_wheel_scroll_up (up);
-    input_set_on_mouse_wheel_scroll_down (down);
-    input_set_on_mouse_wheel_scroll_right (right);
-    input_set_on_mouse_wheel_scroll_left (left);
+    input_set_on_mouse_wheel_scroll_up (images_move_up_scroll_wheel);
+    input_set_on_mouse_wheel_scroll_down (images_move_down_scroll_wheel);
 
     app_state->update = app_update;
 

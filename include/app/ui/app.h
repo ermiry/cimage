@@ -3,6 +3,8 @@
 
 #include "cengine/types/types.h"
 
+#include "cengine/ui/panel.h"
+
 #include "app/states/app.h"
 
 struct _ImageItem;
@@ -26,6 +28,8 @@ extern void app_ui_statusbar_hide (void);
 extern void app_ui_statusbar_set_selected_text (const char *text);
 
 /*** images ***/
+
+extern Panel *images_panel;
 
 extern void app_ui_images_move_up (u32 movement);
 

@@ -374,7 +374,10 @@ void app_ui_images_remove_ui_elements (void) {
     GridLayout *grid = (GridLayout *) images_panel->layout;
     ui_layout_grid_remove_ui_elements (grid);
 
-    if (images_panel) ui_element_destroy (images_panel->ui_element);
+    if (images_panel) {
+        ui_element_destroy (images_panel->ui_element);
+        images_panel = NULL;
+    } 
 
     app_ui_statusbar_hide ();
     app_ui_actionsbar_hide ();
