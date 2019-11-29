@@ -59,6 +59,9 @@ struct _Renderer {
 
     struct _UI *ui;
 
+    Action update;
+    void *update_args;
+
 };
 
 typedef struct _Renderer Renderer;
@@ -95,6 +98,11 @@ extern void renderer_queue_push (Renderer *renderer, SurfaceTexture *st);
 // example: if you have a frame rate of 30, the default loading factor is 1,
 // so you will load 30 textures in a second, 1 for each frame
 extern void renderer_set_background_texture_loading_factor (Renderer *renderer, u32 bg_loading_factor);
+
+// sets an action to executed on every renderer update
+// you can use this if you want to perform action son ui elements, like checking for 
+// the current ui element under the mouse using the ui_element_hover in UI
+extern void renderer_set_update (Renderer *renderer, Action update, void *update_args);
 
 /*** Layers ***/
 

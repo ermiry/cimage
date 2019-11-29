@@ -189,6 +189,8 @@ static void cengine_run (void) {
             if (win->input) win->input (win);
             win->renderer->ui->ui_element_hover = NULL;
             render (win->renderer);
+
+            if (win->renderer->update) win->renderer->update (win->renderer->update_args);
         }
 
         // limit the FPS

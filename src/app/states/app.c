@@ -281,6 +281,50 @@ void images_folder_close (void *args) {
 
 #pragma endregion
 
+static char *last_sub = NULL;
+
+// TODO: pass the rendrer also
+static void main_renderer_update (void *args) {
+
+    // TODO: make this an option!!
+    bool done = false;
+    // Renderer *main_renderer = renderer_get_by_name ("main");
+    Renderer *main_renderer = (Renderer *) args;
+    UIElement *hover_element = ui_element_hover_get (main_renderer->ui);
+    if (hover_element) {
+        if (hover_element->type == UI_IMAGE) {
+            Image *image = (Image *) hover_element->element;
+            char *sub = NULL;
+            char *retval = c_string_remove_sub_after_token_with_idx (image->sprite->img_data->filename->str, '/', &sub, -1);
+            if (retval && sub) {
+                if (!last_sub) {
+                    last_sub = sub;
+                    app_ui_statusbar_set_selected_text (sub);
+                }
+
+                else {
+                    if (strcmp (last_sub, sub)) {
+                        free (last_sub);
+                        last_sub = sub;
+                        app_ui_statusbar_set_selected_text (sub);
+                    }
+                }
+
+                free (retval);
+
+                done = true;
+            }
+        }
+    }
+
+    if (!done) {
+        app_ui_statusbar_set_selected_text (NULL);
+        free (last_sub);
+        last_sub = NULL;
+    } 
+
+}
+
 #pragma region global input
 
 #include "cengine/ui/layout/grid.h"
@@ -368,46 +412,9 @@ void main_screen_input (void *win_ptr) {
 
 State *app_state = NULL;
 
-static char *last_sub = NULL;
-
 static void app_update (void) {
 
     // game_object_update_all ();
-
-    // TODO: make this an option!!
-    bool done = false;
-    Renderer *main_renderer = renderer_get_by_name ("main");
-    UIElement *hover_element = ui_element_hover_get (main_renderer->ui);
-    if (hover_element) {
-        if (hover_element->type == UI_IMAGE) {
-            Image *image = (Image *) hover_element->element;
-            char *sub = NULL;
-            char *retval = c_string_remove_sub_after_token_with_idx (image->sprite->img_data->filename->str, '/', &sub, -1);
-            if (retval && sub) {
-                if (!last_sub) {
-                    last_sub = sub;
-                    app_ui_statusbar_set_selected_text (sub);
-                }
-
-                else {
-                    if (strcmp (last_sub, sub)) {
-                        free (last_sub);
-                        last_sub = sub;
-                        app_ui_statusbar_set_selected_text (sub);
-                    }
-                }
-
-                free (retval);
-
-                done = true;
-            }
-        }
-    }
-
-    if (!done) {
-        app_ui_statusbar_set_selected_text (NULL);
-        printf ("hola!\n");
-    } 
 
 }
 
@@ -419,6 +426,9 @@ static void app_on_enter (void) {
     app_state->update = app_update;
 
     app_ui_init ();
+
+    Renderer *main_renderer = renderer_get_by_name ("main");
+    renderer_set_update (main_renderer, main_renderer_update, main_renderer);
 
 }
 

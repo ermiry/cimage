@@ -74,6 +74,9 @@ static Renderer *renderer_new (void) {
         renderer->window = NULL;
 
         renderer->ui = NULL;
+
+        renderer->update = NULL;
+        renderer->update_args = NULL;
     }
 
     return renderer;
@@ -228,6 +231,18 @@ void renderer_queue_push (Renderer *renderer, SurfaceTexture *st) {
 void renderer_set_background_texture_loading_factor (Renderer *renderer, u32 bg_loading_factor) {
 
     if (renderer) renderer->bg_loading_factor = bg_loading_factor;
+
+}
+
+// sets an action to executed on every renderer update
+// you can use this if you want to perform action son ui elements, like checking for 
+// the current ui element under the mouse using the ui_element_hover in UI
+void renderer_set_update (Renderer *renderer, Action update, void *update_args) {
+
+    if (renderer) {
+        renderer->update = update;
+        renderer->update_args = update_args;
+    }
 
 }
 
