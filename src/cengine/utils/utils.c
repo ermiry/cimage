@@ -346,6 +346,52 @@ char *c_string_remove_sub_after_token (char *str, const char token, char **sub) 
 
 }
 
+// removes a substring from a c string after the idex of the token
+// returns a newly allocated string without the sub,
+// and option to retrieve the actual substring
+// idx set to -1 for the last token match
+// example: /home/ermiry/Documents, token: '/', idx: -1, returns: Documents
+char *c_string_remove_sub_after_token_with_idx (char *str, const char token, char **sub, int idx) {
+
+    char *retval = NULL;
+
+    if (str) {
+        int count = 0;
+        char *ptr = str;
+        char *last_ptr = NULL;
+        int last_token_count = 0;
+		while (*ptr) {
+            if (token == *ptr) {
+                last_token_count++;
+
+                if (idx < 0) last_ptr = ptr;
+                else if (last_token_count == idx) last_ptr = ptr;
+            }
+
+            ptr++;
+        }
+
+        last_ptr++;
+
+        size_t str_len = strlen (str);
+        size_t sub_len = strlen (last_ptr);
+        size_t diff_len = str_len - sub_len;
+
+		if (sub) {
+			*sub = (char *) calloc (sub_len + 1, sizeof (char));
+            memcpy (*sub, last_ptr, sub_len);
+            // *sub[sub_len] = '\0';
+		} 
+
+        retval = (char *) calloc (diff_len + 1, sizeof (char));
+        memcpy (retval, str, diff_len);
+        // retval[diff_len] = '\0';
+    }
+
+    return retval;
+
+}
+
 // removes a substring from a c string delimited by two equal tokens
 // takes the first and last appearance of the token
 // example: test_20191118142101759__TEST__.png - token: '_'
@@ -414,7 +460,7 @@ char *c_string_remove_sub_range_token (char *str, const char token, unsigned int
 
 					if (first_token_count == first) first_ptr = ptr;
 
-					if (last <= 0) last_ptr = ptr;
+					if (last < 0) last_ptr = ptr;
 					else if (last_token_count == last) last_ptr = ptr;
 				}
 

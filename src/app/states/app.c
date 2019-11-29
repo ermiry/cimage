@@ -382,30 +382,32 @@ static void app_update (void) {
         if (hover_element->type == UI_IMAGE) {
             Image *image = (Image *) hover_element->element;
             char *sub = NULL;
-            char *retval = c_string_remove_sub_after_token (image->sprite->img_data->filename->str, 'e', &sub);
+            char *retval = c_string_remove_sub_after_token_with_idx (image->sprite->img_data->filename->str, '/', &sub, -1);
             if (retval && sub) {
-                // printf ("%s\n", sub);
                 if (!last_sub) {
-                    app_ui_statusbar_set_selected_text (sub);
                     last_sub = sub;
-                    free (retval);
+                    app_ui_statusbar_set_selected_text (sub);
                 }
 
                 else {
                     if (strcmp (last_sub, sub)) {
                         free (last_sub);
-                        app_ui_statusbar_set_selected_text (sub);
                         last_sub = sub;
-                        free (retval);
+                        app_ui_statusbar_set_selected_text (sub);
                     }
                 }
+
+                free (retval);
 
                 done = true;
             }
         }
     }
 
-    if (!done) app_ui_statusbar_set_selected_text (NULL);
+    if (!done) {
+        app_ui_statusbar_set_selected_text (NULL);
+        printf ("hola!\n");
+    } 
 
 }
 
