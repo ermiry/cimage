@@ -57,6 +57,11 @@ extern char *c_string_remove_sub (char *str, const char *sub);
 // returns a new string, NULL on error
 extern char *c_string_create_with_ptrs (char *first, char *last);
 
+// removes a substring from a c string that is defined after a token
+// returns a newly allocated string without the sub,
+// and option to retrieve the actual substring
+extern char *c_string_remove_sub_after_token (char *str, const char token, char **sub);
+
 // removes a substring from a c string delimited by two equal tokens
 // takes the first and last appearance of the token
 // example: test_20191118142101759__TEST__.png - token: '_'

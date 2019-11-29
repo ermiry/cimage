@@ -207,7 +207,7 @@ void app_ui_statusbar_hide (void) {
 
 }
 
-static void app_ui_statusbar_set_selected_text (const char *text) {
+void app_ui_statusbar_set_selected_text (const char *text) {
 
     if (text) {
         Renderer *main_renderer = renderer_get_by_name ("main");

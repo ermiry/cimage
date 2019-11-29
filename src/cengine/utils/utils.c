@@ -310,6 +310,42 @@ char *c_string_create_with_ptrs (char *first, char *last) {
 
 }
 
+// removes a substring from a c string that is defined after a token
+// returns a newly allocated string without the sub,
+// and option to retrieve the actual substring
+char *c_string_remove_sub_after_token (char *str, const char token, char **sub) {
+
+    char *retval = NULL;
+
+    if (str) {
+        char *ptr = str;
+		while (*ptr) {
+			if (token == *ptr) {
+                break;
+			}
+
+			ptr++;
+		}
+
+        size_t str_len = strlen (str);
+        size_t sub_len = strlen (ptr);
+        size_t diff_len = str_len - sub_len;
+
+		if (sub) {
+			*sub = (char *) calloc (sub_len + 1, sizeof (char));
+            memcpy (*sub, ptr, sub_len);
+            // *sub[sub_len] = '\0';
+		} 
+
+        retval = (char *) calloc (diff_len + 1, sizeof (char));
+        memcpy (retval, str, diff_len);
+        // retval[diff_len] = '\0';
+    }
+
+    return retval;
+
+}
+
 // removes a substring from a c string delimited by two equal tokens
 // takes the first and last appearance of the token
 // example: test_20191118142101759__TEST__.png - token: '_'

@@ -228,6 +228,8 @@ static UI *ui_new (void) {
         ui->new_ui_element_id = 0;
 
         ui->ui_elements_layers = NULL;
+
+        ui->ui_element_hover = NULL;
     }
 
     return ui;
@@ -315,6 +317,9 @@ static i32 ui_elements_get_free_spot (UI *ui) {
     return -1;
 
 }
+
+// gets the current ui element that is below the mouse
+UIElement *ui_element_hover_get (UI *ui) { if (ui) return ui->ui_element_hover; }
 
 #pragma region render
 

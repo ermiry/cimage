@@ -79,6 +79,8 @@ struct _UI {
 
     DoubleList *ui_elements_layers;
 
+    UIElement *ui_element_hover;
+
 };
 
 typedef struct _UI UI;
@@ -87,6 +89,8 @@ extern void ui_delete (void *ui_ptr);
 
 // init our ui elements structures
 extern UI *ui_create (void);
+
+extern UIElement *ui_element_hover_get (UI *ui);
 
 /*** Public ui funcs ***/
 

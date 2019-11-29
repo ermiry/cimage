@@ -187,6 +187,7 @@ static void cengine_run (void) {
         for (ListElement *le = dlist_start (windows); le; le = le->next) {
             win = (Window *) le->data;
             if (win->input) win->input (win);
+            win->renderer->ui->ui_element_hover = NULL;
             render (win->renderer);
         }
 

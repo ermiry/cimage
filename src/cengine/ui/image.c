@@ -485,6 +485,8 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                     // check if the mouse is in the image
                     if (mousePos.x >= image->ui_element->transform->rect.x && mousePos.x <= (image->ui_element->transform->rect.x + image->ui_element->transform->rect.w) && 
                         mousePos.y >= image->ui_element->transform->rect.y && mousePos.y <= (image->ui_element->transform->rect.y + image->ui_element->transform->rect.h)) {
+                        renderer->ui->ui_element_hover = image->ui_element;
+                            
                         if (image->overlay_texture && !image->selected) {
                             SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
                                 NULL, &image->ui_element->transform->rect, 

@@ -22,6 +22,7 @@
 #include "cengine/manager/manager.h"
 // #include "cengine/game/go.h"
 
+#include "cengine/ui/ui.h"
 #include "cengine/ui/image.h"
 
 #include "cengine/utils/utils.h"
@@ -367,9 +368,44 @@ void main_screen_input (void *win_ptr) {
 
 State *app_state = NULL;
 
+static char *last_sub = NULL;
+
 static void app_update (void) {
 
     // game_object_update_all ();
+
+    // TODO: make this an option!!
+    bool done = false;
+    Renderer *main_renderer = renderer_get_by_name ("main");
+    UIElement *hover_element = ui_element_hover_get (main_renderer->ui);
+    if (hover_element) {
+        if (hover_element->type == UI_IMAGE) {
+            Image *image = (Image *) hover_element->element;
+            char *sub = NULL;
+            char *retval = c_string_remove_sub_after_token (image->sprite->img_data->filename->str, 'e', &sub);
+            if (retval && sub) {
+                // printf ("%s\n", sub);
+                if (!last_sub) {
+                    app_ui_statusbar_set_selected_text (sub);
+                    last_sub = sub;
+                    free (retval);
+                }
+
+                else {
+                    if (strcmp (last_sub, sub)) {
+                        free (last_sub);
+                        app_ui_statusbar_set_selected_text (sub);
+                        last_sub = sub;
+                        free (retval);
+                    }
+                }
+
+                done = true;
+            }
+        }
+    }
+
+    if (!done) app_ui_statusbar_set_selected_text (NULL);
 
 }
 

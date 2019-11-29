@@ -23,6 +23,8 @@ extern void app_ui_statusbar_show (const char *foldername, u32 total);
 
 extern void app_ui_statusbar_hide (void);
 
+extern void app_ui_statusbar_set_selected_text (const char *text);
+
 /*** images ***/
 
 extern void app_ui_images_move_up (u32 movement);
