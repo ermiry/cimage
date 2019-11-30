@@ -17,6 +17,8 @@ extern void app_ui_end (void);
 
 extern void app_ui_actionsbar_show (void);
 
+extern void app_ui_actionsbar_toggle (void);
+
 extern void app_ui_actionsbar_hide (void);
 
 /*** statusbar ***/

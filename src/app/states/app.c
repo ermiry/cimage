@@ -342,13 +342,11 @@ void zoom_more (void *args) {
     }
 
     if (!strcmp (window->renderer->name->str, "main")) {
-        GridLayout *grid =  (GridLayout *) images_panel->layout;
-        ui_layout_grid_update_dimensions (grid, grid->cols - 1, grid->rows - 1);
-        // printf ("+\n");
-    }
-
-    else {
-
+        if (images_panel) {
+            GridLayout *grid =  (GridLayout *) images_panel->layout;
+            ui_layout_grid_update_dimensions (grid, grid->cols - 1, grid->rows - 1);
+            // printf ("+\n");
+        }
     }
 
 }
@@ -363,13 +361,11 @@ void zoom_less (void *args) {
     }
 
     if (!strcmp (window->renderer->name->str, "main")) {
-        GridLayout *grid =  (GridLayout *) images_panel->layout;
-        ui_layout_grid_update_dimensions (grid, grid->cols + 1, grid->rows + 1);
-        // printf ("-\n");
-    }
-
-    else {
-        
+        if (images_panel) {
+            GridLayout *grid =  (GridLayout *) images_panel->layout;
+            ui_layout_grid_update_dimensions (grid, grid->cols + 1, grid->rows + 1);
+            // printf ("-\n");
+        }
     }
 
 }
@@ -392,6 +388,12 @@ void main_screen_input (void *win_ptr) {
                 window_toggle_fullscreen_soft (win);
                 once = true;
                 }
+            }
+
+            // TODO: add a button cooldown
+            else if (input_is_key_down (SDL_SCANCODE_LALT) || input_is_key_down (SDL_SCANCODE_RALT)) {
+                // toggle display actions menu
+                if (images_panel) app_ui_actionsbar_toggle ();
             }
 
             else if (input_is_key_down (SDL_SCANCODE_UP)) {

@@ -112,6 +112,13 @@ static void actionsbar_init (void) {
 
 void app_ui_actionsbar_show (void) {
 
+    ui_element_set_active (actionsbar_panel->ui_element, true);
+    ui_element_set_active (actionsbar_close_button->ui_element, true);
+
+}
+
+void app_ui_actionsbar_toggle (void) {
+
     ui_element_toggle_active (actionsbar_panel->ui_element);
     ui_element_toggle_active (actionsbar_close_button->ui_element);
 
@@ -119,8 +126,8 @@ void app_ui_actionsbar_show (void) {
 
 void app_ui_actionsbar_hide (void) {
 
-    ui_element_toggle_active (actionsbar_panel->ui_element);
-    ui_element_toggle_active (actionsbar_close_button->ui_element);
+    ui_element_set_active (actionsbar_panel->ui_element, false);
+    ui_element_set_active (actionsbar_close_button->ui_element, false);
 
 }
 
