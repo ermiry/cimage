@@ -374,7 +374,12 @@ void zoom_less (void *args) {
 
 #pragma region main screen
 
+#include "cengine/timer.h"
+
 static bool once = false;
+
+static Timer *alt_key_timer = NULL;
+static u32 alt_key_cooldown = 500;
 
 void main_screen_input (void *win_ptr) {
 
@@ -390,10 +395,13 @@ void main_screen_input (void *win_ptr) {
                 }
             }
 
-            // TODO: add a button cooldown
             else if (input_is_key_down (SDL_SCANCODE_LALT) || input_is_key_down (SDL_SCANCODE_RALT)) {
-                // toggle display actions menu
-                if (images_panel) app_ui_actionsbar_toggle ();
+                if (timer_get_ticks (alt_key_timer) > alt_key_cooldown) {
+                    // toggle display actions menu
+                    if (images_panel) app_ui_actionsbar_toggle ();
+
+                    timer_start (alt_key_timer);
+                }
             }
 
             else if (input_is_key_down (SDL_SCANCODE_UP)) {
@@ -489,9 +497,14 @@ static void app_on_enter (void) {
     Renderer *main_renderer = renderer_get_by_name ("main");
     renderer_set_update (main_renderer, main_renderer_update, main_renderer);
 
+    alt_key_timer = timer_new ();
+    timer_start (alt_key_timer);
+
 }
 
 static void app_on_exit (void) { 
+
+    timer_destroy (alt_key_timer);
 
     app_ui_end ();
 
