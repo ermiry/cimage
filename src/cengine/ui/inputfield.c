@@ -75,6 +75,13 @@ void ui_input_field_toggle_active (InputField *input) {
 
 }
 
+// sets the inputs's UI position
+void ui_input_field_set_pos (InputField *input, UIRect *ref_rect, UIPosition pos, Renderer *renderer) {
+
+    if (input) ui_transform_component_set_pos (input->ui_element->transform, renderer, ref_rect, pos, false);
+
+}
+
 // sets the input placeholder text
 void ui_input_field_placeholder_text_set (InputField *input, Renderer *renderer, const char *text,
     Font *font, u32 size, RGBA_Color text_color) {

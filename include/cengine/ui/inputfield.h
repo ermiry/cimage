@@ -55,6 +55,9 @@ extern void ui_input_field_set_active (InputField *input, bool active);
 // toggles the input field to be active or not
 extern void ui_input_field_toggle_active (InputField *input);
 
+// sets the inputs's UI position
+extern void ui_input_field_set_pos (InputField *input, UIRect *ref_rect, UIPosition pos, Renderer *renderer);
+
 // sets the input placeholder text
 extern void ui_input_field_placeholder_text_set (InputField *input, Renderer *renderer, const char *text,
     Font *font, u32 size, RGBA_Color text_color);

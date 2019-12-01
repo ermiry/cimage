@@ -12,6 +12,7 @@
 #include "cengine/ui/button.h"
 #include "cengine/ui/image.h"
 #include "cengine/ui/panel.h"
+#include "cengine/ui/inputfield.h"
 #include "cengine/ui/layout/grid.h"
 
 #include "cengine/utils/utils.h"
@@ -19,18 +20,10 @@
 #include "app/states/app.h"
 
 static Panel *background_panel = NULL;
-static Panel *sidebar = NULL;
 Panel *images_panel = NULL;
-
-static Button *photos_button = NULL;
-static Button *presentation_button = NULL;
-static Button *settings_button = NULL;
 
 static Button *open_folder_button = NULL;
 static TextBox *open_folder_text = NULL;
-
-static Panel *actionsbar_panel = NULL;
-static Button *actionsbar_close_button = NULL;
 
 static Panel *statusbar = NULL;
 static TextBox *statusbar_foldername = NULL;
@@ -40,6 +33,15 @@ static TextBox *statusbar_total = NULL;
 static SDL_Texture *overlay_texture = NULL;
 static SDL_Texture *selected_texture = NULL;
 
+/*** sidebar ***/
+
+#define SIDEBAR_WIDTH           100
+
+static Panel *sidebar = NULL;
+static Button *photos_button = NULL;
+static Button *presentation_button = NULL;
+static Button *settings_button = NULL;
+
 // FIXME: set actions
 static void sidebar_init (u32 screen_height) {
 
@@ -47,7 +49,7 @@ static void sidebar_init (u32 screen_height) {
 
     RGBA_Color blue_night = { 53, 59, 72, 255 };
 
-    sidebar = ui_panel_create (0, 0, 100, screen_height, UI_POS_LEFT_UPPER_CORNER, main_renderer);
+    sidebar = ui_panel_create (0, 0, SIDEBAR_WIDTH, screen_height, UI_POS_LEFT_UPPER_CORNER, main_renderer);
     ui_panel_set_bg_colour (sidebar, main_renderer, blue_night);
     ui_element_set_layer (main_renderer->ui, sidebar->ui_element, "top");
 
@@ -81,6 +83,14 @@ static void sidebar_end (void) {
 
 }
 
+# pragma region actions
+
+#define ACTIONSBAR_HEIGHT           50
+
+static Panel *actionsbar_panel = NULL;
+static InputField *actionsbar_search_input = NULL;
+static Button *actionsbar_close_button = NULL;
+
 static void actionsbar_init (void) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -93,13 +103,23 @@ static void actionsbar_init (void) {
     RGBA_Color statusbar_color = { .r = 37, .g = 44, .b = 54, .a = 245 };
 
     actionsbar_panel = ui_panel_create (sidebar->ui_element->transform->rect.w, 0, 
-        screen_width - sidebar->ui_element->transform->rect.w, 70,
+        screen_width - sidebar->ui_element->transform->rect.w, ACTIONSBAR_HEIGHT,
         UI_POS_LEFT_UPPER_CORNER, main_renderer);
     ui_panel_set_bg_colour (actionsbar_panel, main_renderer, statusbar_color);
     ui_element_set_layer (main_renderer->ui, actionsbar_panel->ui_element, "top");
     ui_element_toggle_active (actionsbar_panel->ui_element);
 
-    actionsbar_close_button = ui_button_create (0, 0, 64, 64, UI_POS_FREE, main_renderer);
+    actionsbar_search_input = ui_input_field_create (0, 0, 400, 40, UI_POS_FREE, main_renderer);
+    ui_input_field_set_pos (actionsbar_search_input, &actionsbar_panel->ui_element->transform->rect, UI_POS_MIDDLE_CENTER, main_renderer);
+    actionsbar_search_input->ui_element->transform->rect.x -= (SIDEBAR_WIDTH / 2);
+    ui_input_field_placeholder_text_set (actionsbar_search_input, main_renderer, "Search", font, 24, RGBA_WHITE);
+    ui_input_field_placeholder_text_pos_set (actionsbar_search_input, UI_POS_MIDDLE_CENTER);
+    ui_input_field_text_set (actionsbar_search_input, main_renderer, "", font, 24, RGBA_WHITE, false);
+    ui_input_field_ouline_set_colour (actionsbar_search_input, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, actionsbar_search_input->ui_element, "top");
+    ui_element_toggle_active (actionsbar_search_input->ui_element);
+
+    actionsbar_close_button = ui_button_create (0, 0, 48, 48, UI_POS_FREE, main_renderer);
     ui_button_set_pos (actionsbar_close_button, &actionsbar_panel->ui_element->transform->rect, UI_POS_RIGHT_CENTER, main_renderer);
     actionsbar_close_button->ui_element->transform->rect.x -= 20;
     // ui_button_set_ouline_colour (actionsbar_close_button, RGBA_WHITE);
@@ -113,6 +133,7 @@ static void actionsbar_init (void) {
 void app_ui_actionsbar_show (void) {
 
     ui_element_set_active (actionsbar_panel->ui_element, true);
+    ui_element_set_active (actionsbar_search_input->ui_element, true);
     ui_element_set_active (actionsbar_close_button->ui_element, true);
 
 }
@@ -120,6 +141,7 @@ void app_ui_actionsbar_show (void) {
 void app_ui_actionsbar_toggle (void) {
 
     ui_element_toggle_active (actionsbar_panel->ui_element);
+    ui_element_toggle_active (actionsbar_search_input->ui_element);
     ui_element_toggle_active (actionsbar_close_button->ui_element);
 
 }
@@ -127,6 +149,7 @@ void app_ui_actionsbar_toggle (void) {
 void app_ui_actionsbar_hide (void) {
 
     ui_element_set_active (actionsbar_panel->ui_element, false);
+    ui_element_set_active (actionsbar_search_input->ui_element, false);
     ui_element_set_active (actionsbar_close_button->ui_element, false);
 
 }
@@ -134,10 +157,12 @@ void app_ui_actionsbar_hide (void) {
 static void actionsbar_end (void) {
 
     if (actionsbar_panel) ui_element_destroy (actionsbar_panel->ui_element);   
-
+    if (actionsbar_search_input) ui_element_destroy (actionsbar_search_input->ui_element);
     if (actionsbar_close_button)  ui_element_destroy (actionsbar_close_button->ui_element);
 
 }
+
+#pragma endregion
 
 static void statusbar_init (void) {
 
