@@ -329,7 +329,7 @@ void ui_input_field_draw (InputField *input, Renderer *renderer) {
                         if (input->pressed) {
                             input->pressed = false;
                             // make this text active
-                            input_set_active_text (input);
+                            input_set_active_text (renderer->window->input, input);
                             // printf ("Pressed!\n");
                         }
                     }

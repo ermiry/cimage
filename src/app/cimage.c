@@ -79,7 +79,7 @@ int cimage_init (void) {
     WindowSize window_size = { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
     Renderer *main_renderer = renderer_create_with_window ("main", 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
         "Cimage", window_size, 0);
-    main_renderer->window->input = main_screen_input;
+    window_set_user_input (main_renderer->window, main_screen_input);
 
     icon_surface = surface_load_image ("./assets/cimage-128.png");
     if (icon_surface) window_set_icon (main_renderer->window, icon_surface);

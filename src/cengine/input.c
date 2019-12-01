@@ -15,14 +15,28 @@
 #include "cengine/ui/inputfield.h"
 #include "cengine/ui/components/text.h"
 
-bool typing = false;
+Input *input_new (void) {
 
-static InputField *active_text = NULL;
+    Input *input = (Input *) malloc (sizeof (Input));
+    if (input) {
+        input->typing = false;
+        input->active_text = NULL;
 
-void input_set_active_text (InputField *text) {
+        input->user_input = NULL;
+    }
 
-    active_text = text;
-    typing = active_text ? true : false;
+    return input;
+
+}
+
+void input_delete (void *input_ptr) { if (input_ptr) free (input_ptr); }
+
+void input_set_active_text (Input *input, InputField *text) {
+
+    if (input) {
+        input->active_text = text;
+        input->typing = input->active_text ? true : false;
+    }
 
 }
 
@@ -242,43 +256,43 @@ static void input_key_down (SDL_Event event) {
     
     // handle escape
     if (event.key.keysym.sym == SDLK_ESCAPE) {
-        if (typing) {
-            input_set_active_text (NULL);
-        }
+        // if (typing) {
+        //     input_set_active_text (NULL);
+        // }
     }
 
     // handle backspace
     else if (event.key.keysym.sym == SDLK_BACKSPACE) {
-        if (active_text && typing) {
-            if (active_text->is_password) 
-                str_remove_last_char (active_text->password);
-            else
-                str_remove_last_char (active_text->text->text);
+        // if (active_text && typing) {
+        //     if (active_text->is_password) 
+        //         str_remove_last_char (active_text->password);
+        //     else
+        //         str_remove_last_char (active_text->text->text);
 
-            // FIXME:
-            // ui_input_field_update (active_text);
-        }
+        //     // FIXME:
+        //     // ui_input_field_update (active_text);
+        // }
     }
 
     // handle copy to clipboard
     else if (event.key.keysym.sym == SDLK_c && SDL_GetModState () & KMOD_CTRL) {
-        if (active_text && typing) {
-            if (active_text->is_password) SDL_SetClipboardText (active_text->password->str);
-            else SDL_SetClipboardText (active_text->text->text->str);
-        }
+        // if (active_text && typing) {
+        //     if (active_text->is_password) SDL_SetClipboardText (active_text->password->str);
+        //     else SDL_SetClipboardText (active_text->text->text->str);
+        // }
     }
 
     // handle paste from clipboard
     else if (event.key.keysym.sym == SDLK_v && SDL_GetModState () & KMOD_CTRL) {
-        if (active_text && typing) {
-            if (active_text->password)
-                str_append_c_string (active_text->password, SDL_GetClipboardText ());
-            else
-                str_append_c_string (active_text->text->text, SDL_GetClipboardText ());
+        // if (active_text && typing) {
+        //     if (active_text->password)
+        //         str_append_c_string (active_text->password, SDL_GetClipboardText ());
+        //     else
+        //         str_append_c_string (active_text->text->text, SDL_GetClipboardText ());
             
-            // FIXME:
-            // ui_input_field_update (active_text);
-        }
+        //     // FIXME:
+        //     // ui_input_field_update (active_text);
+        // }
     }
 
     // handle any custom command + key action set by the user
@@ -348,24 +362,24 @@ void input_end (void) {
 static void input_handle_text_input (SDL_Event event) {
 
     // check if we are typing into something
-    if (typing) {
-        // check for copy or pasting
-        if (!(SDL_GetModState () & KMOD_CTRL && (event.text.text[0] == 'c' || 
-            event.text.text[0] == 'C' || event.text.text[0] == 'v' || 
-            event.text.text[0] == 'V' ))) {
-            if (active_text) {
-                if (active_text->is_password) 
-                    str_append_c_string (active_text->password, event.text.text);
-                else 
-                    str_append_c_string (active_text->text->text, event.text.text);
+    // if (typing) {
+    //     // check for copy or pasting
+    //     if (!(SDL_GetModState () & KMOD_CTRL && (event.text.text[0] == 'c' || 
+    //         event.text.text[0] == 'C' || event.text.text[0] == 'v' || 
+    //         event.text.text[0] == 'V' ))) {
+    //         if (active_text) {
+    //             if (active_text->is_password) 
+    //                 str_append_c_string (active_text->password, event.text.text);
+    //             else 
+    //                 str_append_c_string (active_text->text->text, event.text.text);
 
-                // FIXME:
-                // ui_input_field_update (active_text);
+    //             // FIXME:
+    //             // ui_input_field_update (active_text);
 
-                // printf ("%s\n", active_text->text->str);
-            }
-        }
-    }
+    //             // printf ("%s\n", active_text->text->str);
+    //         }
+    //     }
+    // }
 
 }
 
@@ -391,7 +405,7 @@ void input_handle (SDL_Event event) {
             case SDL_KEYDOWN: input_key_down (event); break;
             case SDL_KEYUP: input_key_up (); break;
 
-            case SDL_TEXTINPUT: input_handle_text_input (event); break;
+            // case SDL_TEXTINPUT: input_handle_text_input (event); break;
 
             default: break;
         }

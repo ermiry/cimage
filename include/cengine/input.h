@@ -10,9 +10,24 @@
 
 #include "cengine/ui/inputfield.h"
 
-extern bool typing;
+struct _Input {
 
-extern void input_set_active_text (InputField *text);
+    // current active input field
+    bool typing;
+    InputField *active_text;
+
+    // custom user input method
+    void (*user_input)(void *);
+
+};
+
+typedef struct _Input Input;
+
+extern Input *input_new (void);
+
+extern void input_delete (void *input_ptr);
+
+extern void input_set_active_text (Input *input, InputField *text);
 
 #define N_MOUSE_BUTTONS     3
 
