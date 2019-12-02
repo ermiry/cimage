@@ -392,6 +392,8 @@ void ui_button_draw (Button *button, Renderer *renderer) {
                     // check if the mouse is in the button
                     if (mousePos.x >= button->ui_element->transform->rect.x && mousePos.x <= (button->ui_element->transform->rect.x + button->ui_element->transform->rect.w) && 
                         mousePos.y >= button->ui_element->transform->rect.y && mousePos.y <= (button->ui_element->transform->rect.y + button->ui_element->transform->rect.h)) {
+                        renderer->ui->ui_element_hover = button->ui_element;
+                            
                         // check if the user pressed the left button over the mouse
                         if (input_get_mouse_button_state (MOUSE_LEFT)) {
                             button->pressed = true;
@@ -400,10 +402,35 @@ void ui_button_draw (Button *button, Renderer *renderer) {
                         
                         else if (!input_get_mouse_button_state (MOUSE_LEFT)) {
                             if (button->pressed) {
+                                if (!button->one_click) {
+                                    button->one_click = true;
+                                    timer_start (button->double_click_timer);
+                                    // button->selected = !button->selected;
+                                    if (button->action) button->action (button->args);
+                                    // printf ("One click!\n");
+                                }
+
+                                else {
+                                    u32 ticks = timer_get_ticks (button->double_click_timer);
+                                    if (ticks <= button->double_click_delay) {
+                                        button->one_click = false;
+                                        if (button->double_click_action) 
+                                            button->double_click_action (button->double_click_args);
+
+                                        // image->selected = !image->selected;
+                                        // printf ("Double click!\n");
+                                    }
+
+                                    else {
+                                        button->one_click = true;
+                                        timer_start (button->double_click_timer);
+                                        // button->selected = !button->selected;
+                                        if (button->action) button->action (button->args);
+                                        // printf ("One click again!\n");
+                                    }
+                                }
+                                
                                 button->pressed = false;
-                                selected_sprite = button->sprites[BUTTON_STATE_MOUSE_UP];
-                                if (button->action) button->action (button->args);
-                                // printf ("Pressed!\n");
                             }
                         }
 
