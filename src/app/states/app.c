@@ -25,6 +25,7 @@
 #include "cengine/ui/ui.h"
 #include "cengine/ui/image.h"
 #include "cengine/ui/inputfield.h"
+#include "cengine/ui/layout/grid.h"
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
@@ -204,7 +205,8 @@ static void *images_load (void *folder_name_ptr) {
 
                 for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
                     // printf ("%s\n", ((String *) le->data)->str);
-                    app_ui_image_display (((ImageItem *) le->data));
+                    app_ui_image_create (((ImageItem *) le->data));
+                    app_ui_image_display (((ImageItem *) le->data)->image);
                 }
             }
             
@@ -286,7 +288,29 @@ void images_search (void *args) {
     if (args) {
         InputField *search_input = (InputField *) args;
 
-        printf ("search: %s\n", search_input->text->text->str);
+        // remove all images from the grid
+        GridLayout *grid = (GridLayout *) images_panel->layout;
+        ui_layout_grid_remove_ui_elements (grid);
+
+        String *query = str_new (search_input->text->text->str);
+
+        // search all the images that matches our query letter by letter
+        ImageItem *img = NULL;
+        for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
+            img = (ImageItem *) le->data;
+
+            ui_element_set_active (img->image->ui_element, false);
+
+            if (!strncasecmp (query->str, img->filename->str, query->len)) {
+                // add this image for display
+                ui_layout_grid_add_element (grid, img->image->ui_element);
+                ui_element_set_active (img->image->ui_element, true);
+            }
+        }
+
+        // TODO: update status bar with counter
+
+        str_delete (query);
     }
 
 }

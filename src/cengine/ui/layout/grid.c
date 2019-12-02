@@ -52,6 +52,16 @@ static GridLayout *ui_layout_grid_new (void) {
 
 }
 
+static void ui_layout_grid_reset_pos_values (GridLayout *grid) {
+
+    if (grid) {
+        grid->curr_n_ui_elements = 0;
+        grid->next_x = 0;
+        grid->next_y = 0;
+    }
+
+}
+
 void ui_layout_grid_delete (void *grid_ptr) {
 
     if (grid_ptr) {
@@ -268,7 +278,9 @@ void ui_layout_grid_remove_ui_elements (GridLayout *grid) {
     if (grid) {
         dlist_set_destroy (grid->elements, grid_element_delete);
         dlist_delete (grid->elements);
+
         grid->elements = dlist_init (grid_element_delete, NULL);
+        ui_layout_grid_reset_pos_values (grid);
     }
 
 }
@@ -279,7 +291,9 @@ void ui_layout_grid_destroy_ui_elements (GridLayout *grid) {
     if (grid) {
         dlist_set_destroy (grid->elements, grid_element_delete_full);
         dlist_delete (grid->elements);
+
         grid->elements = dlist_init (grid_element_delete, NULL);
+        ui_layout_grid_reset_pos_values (grid);
     }
 
 }

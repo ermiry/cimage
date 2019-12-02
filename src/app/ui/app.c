@@ -519,8 +519,18 @@ void app_ui_image_display_in_window (void *img_ptr) {
 
 }
 
-// TODO: first reduce the image and then render what we want
-void app_ui_image_display (ImageItem *image_item) {
+// adds the image into the main grid for display
+void app_ui_image_display (Image *image) {
+
+    if (image) {
+        ui_panel_layout_add_element (images_panel, image->ui_element);
+    }
+
+}
+
+// TODO: load a smaller image to us less memory
+// creates a ui image element to be displayed
+void app_ui_image_create (ImageItem *image_item) {
 
     if (image_item) {
         Renderer *main_renderer = renderer_get_by_name ("main");
@@ -536,8 +546,6 @@ void app_ui_image_display (ImageItem *image_item) {
         ui_image_set_action (image, app_ui_image_select, image_item);
         ui_image_set_double_click_action (image, app_ui_image_display_in_window, image_item);
         // ui_element_set_layer (main_renderer->ui, image->ui_element, "middle");
-
-        ui_panel_layout_add_element (images_panel, image->ui_element);
 
         image_item->image = image;
     }

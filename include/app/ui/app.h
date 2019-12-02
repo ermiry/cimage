@@ -43,6 +43,10 @@ extern void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows)
 // we have closed the images folde,r so hide images ui items
 extern void app_ui_images_remove_ui_elements (void);
 
-extern void app_ui_image_display (struct _ImageItem *image_item);
+// adds the image into the main grid for display
+extern void app_ui_image_display (Image *image);
+
+// creates a ui image element to be displayed
+extern void app_ui_image_create (ImageItem *image_item);
 
 #endif
