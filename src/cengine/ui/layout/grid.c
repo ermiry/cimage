@@ -81,7 +81,7 @@ void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows) {
 
         grid->cell_width = grid->transform->rect.w / grid->cols;
         grid->cell_height = grid->transform->rect.h / grid->rows;
-        printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
+        // printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
         grid->cell_padding_x = grid->cell_width * 0.1;
         grid->cell_padding_y = grid->cell_height * 0.1;
     }
@@ -95,7 +95,7 @@ void ui_layout_grid_set_cell_size (GridLayout *grid, u32 width, u32 height) {
     if (grid) {
         grid->cell_width = width;
         grid->cell_height = height;
-        printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
+        // printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
 
         grid->cell_padding_x = grid->cell_width * 0.1;
         grid->cell_padding_y = grid->cell_height * 0.1;
@@ -104,7 +104,6 @@ void ui_layout_grid_set_cell_size (GridLayout *grid, u32 width, u32 height) {
 }
 
 static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *element) {
-
 
     if (grid && element) {
         u32 max_width = grid->cell_width - grid->cell_padding_x;      // Max width for the image
@@ -263,8 +262,19 @@ void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element) {
 
 }
 
-// removes (destroys) all ui elements from the grid layout
+// removes all ui elements from the grid layout without destroying them
 void ui_layout_grid_remove_ui_elements (GridLayout *grid) {
+
+    if (grid) {
+        dlist_set_destroy (grid->elements, grid_element_delete);
+        dlist_delete (grid->elements);
+        grid->elements = dlist_init (grid_element_delete, NULL);
+    }
+
+}
+
+// destroys the ui elements inside the grid
+void ui_layout_grid_destroy_ui_elements (GridLayout *grid) {
 
     if (grid) {
         dlist_set_destroy (grid->elements, grid_element_delete_full);

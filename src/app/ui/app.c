@@ -406,7 +406,7 @@ void app_ui_images_remove_ui_elements (void) {
 
     // remove the panel and the layout
     GridLayout *grid = (GridLayout *) images_panel->layout;
-    ui_layout_grid_remove_ui_elements (grid);
+    ui_layout_grid_destroy_ui_elements (grid);
 
     if (images_panel) {
         ui_element_destroy (images_panel->ui_element);
