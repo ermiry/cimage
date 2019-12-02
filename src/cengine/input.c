@@ -253,50 +253,55 @@ void input_key_event_unregister (const SDL_Keycode key) {
 static void input_key_down (SDL_Event event) { 
 
     keys_states = SDL_GetKeyboardState (NULL); 
-    
-    // handle escape
-    if (event.key.keysym.sym == SDLK_ESCAPE) {
-        // if (typing) {
-        //     input_set_active_text (NULL);
-        // }
-    }
 
-    // handle backspace
-    else if (event.key.keysym.sym == SDLK_BACKSPACE) {
-        // if (active_text && typing) {
-        //     if (active_text->is_password) 
-        //         str_remove_last_char (active_text->password);
-        //     else
-        //         str_remove_last_char (active_text->text->text);
+    Window *win = NULL;
+    for (ListElement *le = dlist_start (windows); le; le = le->next) {
+        win = (Window *) le->data;
 
-        //     // FIXME:
-        //     // ui_input_field_update (active_text);
-        // }
-    }
+        if (win->keyboard) {
+            // handle escape
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+                if (win->input->typing) {
+                    input_set_active_text (win->input, NULL);
+                }
+            }
 
-    // handle copy to clipboard
-    else if (event.key.keysym.sym == SDLK_c && SDL_GetModState () & KMOD_CTRL) {
-        // if (active_text && typing) {
-        //     if (active_text->is_password) SDL_SetClipboardText (active_text->password->str);
-        //     else SDL_SetClipboardText (active_text->text->text->str);
-        // }
-    }
+            // handle backspace
+            else if (event.key.keysym.sym == SDLK_BACKSPACE) {
+                if (win->input->active_text && win->input->typing) {
+                    if (win->input->active_text->is_password) 
+                        str_remove_last_char (win->input->active_text->password);
+                    else
+                        str_remove_last_char (win->input->active_text->text->text);
 
-    // handle paste from clipboard
-    else if (event.key.keysym.sym == SDLK_v && SDL_GetModState () & KMOD_CTRL) {
-        // if (active_text && typing) {
-        //     if (active_text->password)
-        //         str_append_c_string (active_text->password, SDL_GetClipboardText ());
-        //     else
-        //         str_append_c_string (active_text->text->text, SDL_GetClipboardText ());
-            
-        //     // FIXME:
-        //     // ui_input_field_update (active_text);
-        // }
+                    ui_input_field_update (win->input->active_text, win->renderer);
+                }
+            }
+
+            // handle copy to clipboard
+            else if (event.key.keysym.sym == SDLK_c && SDL_GetModState () & KMOD_CTRL) {
+                if (win->input->active_text && win->input->typing) {
+                    if (win->input->active_text->is_password) SDL_SetClipboardText (win->input->active_text->password->str);
+                    else SDL_SetClipboardText (win->input->active_text->text->text->str);
+                }
+            }
+
+            // handle paste from clipboard
+            else if (event.key.keysym.sym == SDLK_v && SDL_GetModState () & KMOD_CTRL) {
+                if (win->input->active_text && win->input->typing) {
+                    if (win->input->active_text->password)
+                        str_append_c_string (win->input->active_text->password, SDL_GetClipboardText ());
+                    else
+                        str_append_c_string (win->input->active_text->text->text, SDL_GetClipboardText ());
+                    
+                    ui_input_field_update (win->input->active_text, win->renderer);
+                }
+            }
+        }
     }
 
     // handle any custom command + key action set by the user
-    else if (SDL_GetModState () & KMOD_CTRL) {
+    if (SDL_GetModState () & KMOD_CTRL) {
         Command *command = NULL;
         for (ListElement *le = dlist_start (command_actions); le; le = le->next) {
             command = (Command *) le->data;
@@ -362,24 +367,28 @@ void input_end (void) {
 static void input_handle_text_input (SDL_Event event) {
 
     // check if we are typing into something
-    // if (typing) {
-    //     // check for copy or pasting
-    //     if (!(SDL_GetModState () & KMOD_CTRL && (event.text.text[0] == 'c' || 
-    //         event.text.text[0] == 'C' || event.text.text[0] == 'v' || 
-    //         event.text.text[0] == 'V' ))) {
-    //         if (active_text) {
-    //             if (active_text->is_password) 
-    //                 str_append_c_string (active_text->password, event.text.text);
-    //             else 
-    //                 str_append_c_string (active_text->text->text, event.text.text);
+    Window *win = NULL;
+    for (ListElement *le = dlist_start (windows); le; le = le->next) {
+        win = (Window *) le->data;
 
-    //             // FIXME:
-    //             // ui_input_field_update (active_text);
+        if (win->keyboard && win->input->typing) {
+            // check for copy or pasting
+            if (!(SDL_GetModState () & KMOD_CTRL && (event.text.text[0] == 'c' || 
+                event.text.text[0] == 'C' || event.text.text[0] == 'v' || 
+                event.text.text[0] == 'V' ))) {
+                if (win->input->active_text) {
+                    if (win->input->active_text->is_password) 
+                        str_append_c_string (win->input->active_text->password, event.text.text);
+                    else 
+                        str_append_c_string (win->input->active_text->text->text, event.text.text);
 
-    //             // printf ("%s\n", active_text->text->str);
-    //         }
-    //     }
-    // }
+                    ui_input_field_update (win->input->active_text, win->renderer);
+
+                    // printf ("%s\n", active_text->text->str);
+                }
+            }
+        }
+    }
 
 }
 
@@ -405,7 +414,7 @@ void input_handle (SDL_Event event) {
             case SDL_KEYDOWN: input_key_down (event); break;
             case SDL_KEYUP: input_key_up (); break;
 
-            // case SDL_TEXTINPUT: input_handle_text_input (event); break;
+            case SDL_TEXTINPUT: input_handle_text_input (event); break;
 
             default: break;
         }
