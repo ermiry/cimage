@@ -267,6 +267,8 @@ static void statusbar_end (void) {
 
 }
 
+#include "cengine/ui/dropdown.h"
+
 void app_ui_init (void) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -304,6 +306,26 @@ void app_ui_init (void) {
 
     actionsbar_init ();
     statusbar_init ();
+
+    Dropdown *projects_update_type_dropdown = ui_dropdown_create (0, 225, 200, 50, UI_POS_MIDDLE_CENTER, main_renderer);
+    ui_dropdown_set_options (projects_update_type_dropdown, 0, 5, 200, 200, UI_POS_BOTTOM_CENTER, main_renderer);
+    ui_dropdown_set_ouline_colour (projects_update_type_dropdown, RGBA_WHITE);
+    ui_dropdown_set_placeholder (projects_update_type_dropdown, main_renderer, "Type", font, 32, RGBA_WHITE);
+    ui_dropdown_set_placeholder_pos (projects_update_type_dropdown, main_renderer, UI_POS_MIDDLE_CENTER);
+    ui_dropdown_extened_set_bg_colour (projects_update_type_dropdown, main_renderer, RGBA_BLACK);
+
+    DropdownOption *option_type_app = ui_dropdown_option_create (main_renderer, "App", font, 32, RGBA_WHITE);
+    ui_dropdown_option_set_ouline_colour (option_type_app, RGBA_WHITE);
+    ui_dropdown_option_add (projects_update_type_dropdown, option_type_app);
+    DropdownOption *option_type_frame = ui_dropdown_option_create (main_renderer, "Framework", font, 32, RGBA_WHITE);
+    ui_dropdown_option_set_ouline_colour (option_type_frame, RGBA_WHITE);
+    ui_dropdown_option_add (projects_update_type_dropdown, option_type_frame);
+    DropdownOption *option_type_idea = ui_dropdown_option_create (main_renderer, "Idea", font, 32, RGBA_WHITE);
+    ui_dropdown_option_set_ouline_colour (option_type_idea, RGBA_WHITE);
+    ui_dropdown_option_add (projects_update_type_dropdown, option_type_idea);
+    DropdownOption *option_type_other = ui_dropdown_option_create (main_renderer, "Other", font, 32, RGBA_WHITE);
+    ui_dropdown_option_set_ouline_colour (option_type_other, RGBA_WHITE);
+    ui_dropdown_option_add (projects_update_type_dropdown, option_type_other);
 
 }
 
