@@ -51,6 +51,10 @@ typedef struct InputField {
     bool pressed;
     bool active;
 
+    // action to be triggered every key input
+    Action on_key_input;
+    void *on_key_input_args;
+
 } InputField;
 
 extern void ui_input_field_delete (void *input_ptr);
@@ -110,6 +114,10 @@ extern void ui_input_field_bg_remove (InputField *input);
 
 // sets the option to draw an outline rect when the input is selected
 extern void ui_input_field_selected_set (InputField *input, RGBA_Color selected_color);
+
+// sets an action to be triggered every input
+// works for every keystroke, paste, delete
+extern void ui_input_field_set_on_key_input (InputField *input, Action on_key_input, void *on_key_input_args);
 
 // creates a new input field
 extern InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, struct _Renderer *renderer);

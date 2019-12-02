@@ -24,6 +24,7 @@
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/image.h"
+#include "cengine/ui/inputfield.h"
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
@@ -276,6 +277,17 @@ void images_folder_close (void *args) {
 
     cimage_delete (cimage);
     cimage = NULL;
+
+}
+
+// gets executed on every input on the search input
+void images_search (void *args) {
+
+    if (args) {
+        InputField *search_input = (InputField *) args;
+
+        printf ("search: %s\n", search_input->text->text->str);
+    }
 
 }
 

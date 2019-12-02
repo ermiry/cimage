@@ -115,7 +115,9 @@ static void actionsbar_init (void) {
     ui_input_field_placeholder_text_set (actionsbar_search_input, main_renderer, "Search", font, 24, RGBA_WHITE);
     ui_input_field_placeholder_text_pos_set (actionsbar_search_input, UI_POS_MIDDLE_CENTER);
     ui_input_field_text_set (actionsbar_search_input, main_renderer, "", font, 24, RGBA_WHITE, false);
+    ui_input_field_text_pos_set (actionsbar_search_input, UI_POS_MIDDLE_CENTER);
     ui_input_field_ouline_set_colour (actionsbar_search_input, RGBA_WHITE);
+    ui_input_field_set_on_key_input (actionsbar_search_input, images_search, actionsbar_search_input);
     ui_element_set_layer (main_renderer->ui, actionsbar_search_input->ui_element, "top");
     ui_element_toggle_active (actionsbar_search_input->ui_element);
 

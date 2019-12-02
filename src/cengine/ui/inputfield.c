@@ -276,6 +276,17 @@ void ui_input_field_selected_set (InputField *input, RGBA_Color selected_color) 
 
 }
 
+// sets an action to be triggered every input
+// works for every keystroke, paste, delete
+void ui_input_field_set_on_key_input (InputField *input, Action on_key_input, void *on_key_input_args) {
+
+    if (input) {
+        input->on_key_input = on_key_input;
+        input->on_key_input_args = on_key_input_args;
+    }
+
+}
+
 // creates a new input field
 InputField *ui_input_field_create (i32 x, i32 y, u32 w, u32 h, UIPosition pos, Renderer *renderer) {
 

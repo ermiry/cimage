@@ -275,6 +275,8 @@ static void input_key_down (SDL_Event event) {
                         str_remove_last_char (win->input->active_text->text->text);
 
                     ui_input_field_update (win->input->active_text, win->renderer);
+                    if (win->input->active_text->on_key_input)
+                        win->input->active_text->on_key_input (win->input->active_text->on_key_input_args);
                 }
             }
 
@@ -295,6 +297,8 @@ static void input_key_down (SDL_Event event) {
                         str_append_c_string (win->input->active_text->text->text, SDL_GetClipboardText ());
                     
                     ui_input_field_update (win->input->active_text, win->renderer);
+                    if (win->input->active_text->on_key_input)
+                        win->input->active_text->on_key_input (win->input->active_text->on_key_input_args);
                 }
             }
         }
@@ -383,6 +387,8 @@ static void input_handle_text_input (SDL_Event event) {
                         str_append_c_string (win->input->active_text->text->text, event.text.text);
 
                     ui_input_field_update (win->input->active_text, win->renderer);
+                    if (win->input->active_text->on_key_input)
+                        win->input->active_text->on_key_input (win->input->active_text->on_key_input_args);
 
                     // printf ("%s\n", active_text->text->str);
                 }
