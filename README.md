@@ -8,10 +8,10 @@
 
 Open **cimage** and select you photos folder. Then select the parameters you want to organize your photos and let **cimage** do its magic. A small file will be generated and you can use it cross-platform to view your photos in the same way in all your devices.
 
-Refer to the official documentation for advanced preferences, questions and updates: https://ermiry.com/cimage
+Refer to the official documentation for advanced preferences, questions and updates: cimage.ermiry.com
 
 ### Download 
 
 You can download the rolling update version od cimage by clonning this repository; although there is no warranty of a seamless user experience.
 
-Or you can download the last stable release in the release tab here on GitHub or from the official download page: https://ermiry.com/cimage
+Or you can download the last stable release in the release tab here on GitHub or from the official download page: cimage.ermiry.com
