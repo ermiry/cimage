@@ -144,11 +144,11 @@ static DoubleList *images_folder_read (const char *images_dir) {
     DoubleList *images = NULL;
 
     if (images_dir) {
-        images = dlist_init (image_item_delete, image_item_comparator);
-        
         struct dirent *ep = NULL;
         DIR *dp = opendir (images_dir);
         if (dp) {
+            images = dlist_init (image_item_delete, image_item_comparator);
+
             #ifdef CIMAGE_DEBUG
             cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Starting to read images...");
             #endif
