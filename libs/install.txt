@@ -1,0 +1,5 @@
+Install pthreads (if necessary)
+sudo apt-get install libpthread-stubs0-dev
+
+Install SDL2
+sudo apt-get install libsdl2-dev
