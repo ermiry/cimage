@@ -9,3 +9,8 @@ sudo apt-get install libsdl2-ttf-dev
 
 Install SDL2-Image development files
 sudo apt-get install libsdl2-image-dev
+
+For videos, install:
+sudo apt-get install libavcodec-dev
+sudo apt-get install libavformat-dev
+sudo apt-get install libswscale-dev 
