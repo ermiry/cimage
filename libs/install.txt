@@ -3,3 +3,9 @@ sudo apt-get install libpthread-stubs0-dev
 
 Install SDL2
 sudo apt-get install libsdl2-dev
+
+Install SDL2-TTF development files
+sudo apt-get install libsdl2-ttf-dev
+
+Install SDL2-Image development files
+sudo apt-get install libsdl2-image-dev
