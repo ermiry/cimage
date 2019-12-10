@@ -550,7 +550,6 @@ void alloc_picture(void *userdata) {
   }
   // Allocate a place to put our YUV image on that screen
   SDL_LockMutex(screen_mutex);
-  sdl_surface
   vp->bmp = SDL_CreateYUVOverlay(is->video_ctx->width,
 				 is->video_ctx->height,
 				 SDL_YV12_OVERLAY,
