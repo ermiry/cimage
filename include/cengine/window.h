@@ -79,6 +79,9 @@ extern void window_toggle_full_screen (Window *window);
 // first removes border from window, and the scales to max resolution
 extern void window_toggle_fullscreen_soft (Window *window);
 
+// toggles window borders on and off
+extern void window_toggle_borders (Window *window);
+
 // resizes the window asscoaited with a renderer
 extern int window_resize (Window *window, u32 new_width, u32 new_height);
 
