@@ -6,3 +6,13 @@ Comment=A photograph visualizer
 Exec=/home/ermiry/Documents/ermiry/cApps/cimage/cimage
 Icon=/home/ermiry/Documents/ermiry/cApps/cimage/assets/cimage-512.png
 Terminal=false
+
+FIXME: use this as a base
+[Desktop Entry] 
+Encoding=UTF-8 
+Name=Postman 
+Exec=postman 
+Icon=/opt/Postman/resources/app/assets/icon.png 
+Terminal=false 
+Type=Application 
+Categories=Development; 
