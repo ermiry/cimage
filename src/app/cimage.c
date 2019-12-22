@@ -13,6 +13,9 @@
 #include "cengine/threads/thread.h"
 #include "cengine/manager/manager.h"
 
+#include "cengine/ui/font.h"
+#include "cengine/ui/notification.h"
+
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
@@ -33,6 +36,8 @@ void cimage_die (const char *error) {
 // Renderer *main_renderer = NULL;
 SDL_Surface *icon_surface = NULL;
 
+NotiCenter *main_noti_center = NULL;
+
 static int cimage_init_ui (Renderer *renderer) {
 
     u8 retval = 1;
@@ -44,6 +49,9 @@ static int cimage_init_ui (Renderer *renderer) {
         if (main_font) {
             ui_font_set_sizes (main_font, 6, 16, 20, 24, 32, 64, 200);
             ui_font_load (main_font, renderer, TTF_STYLE_NORMAL);
+
+            main_noti_center = ui_noti_center_create (renderer->ui, 3, UI_POS_RIGHT_BOTTOM_CORNER, renderer);
+            if (main_noti_center) ui_element_set_layer (renderer->ui, main_noti_center->ui_element, "top");
 
             retval = 0;
         }

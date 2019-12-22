@@ -30,6 +30,7 @@
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
+#include "cimage.h"
 #include "app/states/app.h"
 #include "app/ui/app.h"
 
@@ -212,13 +213,17 @@ static void *images_load (void *folder_name_ptr) {
             
             else {
                 // TODO: display error message in ui
-                #ifdef CIMAGE_DEBUG
                 char *status = c_string_create ("No images found in dir: %s!", folder_name->str);
                 if (status) {
+                    #ifdef CIMAGE_DEBUG
                     cengine_log_msg (stderr, LOG_WARNING, LOG_NO_TYPE, status);
+                    #endif
+
+                    ui_notification_create_and_display (main_noti_center, renderer_get_by_name ("main"), NOTI_TYPE_ERROR, 4, false,
+                        NULL, status);
+
                     free (status);
                 }
-                #endif
 
                 dlist_delete (cimage->images);
                 cimage->images = NULL; 
