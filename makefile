@@ -4,7 +4,7 @@ SDL2 	:= `sdl2-config --cflags --libs` -l SDL2_image -l SDL2_ttf
 MATH 	:= -lm 
 PTHREAD := -l pthread
 
-FFMPEG	:= -l avutil -l avformat -l avcodec -l avutil
+FFMPEG	:= -l avutil -l avformat -l avcodec -l avutil -l swresample
 
 # development
 DEVELOPMENT = -D CENGINE_DEBUG

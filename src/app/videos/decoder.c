@@ -202,3 +202,37 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
     return dec;
 
 }
+
+#pragma region output buffer
+
+int decoder_write_output (Decoder *dec, void *packet) {
+
+	int retval = 1;
+
+	if (dec && packet) {
+		if (SDL_LockMutex (dec->output_lock) == 0) {
+			retval = buffer_write (dec->buffer[DEC_BUF_OUT], packet);
+			SDL_UnlockMutex (dec->output_lock);
+		}
+	}
+
+    return retval;
+
+}
+
+bool decoder_can_write_output (Decoder *dec) {
+
+	bool retval = false;
+
+    if (dec) {
+		if (SDL_LockMutex (dec->output_lock) == 0) {
+			retval = !buffer_is_full (dec->buffer[DEC_BUF_OUT]);
+			SDL_UnlockMutex (dec->output_lock);
+		}
+    }
+    
+    return retval;
+
+}
+
+#pragma endregion

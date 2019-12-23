@@ -54,6 +54,41 @@ typedef struct AudioPacket {
 
 } AudioPacket;
 
+static AudioPacket *audio_packet_new (void) {
+
+	AudioPacket *p = (AudioPacket *) malloc (sizeof (AudioPacket));
+	if (p) {
+		memset (p, 0, sizeof (AudioPacket));
+
+		p->rb = NULL;
+	}
+
+	return p;
+
+}
+
+static void auido_packet_delete (AudioPacket *p) {
+
+	if (p) {
+		ring_buffer_destroy (p->rb);
+		free (p);
+	}
+
+}
+
+static AudioPacket *auido_packet_create (const char *data, size_t len, double pts) {
+
+	AudioPacket *p = audio_packet_new ();
+	if (p) {
+		p->rb = ring_buffer_create (len);
+		ring_buffer_write (p->rb, data, len);
+		p->pts = pts;
+	}
+
+	return p;
+
+}
+
 static void free_out_audio_packet_cb (void *packet) {
 
 	if (packet) {
@@ -151,7 +186,7 @@ static void dec_read_audio (Decoder *dec) {
 		int ret = 0;
 
 		// Pull decoded frames out when ready and if we have room in decoder output buffer
-		while (!ret && Kit_CanWriteDecoderOutput (dec)) {
+		while (!ret && decoder_can_write_output (dec)) {
 			ret = avcodec_receive_frame (dec->codec_ctx, audio_dec->scratch_frame);
 			if(!ret) {
 				dst_nb_samples = av_rescale_rnd (
@@ -179,16 +214,17 @@ static void dec_read_audio (Decoder *dec) {
 					&dst_linesize,
 					dec->output.channels,
 					len,
-					_FindAVSampleFormat(dec->output.format), 1);
+					_FindAVSampleFormat (dec->output.format), 1);
 
 				// Get presentation timestamp
 				pts = audio_dec->scratch_frame->best_effort_timestamp;
 				pts *= av_q2d (dec->format_ctx->streams[dec->stream_index]->time_base);
 
 				// Lock, write to audio buffer, unlock
-				out_packet = _CreateAudioPacket (
-					(char*)dst_data[0], (size_t)dst_bufsize, pts);
-				Kit_WriteDecoderOutput (dec, out_packet);
+				// TODO: 23//12/2019 -- 11:16 -- possible memory leak here if we dont delete the packet
+				out_packet = auido_packet_create (
+					(char *) dst_data[0], (size_t)dst_bufsize, pts);
+				decoder_write_output (dec, out_packet);
 
 				// Free temps
 				av_freep (&dst_data[0]);

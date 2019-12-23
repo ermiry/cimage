@@ -1,6 +1,8 @@
 #ifndef _CIMAGE_MEDIA_VIDEOS_DECODER_H_
 #define _CIMAGE_MEDIA_VIDEOS_DECODER_H_
 
+#include <stdbool.h>
+
 #include <SDL2/SDL_mutex.h>
 
 #include <libavcodec/avcodec.h>
@@ -52,5 +54,11 @@ struct Decoder {
 
 extern Decoder *decoder_create (const VideoSource *src, int stream_index, 
     int out_b_size, dec_free_packet_cb free_out_cb, int thread_count);
+
+/*** output buffer ***/
+
+extern int decoder_write_output (Decoder *dec, void *packet);
+
+extern bool decoder_can_write_output (Decoder *dec);
 
 #endif
