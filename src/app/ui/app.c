@@ -18,6 +18,7 @@
 #include "cengine/utils/utils.h"
 
 #include "app/states/app.h"
+#include "app/media.h"
 
 static Panel *background_panel = NULL;
 Panel *images_panel = NULL;
@@ -287,7 +288,7 @@ void app_ui_init (void) {
     sidebar_init (screen_height);
 
     open_folder_button = ui_button_create (0, 0, 128, 128, UI_POS_MIDDLE_CENTER, main_renderer);
-    ui_button_set_action (open_folder_button, images_folder_select, NULL);
+    ui_button_set_action (open_folder_button, media_folder_select, NULL);
     // ui_button_set_ouline_colour (photos_button, RGBA_WHITE);
     ui_button_set_sprite (open_folder_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/folder.png");
     ui_element_set_layer (main_renderer->ui, open_folder_button->ui_element, "top");

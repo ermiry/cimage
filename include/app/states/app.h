@@ -24,6 +24,8 @@ typedef struct _Cimage Cimage;
 
 extern Cimage *cimage;
 
+extern Cimage *cimage_create (void);
+
 struct _ImageItem {
 
     Image *image;
