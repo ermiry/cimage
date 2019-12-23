@@ -3,158 +3,134 @@
 
 #include "app/videos/buffers/ring.h"
 
-/**
-  * Creates a new ringbuffer with the given size.
-  * @param size Size for the new ringbuffer
-  * @return Ringbuffer handle
-  */
-RingBuffer* Kit_CreateRingBuffer(unsigned int size) {
-    RingBuffer *rb = calloc(1, sizeof(RingBuffer));
-    if(rb == NULL) return NULL;
-    rb->size = size;
-    rb->data = malloc(size);
-    if(rb->data == NULL) {
-        free(rb);
-        return NULL;
+static RingBuffer *ring_buffer_new (void) {
+
+    RingBuffer *rb = (RingBuffer *) malloc (sizeof (RingBuffer));
+    if (rb) {
+        memset (rb, 0, sizeof (RingBuffer));
+
+        rb->data = NULL;
     }
+
+    return rb;
+
+}
+
+RingBuffer *ring_buffer_create (unsigned int size) {
+    
+    RingBuffer *rb = ring_buffer_new ();
+    if (rb) {
+        rb->size = size;
+        rb->data = malloc(size);
+        if(rb->data == NULL) {
+            free(rb);
+            return NULL;
+        }
+    }
+
     return rb;
 }
 
-/**
-  * Deletes the given ringbuffer.
-  * @param rb Ringbuffer to be deleted.
-  */
-void Kit_DestroyRingBuffer(RingBuffer* rb) {
-    if(rb == NULL) return;
-    free(rb->data);
-    free(rb);
+
+void ring_buffer_destroy (RingBuffer* rb) {
+
+    if (rb) {
+        free(rb->data);
+        free(rb);
+    }
+
 }
 
-/**
-  * Writes to the given ringbuffer. If given length is larger than the amount
-  * the ringbuffer can fit, only the data that fits will be written.
-  * @param rb Ringbuffer to write to.
-  * @param data Data to write
-  * @param len Data length
-  * @return Amount of data that was actually written.
-  */
-int Kit_WriteRingBuffer(RingBuffer *rb, const char* data, int len) {
-    int k;
-    len = (len > (rb->size - rb->len)) ? (rb->size - rb->len) : len;
-    if(rb->len < rb->size) {
-        if(len + rb->wpos > rb->size) {
-            k = (len + rb->wpos) % rb->size;
-            memcpy((rb->data + rb->wpos), data, len - k);
-            memcpy(rb->data, data+(len-k), k);
+int ring_buffer_write (RingBuffer *rb, const char* data, int len) {
+
+    if (rb) {
+        int k;
+        len = (len > (rb->size - rb->len)) ? (rb->size - rb->len) : len;
+        if(rb->len < rb->size) {
+            if(len + rb->wpos > rb->size) {
+                k = (len + rb->wpos) % rb->size;
+                memcpy((rb->data + rb->wpos), data, len - k);
+                memcpy(rb->data, data+(len-k), k);
+            } else {
+                memcpy((rb->data + rb->wpos), data, len);
+            }
+            rb->len += len;
+            rb->wpos += len;
+            if(rb->wpos >= rb->size) {
+                rb->wpos = rb->wpos % rb->size;
+            }
+            return len;
+        }
+    }
+    
+    return 0;
+}
+
+static void ring_buffer_reading_data (const RingBuffer *rb, char *data, const int len) {
+    
+    if (rb) {
+        int k;
+        if(len + rb->rpos > rb->size) {
+            k = (len + rb->rpos) % rb->size;
+            memcpy(data, rb->data + rb->rpos, len - k);
+            memcpy(data + (len - k), rb->data, k);
         } else {
-            memcpy((rb->data + rb->wpos), data, len);
+            memcpy(data, rb->data + rb->rpos, len);
         }
-        rb->len += len;
-        rb->wpos += len;
-        if(rb->wpos >= rb->size) {
-            rb->wpos = rb->wpos % rb->size;
-        }
-        return len;
     }
+    
+}
+
+int ring_buffer_read (RingBuffer *rb, char *data, int len) {
+
+    if (rb) {
+        len = (len > rb->len) ? rb->len : len;
+        if(rb->len > 0) {
+            ring_buffer_reading_data(rb, data, len);
+            rb->len -= len;
+            rb->rpos += len;
+            if(rb->rpos >= rb->size) {
+                rb->rpos = rb->rpos % rb->size;
+            }
+            return len;
+        }
+    }
+    
     return 0;
 }
 
-static void _ReadRingBufferData(const RingBuffer *rb, char *data, const int len) {
-    int k;
-    if(len + rb->rpos > rb->size) {
-        k = (len + rb->rpos) % rb->size;
-        memcpy(data, rb->data + rb->rpos, len - k);
-        memcpy(data + (len - k), rb->data, k);
-    } else {
-        memcpy(data, rb->data + rb->rpos, len);
-    }
-}
+int ring_buffer_peek (const RingBuffer *rb, char *data, int len) {
 
-/**
-  * Reads data from ringbuffer. If ringbuffer has less data than was requested,
-  * only the available data will be read.
-  * @param rb Ringbuffer to read from.
-  * @param data Buffer to read into.
-  * @param len How much data do we want
-  * @return Amount of data that was actually read.
-  */
-int Kit_ReadRingBuffer(RingBuffer *rb, char *data, int len) {
-    len = (len > rb->len) ? rb->len : len;
-    if(rb->len > 0) {
-        _ReadRingBufferData(rb, data, len);
-        rb->len -= len;
-        rb->rpos += len;
-        if(rb->rpos >= rb->size) {
-            rb->rpos = rb->rpos % rb->size;
+    if (rb) {
+        len = (len > rb->len) ? rb->len : len;
+        if(rb->len > 0) {
+            ring_buffer_reading_data(rb, data, len);
+            return len;
         }
-        return len;
     }
+    
     return 0;
 }
 
-/**
-  * Peeks into the given ringbuffer. Technically same as rb_read, but does not advance
-  * the internal position pointer. In other words, you may peek as many times as you wish,
-  * and will always get the same data.
-  * @param rb Ringbuffer to peek into.
-  * @param data Buffer to read into
-  * @param len How much data do we need
-  * @return Amount of data actually read
-  */
-int Kit_PeekRingBuffer(const RingBuffer *rb, char *data, int len) {
-    len = (len > rb->len) ? rb->len : len;
-    if(rb->len > 0) {
-        _ReadRingBufferData(rb, data, len);
-        return len;
-    }
-    return 0;
-}
+int ring_buffer_advance (RingBuffer *rb, int len) {
 
-/**
-  * Advances the internal position counter by given amount. Note that counter can only be
-  * advanced by the amount of unreadable data in ringbuffer.
-  * @param rb Ringbuffer to handle
-  * @param len How much should the position counter be increased
-  * @return How much the position counter was actually increased.
-  */
-int Kit_AdvanceRingBuffer(RingBuffer *rb, int len) {
-    len = (len > rb->len) ? rb->len : len;
-    if(rb->len > 0) {
-        rb->len -= len;
-        rb->rpos += len;
-        if(rb->rpos >= rb->size) {
-            rb->rpos = rb->rpos % rb->size;
+    if (rb) {
+        len = (len > rb->len) ? rb->len : len;
+        if(rb->len > 0) {
+            rb->len -= len;
+            rb->rpos += len;
+            if(rb->rpos >= rb->size) {
+                rb->rpos = rb->rpos % rb->size;
+            }
+            return len;
         }
-        return len;
     }
+    
     return 0;
 }
 
-/**
-  * Returns the current length of the Ringbuffer. In other words, how much data
-  * the ringbuffer contains
-  * @param rb Ringbuffer to handle
-  * @return Data in ringbuffer (in bytes).
-  */
-int Kit_GetRingBufferLength(const RingBuffer *rb) {
-    return rb->len;
-}
+int ring_buffer_length (const RingBuffer *rb) { if (rb) return rb->len; }
 
-/**
-  * Returns the size of the ringbuffer. In other words, the maximum amount of data
-  * the ringbuffer can hold.
-  * @param rb Ringbuffer to handle
-  * @return Size of the ringbuffer
-  */
-int Kit_GetRingBufferSize(const RingBuffer *rb) {
-    return rb->size;
-}
+int ring_buffer_size (const RingBuffer *rb) { if (rb) return rb->size; }
 
-/**
-  * Returns the free size of the ringbuffer.
-  * @param rb Ringbuffer to handle
-  * @return Free size in the ringbuffer
-  */
-int Kit_GetRingBufferFree(const RingBuffer *rb) {
-    return rb->size - rb->len;
-}
+int ring_buffer_free_size (const RingBuffer *rb) { if (rb) return rb->size - rb->len; }
