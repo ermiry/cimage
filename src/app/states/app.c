@@ -10,9 +10,7 @@
 #include "cengine/collections/dlist.h"
 
 #include "cengine/input.h"
-#include "cengine/files.h"
 
-#include "cengine/threads/thread.h"
 #include "cengine/manager/manager.h"
 // #include "cengine/game/go.h"
 
@@ -26,12 +24,10 @@
 
 #include "cimage.h"
 #include "app/states/app.h"
+#include "app/media.h"
 #include "app/ui/app.h"
 
-#define DEFAULT_N_COLS          5
-#define DEFAULT_N_ROWS          4
-
-static void image_item_delete_dummy (void *img_ptr);
+#pragma region cimage
 
 Cimage *cimage = NULL;
 
@@ -48,7 +44,7 @@ static Cimage *cimage_new (void) {
 
 }
 
-static void cimage_delete (void *cimage_ptr) {
+void cimage_delete (void *cimage_ptr) {
 
     if (cimage_ptr) {
         Cimage *cimage = (Cimage *) cimage_ptr;
@@ -66,164 +62,8 @@ static void cimage_delete (void *cimage_ptr) {
 Cimage *cimage_create (void) {
 
     Cimage *cimage = cimage_new ();
-    if (cimage) cimage->selected_images = dlist_init (image_item_delete_dummy, NULL);
+    if (cimage) cimage->selected_images = dlist_init (media_item_delete_dummy, NULL);
     return cimage;
-
-}
-
-#pragma region images
-
-static ImageItem *image_item_new (void) {
-
-    ImageItem *img = (ImageItem *) malloc (sizeof (ImageItem));
-    if (img) {
-        img->image = NULL;
-        img->filename = NULL;
-        img->path = NULL;
-        img->selected = false;
-    }
-
-    return img;
-
-}
-
-static void image_item_delete (void *img_ptr) {
-
-    if (img_ptr) {
-        ImageItem *img = (ImageItem *) img_ptr;
-
-        str_delete (img->filename);
-        str_delete (img->path);
-
-        free (img);
-    }
-
-}
-
-static void image_item_delete_dummy (void *img_ptr) {}
-
-static int image_item_comparator (const void *a, const void *b) {
-
-    if (a && b) {
-        ImageItem *img_a = (ImageItem *) a;
-        ImageItem *img_b = (ImageItem *) b;
-
-        return strcmp (img_a->filename->str, img_b->filename->str);
-    }
-
-}
-
-// TODO: better file type check!!
-static bool is_image_file (const char *filename) {
-
-    int result;
-    bool retval = false;
-
-    if (filename) {
-        char *ext = files_get_file_extension (filename);
-        if (ext) {
-            if (!strcmp (ext, "png") || !strcmp (ext, "jpg") || !strcmp (ext, "jpeg"))
-                retval = true;
-
-            free (ext);
-        }
-    }
-
-    return retval;
-
-}
-
-// get a list of valid images names from the directory
-static DoubleList *images_folder_read (const char *images_dir) {
-
-    DoubleList *images = NULL;
-
-    if (images_dir) {
-        struct dirent *ep = NULL;
-        DIR *dp = opendir (images_dir);
-        if (dp) {
-            images = dlist_init (image_item_delete, image_item_comparator);
-
-            #ifdef CIMAGE_DEBUG
-            cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Starting to read images...");
-            #endif
-
-            while ((ep = readdir (dp)) != NULL) {
-                if (strcmp (ep->d_name, ".") && strcmp (ep->d_name, "..")) {
-                    if (is_image_file (ep->d_name)) {
-                        ImageItem *img = image_item_new ();
-                        img->filename = str_new (ep->d_name);
-                        img->path = str_create ("%s/%s", images_dir, ep->d_name);
-
-                        dlist_insert_after (images, dlist_end (images), img);
-                    }
-                }
-            }
-
-            (void) closedir (dp);
-
-            #ifdef CIMAGE_DEBUG
-            cengine_log_msg (stdout, LOG_SUCCESS, LOG_NO_TYPE, "Done reading images!");
-            #endif
-        }
-
-        else {
-            char *status = c_string_create ("Failed to open dir: %s", images_dir);
-            if (status) {
-                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
-                free (status);
-            }
-
-            #ifdef CIMAGE_DEBUG
-            perror ("Error");
-            #endif
-        }
-    }
-
-    return images;
-
-}
-
-void images_folder_close (void *args) {
-
-    // remove UI
-    app_ui_images_remove_ui_elements ();
-
-    cimage_delete (cimage);
-    cimage = NULL;
-
-}
-
-// gets executed on every input on the search input
-void images_search (void *args) {
-
-    if (args) {
-        InputField *search_input = (InputField *) args;
-
-        // remove all images from the grid
-        GridLayout *grid = (GridLayout *) images_panel->layout;
-        ui_layout_grid_remove_ui_elements (grid);
-
-        String *query = str_new (search_input->text->text->str);
-
-        // search all the images that matches our query letter by letter
-        ImageItem *img = NULL;
-        for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
-            img = (ImageItem *) le->data;
-
-            ui_element_set_active (img->image->ui_element, false);
-
-            if (!strncasecmp (query->str, img->filename->str, query->len)) {
-                // add this image for display
-                ui_layout_grid_add_element (grid, img->image->ui_element);
-                ui_element_set_active (img->image->ui_element, true);
-            }
-        }
-
-        // TODO: update status bar with counter
-
-        str_delete (query);
-    }
 
 }
 

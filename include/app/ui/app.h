@@ -5,9 +5,10 @@
 
 #include "cengine/ui/panel.h"
 
-#include "app/states/app.h"
+#include "app/media.h"
 
-struct _ImageItem;
+#define DEFAULT_GRID_N_COLS          5
+#define DEFAULT_GRID_N_ROWS          4
 
 extern void app_ui_init (void);
 
@@ -47,6 +48,6 @@ extern void app_ui_images_remove_ui_elements (void);
 extern void app_ui_image_display (Image *image);
 
 // creates a ui image element to be displayed
-extern void app_ui_image_create (ImageItem *image_item);
+extern void app_ui_image_create (MediaItem *image_item);
 
 #endif

@@ -24,24 +24,9 @@ typedef struct _Cimage Cimage;
 
 extern Cimage *cimage;
 
+extern void cimage_delete (void *cimage_ptr);
+
 extern Cimage *cimage_create (void);
-
-struct _ImageItem {
-
-    Image *image;
-    String *filename;
-    String *path;
-    bool selected;
-
-};
-
-typedef struct _ImageItem ImageItem;
-
-extern void images_folder_select (void *args);
-
-extern void images_folder_close (void *args);
-
-extern void images_search (void *args);
 
 extern void main_screen_input (void *win_ptr);
 

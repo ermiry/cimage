@@ -25,7 +25,7 @@ DEPEXT      := d
 OBJEXT      := o
 
 CFLAGS      := -g $(DEFINES)
-LIB         :=  $(PTHREAD) $(SQLITE3) $(SDL2) $(MATH)
+LIB         := $(MATH) $(PTHREAD) $(SDL2) $(FFMPEG)
 INC         := -I $(INCDIR) -I /usr/local/include
 INCDEP      := -I $(INCDIR)
 

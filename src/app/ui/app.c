@@ -118,7 +118,7 @@ static void actionsbar_init (void) {
     ui_input_field_text_set (actionsbar_search_input, main_renderer, "", font, 24, RGBA_WHITE, false);
     ui_input_field_text_pos_set (actionsbar_search_input, UI_POS_MIDDLE_CENTER);
     ui_input_field_ouline_set_colour (actionsbar_search_input, RGBA_WHITE);
-    ui_input_field_set_on_key_input (actionsbar_search_input, images_search, actionsbar_search_input);
+    ui_input_field_set_on_key_input (actionsbar_search_input, media_search, actionsbar_search_input);
     ui_element_set_layer (main_renderer->ui, actionsbar_search_input->ui_element, "top");
     ui_element_toggle_active (actionsbar_search_input->ui_element);
 
@@ -128,7 +128,7 @@ static void actionsbar_init (void) {
     // ui_button_set_ouline_colour (actionsbar_close_button, RGBA_WHITE);
     ui_button_set_sprite (actionsbar_close_button, main_renderer, BUTTON_STATE_MOUSE_OUT, "./assets/icons/close.png");
     ui_element_set_layer (main_renderer->ui, actionsbar_close_button->ui_element, "top");
-    ui_button_set_action (actionsbar_close_button, images_folder_close, NULL);
+    ui_button_set_action (actionsbar_close_button, media_folder_close, NULL);
     ui_element_toggle_active (actionsbar_close_button->ui_element);
 
 }
@@ -446,28 +446,28 @@ void app_ui_images_remove_ui_elements (void) {
 }
 
 // add image to selected list and sets selected text in status bar
-void app_ui_image_select (void *img_item_ptr) {
+void app_ui_image_select (void *media_item_ptr) {
 
-    if (img_item_ptr) {
-        ImageItem *img = (ImageItem *) img_item_ptr;
+    if (media_item_ptr) {
+        MediaItem *item = (MediaItem *) media_item_ptr;
 
         // if (img->selected) dlist_remove (cimage->selected_images, img);
-        if (img->selected) {
-            dlist_remove_element (cimage->selected_images, dlist_get_element (cimage->selected_images, img));
-            img->selected = false;
+        if (item->selected) {
+            dlist_remove_element (cimage->selected_images, dlist_get_element (cimage->selected_images, item));
+            item->selected = false;
         } 
         
         else {
-            dlist_insert_after (cimage->selected_images, dlist_end (cimage->selected_images), img);
-            img->selected = true;
+            dlist_insert_after (cimage->selected_images, dlist_end (cimage->selected_images), item);
+            item->selected = true;
         } 
 
         if (!cimage->selected_images->size) app_ui_statusbar_set_selected_text (NULL);
 
         else if (cimage->selected_images->size == 1) {
-            ImageItem *image_item = (ImageItem *) (dlist_start (cimage->selected_images)->data);
-            if (image_item) 
-                app_ui_statusbar_set_selected_text (image_item->filename->str);
+            MediaItem *media_item = (MediaItem *) (dlist_start (cimage->selected_images)->data);
+            if (media_item) 
+                app_ui_statusbar_set_selected_text (media_item->filename->str);
         }
 
         else {
@@ -481,10 +481,11 @@ void app_ui_image_select (void *img_item_ptr) {
 
 }
 
-void app_ui_image_display_in_window (void *img_ptr) {
+// FIXME: we need to make this work with videos!!!
+void app_ui_image_display_in_window (void *item_ptr) {
 
-    if (img_ptr) {
-        ImageItem *image = (ImageItem *) img_ptr;
+    if (item_ptr) {
+        MediaItem *item = (MediaItem *) item_ptr;
 
         // check if we already displaying the image
         bool found = false;
@@ -492,7 +493,7 @@ void app_ui_image_display_in_window (void *img_ptr) {
         for (ListElement *le = dlist_start (renderers); le; le = le->next) {
             renderer = (Renderer *) le->data;
 
-            if (!strcmp (renderer->name->str, image->filename->str)) {
+            if (!strcmp (renderer->name->str, item->filename->str)) {
                 window_focus (renderer->window);
                 found = true;
                 break;
@@ -508,8 +509,8 @@ void app_ui_image_display_in_window (void *img_ptr) {
             u32 max_height = display_mode.h * 0.80;
 
             float ratio = 0;
-            u32 width = image->image->sprite->img_data->w;
-            u32 height = image->image->sprite->img_data->h; 
+            u32 width = item->image->sprite->img_data->w;
+            u32 height = item->image->sprite->img_data->h; 
 
             WindowSize window_size = { .width = width, .height = height };
 
@@ -529,14 +530,14 @@ void app_ui_image_display_in_window (void *img_ptr) {
                 height = height * ratio;
             }
 
-            Renderer *renderer = renderer_create_with_window (image->filename->str, 
+            Renderer *renderer = renderer_create_with_window (item->filename->str, 
                 0, SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED,
-                image->filename->str, window_size, 0);
+                item->filename->str, window_size, 0);
 
             // load a new image
             Image *new_image = ui_image_create_static (0, 0, renderer);
             ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
-            ui_image_set_sprite (new_image, renderer, image->image->sprite->img_data->filename->str);
+            ui_image_set_sprite (new_image, renderer, item->image->sprite->img_data->filename->str);
             ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
         }
     }
@@ -554,7 +555,7 @@ void app_ui_image_display (Image *image) {
 
 // TODO: load a smaller image to us less memory
 // creates a ui image element to be displayed
-void app_ui_image_create (ImageItem *image_item) {
+void app_ui_image_create (MediaItem *image_item) {
 
     if (image_item) {
         Renderer *main_renderer = renderer_get_by_name ("main");
