@@ -7,6 +7,7 @@
 #include <libavformat/avformat.h>
 
 #include "app/videos/format.h"
+#include "app/videos/source.h"
 #include "app/videos/buffers/buffer.h"
 
 enum {
@@ -48,5 +49,8 @@ struct Decoder {
 	dec_close_cb dec_close;      ///< Decoder close function callback
 
 };
+
+extern Decoder *decoder_create (const VideoSource *src, int stream_index, 
+    int out_b_size, dec_free_packet_cb free_out_cb, int thread_count);
 
 #endif

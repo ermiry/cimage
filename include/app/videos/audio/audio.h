@@ -4,6 +4,8 @@
 #include "app/videos/decoder.h"
 #include "app/videos/source.h"
 
+#define AUDIO_SYNC_THRESHOLD            0.05
+
 extern Decoder *auido_create_decoder (const VideoSource *src, int stream_idx);
 
 #endif
