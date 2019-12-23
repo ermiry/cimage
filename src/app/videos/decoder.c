@@ -7,6 +7,7 @@
 
 #include "app/videos/decoder.h"
 #include "app/videos/source.h"
+#include "app/videos/buffers/buffer.h"
 
 #define BUFFER_IN_SIZE                  256
 
