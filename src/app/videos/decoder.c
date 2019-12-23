@@ -62,14 +62,13 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
 
         // Make sure index seems correct
         if (stream_index >= (int) format_ctx->nb_streams || stream_index < 0) {
-            char *status = c_string_create ("decoder_create () - invalid stream %d", stream_index);
+            char *status = c_string_create ("decoder_create () - Invalid stream %d", stream_index);
             if (status) {
+                #ifdef CIMAGE_DEBUG
                 cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                #endif
                 free (status);
             }
-            // FIXME: error!
-            // Kit_SetError("Invalid stream %d", stream_index);
-            // goto exit_0;
         }
 
         else {
@@ -77,20 +76,43 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
             if (dec) {
                 codec = avcodec_find_decoder (format_ctx->streams[stream_index]->codecpar->codec_id);
                 if (!codec) {
-                    // FIXME: ERROR!
+                    char *status = c_string_create ("decoder_create () - No suitable decoder found for stream %d", stream_index);
+                    if (status) {
+                        #ifdef CIMAGE_DEBUG
+                        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                        #endif
+                        free (status);
+                    }
+
+                    error = true;
                 }
 
                 else {
                     // Allocate a context for the codec
-                    codec_ctx = avcodec_alloc_context3(codec);
+                    codec_ctx = avcodec_alloc_context3 (codec);
                     if (codec_ctx == NULL) {
-                        // Kit_SetError("Unable to allocate codec context for stream %d", stream_index);
-                        // goto exit_1;
+                        char *status = c_string_create ("decoder_create () - Unable to allocate codec context for stream %d", stream_index);
+                        if (status) {
+                            #ifdef CIMAGE_DEBUG
+                            cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                            #endif
+                            free (status);
+                        }
+
+                        error = true;
                     }
 
                     else {
-                        if (avcodec_parameters_to_context(codec_ctx, format_ctx->streams[stream_index]->codecpar) < 0) {
-                            // FIXME: error!
+                        if (avcodec_parameters_to_context (codec_ctx, format_ctx->streams[stream_index]->codecpar) < 0) {
+                            char *status = c_string_create ("decoder_create () - Unable to copy codec context for stream %d", stream_index);
+                            if (status) {
+                                #ifdef CIMAGE_DEBUG
+                                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                                #endif
+                                free (status);
+                            }
+
+                            error = true;
                         }
 
                         else {
@@ -105,14 +127,20 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
 
                             // This is required for ass_process_chunk() support
                             #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 25, 100)
-                                av_dict_set(&codec_opts, "sub_text_format", "ass", 0);
+                                av_dict_set (&codec_opts, "sub_text_format", "ass", 0);
                             #endif
 
                             // Open the stream
-                            if(avcodec_open2(codec_ctx, codec, &codec_opts) < 0) {
-                                // FIXME: error!
-                                // Kit_SetError("Unable to open codec for stream %d", stream_index);
-                                // goto exit_2;
+                            if (avcodec_open2(codec_ctx, codec, &codec_opts) < 0) {
+                                char *status = c_string_create ("decoder_create () - Unable to open codec for stream %d", stream_index);
+                                if (status) {
+                                    #ifdef CIMAGE_DEBUG
+                                    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                                    #endif
+                                    free (status);
+                                }
+
+                                error = true;
                             }
 
                             // Set index and codec
@@ -121,31 +149,53 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
                             dec->format_ctx = format_ctx;
 
                             // Allocate input/output ringbuffers
-                            for(int i = 0; i < 2; i++) {
-                                dec->buffer[i] = Kit_CreateBuffer(bsizes[i], free_hooks[i]);
-                                if(dec->buffer[i] == NULL) {
-                                    // FIXME: ERROR!
-                                    // Kit_SetError("Unable to allocate buffer for stream %d: %s", stream_index, SDL_GetError());
-                                    // goto exit_3;
+                            for (int i = 0; i < 2; i++) {
+                                dec->buffer[i] = buffer_create (bsizes[i], free_hooks[i]);
+                                if (dec->buffer[i] == NULL) {
+                                    char *status = c_string_create ("Unable to allocate buffer for stream %d", stream_index);
+                                    if (status) {
+                                        #ifdef CIMAGE_DEBUG
+                                        cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                                        #endif
+                                        free (status);
+                                    }
+                                    error = true;
                                 }
                             }
 
                             // Create a lock for output buffer synchronization
-                            dec->output_lock = SDL_CreateMutex();
-                            if(dec->output_lock == NULL) {
-                                // FIXME: ERROR!
-                                // Kit_SetError("Unable to allocate mutex for stream %d: %s", stream_index, SDL_GetError());
-                                // goto exit_3;
+                            dec->output_lock = SDL_CreateMutex ();
+                            if (dec->output_lock == NULL) {
+                                char *status = c_string_create ("Unable to allocate mutex for stream %d", stream_index);
+                                if (status) {
+                                    #ifdef CIMAGE_DEBUG
+                                    cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+                                    #endif
+                                    free (status);
+                                }
+                                
+                                #ifdef CIMAGE_DEBUG
+                                cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, 
+                                    SDL_GetError ());
+                                #endif
+                                error = true;
                             }
                         }
                     }
                 }
             }
         }
-    }
 
-    if (error) {
-        // FIXME: correctly free memory!
+        if (error) {
+            for (int i = 0; i < DEC_BUF_COUNT; i++) buffer_destroy (dec->buffer[i]);
+
+            if (codec_ctx) avcodec_close (codec_ctx);
+            if (codec_opts) av_dict_free (&codec_opts);
+            if (codec_ctx) avcodec_free_context (&codec_ctx);
+
+            decoder_delete (dec);
+            dec = NULL;
+        }
     }
 
     return dec;

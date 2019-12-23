@@ -9,12 +9,18 @@
 #include "app/videos/format.h"
 #include "app/videos/buffers/buffer.h"
 
+enum {
+	DEC_BUF_IN = 0,
+	DEC_BUF_OUT,
+	DEC_BUF_COUNT
+};
+
 enum DecoderIndex {
 
-    VIDEO_DEC           = 0,
-    AUDIO_DEC           = 1,
-    SUBTITLE_DEC        = 2,
-    DECODER_COUNT       = 3
+	VIDEO_DEC           = 0,
+	AUDIO_DEC           = 1,
+	SUBTITLE_DEC        = 2,
+	DECODER_COUNT       = 3
 
 };
 
@@ -26,20 +32,20 @@ typedef void (*dec_free_packet_cb)(void *packet);
 
 struct Decoder {
 
-    int stream_index;            ///< Source stream index for the current stream
-    double clock_sync;           ///< Sync source for current stream
-    double clock_pos;            ///< Current pts for the stream
-    OutputFormat output;        ///< Output format for the decoder
+	int stream_index;            ///< Source stream index for the current stream
+	double clock_sync;           ///< Sync source for current stream
+	double clock_pos;            ///< Current pts for the stream
+	OutputFormat output;        ///< Output format for the decoder
 
-    AVCodecContext *codec_ctx;   ///< FFMpeg internal: Codec context
-    AVFormatContext *format_ctx; ///< FFMpeg internal: Format context (owner: Kit_Source)
+	AVCodecContext *codec_ctx;   ///< FFMpeg internal: Codec context
+	AVFormatContext *format_ctx; ///< FFMpeg internal: Format context (owner: Kit_Source)
 
-    SDL_mutex *output_lock;      ///< Threading lock for output buffer
-    Buffer *buffer[2];          ///< Buffers for incoming and decoded packets
+	SDL_mutex *output_lock;      ///< Threading lock for output buffer
+	Buffer *buffer[2];          ///< Buffers for incoming and decoded packets
 
-    void *userdata;              ///< Decoder specific information (Audio, video, subtitle context)
-    dec_decode_cb dec_decode;    ///< Decoder decoding function callback
-    dec_close_cb dec_close;      ///< Decoder close function callback
+	void *userdata;              ///< Decoder specific information (Audio, video, subtitle context)
+	dec_decode_cb dec_decode;    ///< Decoder decoding function callback
+	dec_close_cb dec_close;      ///< Decoder close function callback
 
 };
 
