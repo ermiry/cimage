@@ -23,4 +23,13 @@ typedef struct VideoPlayer {
 
 } VideoPlayer;
 
+extern VideoPlayer *video_player_create (const VideoSource *src,
+                                    int video_stream_index,
+                                    int audio_stream_index,
+                                    int subtitle_stream_index,
+                                    int screen_w,
+                                    int screen_h);
+
+extern void video_player_close (VideoPlayer *player);
+
 #endif

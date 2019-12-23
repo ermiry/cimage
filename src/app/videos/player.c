@@ -56,6 +56,7 @@ VideoPlayer *video_player_create (const VideoSource *src,
             bool error = false;
 
             // init audio decoder
+            // player->decoders[AUDIO_DEC] = 
 
             // init video decoder
 
