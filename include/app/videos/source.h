@@ -12,6 +12,13 @@ typedef enum StreamType {
 
 } StreamType;
 
+typedef struct StreamInfo {
+
+    int index;                  ///< Stream index
+    StreamType type;            ///< Stream type
+
+} StreamInfo;
+
 typedef struct VideoSource {
 
     void *format_ctx;           ///< FFmpeg: Videostream format context
