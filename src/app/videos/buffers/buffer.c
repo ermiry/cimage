@@ -1,20 +1,35 @@
 #include <stdlib.h>
-#include <assert.h>
+#include <string.h>
 
 #include "app/videos/buffers/buffer.h"
 
+static Buffer *buffer_new (void) {
+
+    Buffer *buffer = (Buffer *) malloc (sizeof (Buffer));
+    if (buffer) {
+        memset (buffer, 0, sizeof (Buffer));
+
+        buffer->free_cb = NULL;
+        buffer->data = NULL;
+    }
+
+    return buffer;
+
+}
+
 Buffer *buffer_create (unsigned int size, BufferFreeCallback free_cb) {
-    Buffer *b = calloc(1, sizeof(Buffer));
-    if(b == NULL) {
-        return NULL;
+
+    Buffer *b = buffer_new ();
+    if (b) {
+        b->size = size;
+        b->free_cb = free_cb;
+        b->data = calloc(size, sizeof(void*));
+        if(b->data == NULL) {
+            free(b);
+            return NULL;
+        }
     }
-    b->size = size;
-    b->free_cb = free_cb;
-    b->data = calloc(size, sizeof(void*));
-    if(b->data == NULL) {
-        free(b);
-        return NULL;
-    }
+    
     return b;
 }
 
