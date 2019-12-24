@@ -11,6 +11,7 @@
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
+#include "app/settings.h"
 #include "app/videos/format.h"
 #include "app/videos/decoder.h"
 #include "app/videos/source.h"
@@ -274,7 +275,9 @@ Decoder *auido_create_decoder (const VideoSource *src, int stream_idx) {
 
     if (src && (stream_idx >= 0)) {
         // create the generic decoder
-        dec = decoder_create (src, stream_idx, AUDIO_BUF_FRAMES, free_out_audio_packet_cb, THREAD_COUNT);
+        dec = decoder_create (src, stream_idx, 
+			main_settings->video_settings->audio_buf_frames, free_out_audio_packet_cb, 
+			main_settings->video_settings->dec_thread_count);
         if (dec) {
             AudioDecoder *audio_dec = audio_dec_new ();
             if (audio_dec) {

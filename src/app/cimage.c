@@ -20,6 +20,7 @@
 #include "cengine/utils/log.h"
 
 #include "cimage.h"
+#include "app/settings.h"
 #include "app/states/app.h"
 
 void cimage_quit (void) { running = false; }
@@ -77,11 +78,12 @@ int cimage_init (void) {
     cengine_set_quit (cimage_quit);
     cengine_assets_set_path ("./assets");
 
-    // TODO: load settings
-
     retval = cengine_init ();
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
     errors |= retval;
+
+    // load settings
+    main_settings = settings_create ();
 
     // create our main renderer
     WindowSize window_size = { DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT };
@@ -102,6 +104,8 @@ int cimage_init (void) {
 }
 
 int cimage_end (void) {
+
+    settings_delete (main_settings);
 
     // surface_delete (icon_surface);
 
