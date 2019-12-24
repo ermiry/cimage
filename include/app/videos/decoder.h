@@ -10,6 +10,7 @@
 
 #include "app/videos/format.h"
 #include "app/videos/source.h"
+#include "app/videos/codec.h"
 #include "app/videos/buffers/buffer.h"
 
 enum {
