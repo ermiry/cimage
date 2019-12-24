@@ -122,3 +122,28 @@ void video_player_close (VideoPlayer *player) {
     }
 
 }
+
+#pragma region getters
+
+int video_player_get_video_stream (const VideoPlayer *player) {
+
+    if (player) return decoder_get_stream_index (player->decoders[VIDEO_DEC]);
+	return -1;
+
+}
+
+int video_player_get_audio_stream (const VideoPlayer *player) {
+
+    if (player) return decoder_get_stream_index (player->decoders[AUDIO_DEC]);
+	return -1;
+
+}
+
+int video_player_get_subtitle_stream (const VideoPlayer *player) {
+
+    if (player) return decoder_get_stream_index (player->decoders[SUBTITLE_DEC]);
+	return -1;
+
+}
+
+#pragma endregion

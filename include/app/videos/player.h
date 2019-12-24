@@ -32,4 +32,10 @@ extern VideoPlayer *video_player_create (const VideoSource *src,
 
 extern void video_player_close (VideoPlayer *player);
 
+extern int video_player_get_video_stream (const VideoPlayer *player);
+
+extern int video_player_get_audio_stream (const VideoPlayer *player);
+
+extern int video_player_get_subtitle_stream (const VideoPlayer *player);
+
 #endif
