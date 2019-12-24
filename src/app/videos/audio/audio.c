@@ -16,10 +16,6 @@
 #include "app/videos/source.h"
 #include "app/videos/buffers/ring.h"
 
-// FIXME: move this to settings
-#define AUDIO_BUF_FRAMES			64
-#define THREAD_COUNT				4
-
 typedef struct AudioDecoder {
 
     SwrContext *swr;
