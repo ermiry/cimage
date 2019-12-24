@@ -34,9 +34,17 @@ static Decoder *decoder_new (void) {
 static void decoder_delete (void *decoder_ptr) {
 
     if (decoder_ptr) {
-        Decoder *decoder = (Decoder *) decoder_ptr;
+        Decoder *dec = (Decoder *) decoder_ptr;
 
-        free (decoder);
+        if (dec->dec_close) dec->dec_close(dec);
+
+        for (int i = 0; i < DEC_BUF_COUNT; i++) buffer_destroy (dec->buffer[i]);
+
+        SDL_DestroyMutex (dec->output_lock);
+        avcodec_close (dec->codec_ctx);
+        avcodec_free_context (&dec->codec_ctx);
+
+        free (dec);
     }
 
 }
@@ -205,7 +213,7 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
 
 void decoder_close (Decoder *dec) {
 
-    // FIXME:
+    if (dec) decoder_delete (dec);
 
 }
 

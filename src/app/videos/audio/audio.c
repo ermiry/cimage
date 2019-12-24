@@ -16,6 +16,10 @@
 #include "app/videos/source.h"
 #include "app/videos/buffers/ring.h"
 
+// FIXME: move this to settings
+#define AUDIO_BUF_FRAMES			64
+#define THREAD_COUNT				4
+
 typedef struct AudioDecoder {
 
     SwrContext *swr;
@@ -274,8 +278,7 @@ Decoder *auido_create_decoder (const VideoSource *src, int stream_idx) {
 
     if (src && (stream_idx >= 0)) {
         // create the generic decoder
-        // FIXME: pass correct values
-        dec = decoder_create (src, stream_idx, 0, free_out_audio_packet_cb, 0);
+        dec = decoder_create (src, stream_idx, AUDIO_BUF_FRAMES, free_out_audio_packet_cb, THREAD_COUNT);
         if (dec) {
             AudioDecoder *audio_dec = audio_dec_new ();
             if (audio_dec) {
