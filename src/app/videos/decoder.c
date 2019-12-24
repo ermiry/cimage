@@ -203,6 +203,12 @@ Decoder *decoder_create (const VideoSource *src, int stream_index,
 
 }
 
+void decoder_close (Decoder *dec) {
+
+    // FIXME:
+
+}
+
 #pragma region output buffer
 
 int decoder_write_output (Decoder *dec, void *packet) {

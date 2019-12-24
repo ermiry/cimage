@@ -1,10 +1,15 @@
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #include <SDL2/SDL_audio.h>
 
 #include <libavformat/avformat.h>
 #include <libavutil/samplefmt.h>
 #include <libswresample/swresample.h>
+
+#include "cengine/utils/utils.h"
+#include "cengine/utils/log.h"
 
 #include "app/videos/format.h"
 #include "app/videos/decoder.h"
@@ -274,6 +279,8 @@ Decoder *auido_create_decoder (const VideoSource *src, int stream_idx) {
         if (dec) {
             AudioDecoder *audio_dec = audio_dec_new ();
             if (audio_dec) {
+				bool error = false;
+
                 // Create temporary audio frame
                 audio_dec->scratch_frame = av_frame_alloc ();
                 if (audio_dec->scratch_frame) {
@@ -307,17 +314,45 @@ Decoder *auido_create_decoder (const VideoSource *src, int stream_idx) {
                     }
 
                     else {
-                        // FIXME: error!
+                        #ifdef CIMAGE_DEBUG
+						char *status = c_string_create ("auido_create_decoder () - Unable to initialize audio resampler context");
+						if (status) {
+							cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+							free (status);
+						}
+						#endif
                     }
                 }
 
                 else {
-                    // FIXME: error
+					#ifdef CIMAGE_DEBUG
+					char *status = c_string_create ("auido_create_decoder () - Unable to initialize temporary audio frame");
+					if (status) {
+						cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+						free (status);
+					}
+					#endif
                 }
+
+				if (error) {
+					audio_dec_delete (audio_dec);
+					
+					decoder_close (dec);
+					dec = NULL;
+				}
             }
 
             else {
-                // FIXME: error!
+				#ifdef CIMAGE_DEBUG
+				char *status = c_string_create ("auido_create_decoder () - Failed to allocate new audio decoder");
+				if (status) {
+					cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, status);
+					free (status);
+				}
+				#endif
+
+				decoder_close (dec);
+				dec = NULL;
             }
         }
     }

@@ -55,6 +55,8 @@ struct Decoder {
 extern Decoder *decoder_create (const VideoSource *src, int stream_index, 
     int out_b_size, dec_free_packet_cb free_out_cb, int thread_count);
 
+extern void decoder_close (Decoder *dec);
+
 /*** output buffer ***/
 
 extern int decoder_write_output (Decoder *dec, void *packet);
