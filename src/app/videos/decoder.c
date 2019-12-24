@@ -217,6 +217,45 @@ void decoder_close (Decoder *dec) {
 
 }
 
+#pragma region info
+
+// returns 0 on success, 1 on error
+int decoder_get_codec_info (const Decoder *dec, Codec *codec) {
+
+	if (dec) {
+		codec->threads = dec->codec_ctx->thread_count;
+		snprintf(codec->name, CODEC_NAME_MAX, "%s", dec->codec_ctx->codec->name);
+		snprintf(codec->description, CODEC_DESC_MAX, "%s", dec->codec_ctx->codec->long_name);
+		return 0;
+	}
+
+	memset (codec, 0, sizeof (Codec));
+	return 1;
+
+}
+
+// returns 0 on success, 1 on error
+int decoder_get_output_format (const Decoder *dec, OutputFormat *output) {
+
+	if (dec) {
+		memcpy (output, &dec->output, sizeof (OutputFormat));
+		return 0;
+	} 
+
+	memset (output, 0, sizeof (OutputFormat));
+	return 1;
+
+}
+
+int decoder_get_stream_index (const Decoder *dec) {
+
+	if (dec) return dec->stream_index;
+	return -1;
+
+}
+
+#pragma endregion
+
 #pragma region output buffer
 
 int decoder_write_output (Decoder *dec, void *packet) {

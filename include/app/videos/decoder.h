@@ -57,6 +57,16 @@ extern Decoder *decoder_create (const VideoSource *src, int stream_index,
 
 extern void decoder_close (Decoder *dec);
 
+/*** info ***/
+
+// returns 0 on success, 1 on error
+extern int decoder_get_codec_info (const Decoder *dec, Codec *codec);
+
+// returns 0 on success, 1 on error
+extern int decoder_get_output_format (const Decoder *dec, OutputFormat *output);
+
+extern int decoder_get_stream_index (const Decoder *dec);
+
 /*** output buffer ***/
 
 extern int decoder_write_output (Decoder *dec, void *packet);

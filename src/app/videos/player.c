@@ -11,6 +11,7 @@
 
 #include "app/videos/player.h"
 #include "app/videos/decoder.h"
+#include "app/videos/audio/audio.h"
 
 static VideoPlayer *video_player_new (void) {
 
@@ -56,7 +57,7 @@ VideoPlayer *video_player_create (const VideoSource *src,
             bool error = false;
 
             // init audio decoder
-            // player->decoders[AUDIO_DEC] = 
+            player->decoders[AUDIO_DEC] = auido_create_decoder (src, audio_stream_index);
 
             // init video decoder
 
@@ -114,9 +115,8 @@ void video_player_close (VideoPlayer *player) {
         SDL_WaitThread (player->dec_thread, NULL);
         SDL_DestroyMutex (player->dec_lock);
 
-        // FIXME:
         // Shutdown decoders
-        // for (int i = 0; i < DECODER_COUNT; i++) Kit_CloseDecoder (player->decoders[i]);
+        for (int i = 0; i < DECODER_COUNT; i++) decoder_close (player->decoders[i]);
 
         video_player_delete (player);
     }
