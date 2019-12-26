@@ -167,4 +167,29 @@ PlayerState video_player_get_state (const VideoPlayer *player) {
 
 }
 
+double video_player_get_duration (const VideoPlayer *player) {
+
+	if (player) {
+		AVFormatContext *fmt_ctx = player->src->format_ctx;
+		return (fmt_ctx->duration / AV_TIME_BASE);
+	}
+
+	return 0;
+    
+}
+
+double video_player_get_position (const VideoPlayer *player) {
+
+	if (player) {
+		if (player->decoders[VIDEO_DEC]) {
+			return ((Decoder*) player->decoders[VIDEO_DEC])->clock_pos;
+		}
+		if (player->decoders[AUDIO_DEC]) {
+			return ((Decoder*) player->decoders[AUDIO_DEC])->clock_pos;
+		}
+	}
+
+    return 0;
+}
+
 #pragma endregion

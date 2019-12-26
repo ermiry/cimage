@@ -59,4 +59,8 @@ extern void video_player_get_info (const VideoPlayer *player, VideoPlayerInfo *i
 
 extern PlayerState video_player_get_state (const VideoPlayer *player);
 
+extern double video_player_get_duration (const VideoPlayer *player);
+
+extern double video_player_get_position (const VideoPlayer *player);
+
 #endif
