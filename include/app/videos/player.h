@@ -2,6 +2,8 @@
 #define _CIMAGE_MEDIA_VIDEOS_PLAYER_H_
 
 #include "app/videos/source.h"
+#include "app/videos/codec.h"
+#include "app/videos/format.h"
 
 typedef enum PlayerState {
 
@@ -52,5 +54,9 @@ extern int video_player_get_video_stream (const VideoPlayer *player);
 extern int video_player_get_audio_stream (const VideoPlayer *player);
 
 extern int video_player_get_subtitle_stream (const VideoPlayer *player);
+
+extern void video_player_get_info (const VideoPlayer *player, VideoPlayerInfo *info);
+
+extern PlayerState video_player_get_state (const VideoPlayer *player);
 
 #endif
