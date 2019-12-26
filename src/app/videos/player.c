@@ -4,6 +4,8 @@
 #include <SDL2/SDL_thread.h>
 #include <SDL2/SDL_mutex.h>
 
+#include <libavutil/time.h>
+
 #include "cengine/threads/thread.h"
 
 #include "cengine/utils/utils.h"
@@ -197,6 +199,23 @@ double video_player_get_position (const VideoPlayer *player) {
 #pragma endregion
 
 #pragma region main
+
+static double _GetSystemTime () { return (double) av_gettime () / 1000000.0; }
+
+static void _SetClockSync (VideoPlayer *player) {
+
+	double sync = _GetSystemTime();
+	for (int i = 0; i < DECODER_COUNT; i++) 
+		decoder_set_clock_sync (player->decoders[i], sync);
+    
+}
+
+static void _ChangeClockSync (VideoPlayer *player, double delta) {
+
+	for (int i = 0; i < DECODER_COUNT; i++) 
+		decoder_change_clock_sync (player->decoders[i], delta);
+
+}
 
 void video_player_start (VideoPlayer *player) {
 

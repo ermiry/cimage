@@ -68,6 +68,12 @@ extern int decoder_get_output_format (const Decoder *dec, OutputFormat *output);
 
 extern int decoder_get_stream_index (const Decoder *dec);
 
+/*** clock ***/
+
+extern void decoder_set_clock_sync (Decoder *dec, double sync);
+
+extern void decoder_change_clock_sync (Decoder *dec, double sync);
+
 /*** output buffer ***/
 
 extern int decoder_write_output (Decoder *dec, void *packet);

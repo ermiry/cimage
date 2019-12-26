@@ -257,6 +257,22 @@ int decoder_get_stream_index (const Decoder *dec) {
 
 #pragma endregion
 
+#pragma region clock
+
+void decoder_set_clock_sync (Decoder *dec, double sync) {
+
+    if (dec) dec->clock_sync = sync;
+
+}
+
+void decoder_change_clock_sync (Decoder *dec, double sync) {
+
+    if (dec) dec->clock_sync += sync;
+
+}
+
+#pragma endregion
+
 #pragma region output buffer
 
 int decoder_write_output (Decoder *dec, void *packet) {
