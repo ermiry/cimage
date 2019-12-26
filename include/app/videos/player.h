@@ -23,6 +23,21 @@ typedef struct VideoPlayer {
 
 } VideoPlayer;
 
+typedef struct VideoPlayerStreamInfo {
+
+	Codec codec;                ///< Decoder codec information
+	OutputFormat output;        ///< Information about the output format
+
+} VideoPlayerStreamInfo;
+
+typedef struct VideoPlayerInfo {
+
+	VideoPlayerStreamInfo video;        ///< Video stream data
+	VideoPlayerStreamInfo audio;        ///< Audio stream data
+	VideoPlayerStreamInfo subtitle;     ///< Subtitle stream data
+
+} VideoPlayerInfo;
+
 extern VideoPlayer *video_player_create (const VideoSource *src,
                                     int video_stream_index,
                                     int audio_stream_index,

@@ -146,4 +146,19 @@ int video_player_get_subtitle_stream (const VideoPlayer *player) {
 
 }
 
+void Kit_GetPlayerInfo (const VideoPlayer *player, VideoPlayerInfo *info) {
+
+    if (player && info) {
+		void *streams[] = {&info->video, &info->audio, &info->subtitle};
+		for (int i = 0; i < DECODER_COUNT; i++) {
+			Decoder *dec = player->decoders[i];
+			VideoPlayerStreamInfo *stream = streams[i];
+			Kit_GetDecoderCodecInfo (dec, &stream->codec);
+			Kit_GetDecoderOutputFormat (dec, &stream->output);
+		}
+    }
+
+    
+}
+
 #pragma endregion
