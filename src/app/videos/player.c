@@ -226,4 +226,36 @@ void video_player_start (VideoPlayer *player) {
 
 }
 
+void video_player_stop (VideoPlayer *player) {
+
+	if (player) {
+		if (SDL_LockMutex(player->dec_lock) == 0) {
+			switch (player->state) {
+				case PLAYER_STOPPED:
+				case PLAYER_CLOSED:
+					break;
+				case PLAYER_PLAYING:
+				case PLAYER_PAUSED:
+					player->state = PLAYER_STOPPED;
+					for(int i = 0; i < DECODER_COUNT; i++) {
+						Kit_ClearDecoderBuffers (player->decoders[i]);
+					}
+					break;
+			}
+
+			SDL_UnlockMutex (player->dec_lock);
+		}
+	}
+
+}
+
+void video_player_pause (VideoPlayer *player) {
+
+	if (player) {
+		player->state = PLAYER_PAUSED;
+    	player->pause_started = _GetSystemTime ();
+	}
+
+}
+
 #pragma endregion

@@ -67,4 +67,8 @@ extern double video_player_get_position (const VideoPlayer *player);
 
 extern void video_player_start (VideoPlayer *player);
 
+extern void video_player_stop (VideoPlayer *player);
+
+extern void video_player_pause (VideoPlayer *player);
+
 #endif
