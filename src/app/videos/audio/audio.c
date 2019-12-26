@@ -269,7 +269,7 @@ static void dec_close_audio_cb (Decoder *dec) {
     
 }
 
-Decoder *auido_create_decoder (const VideoSource *src, int stream_idx) {
+Decoder *audio_create_decoder (const VideoSource *src, int stream_idx) {
 
     Decoder *dec = NULL;
 

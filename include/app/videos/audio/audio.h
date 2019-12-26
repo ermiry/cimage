@@ -6,6 +6,6 @@
 
 #define AUDIO_SYNC_THRESHOLD            0.05
 
-extern Decoder *auido_create_decoder (const VideoSource *src, int stream_idx);
+extern Decoder *audio_create_decoder (const VideoSource *src, int stream_idx);
 
 #endif
