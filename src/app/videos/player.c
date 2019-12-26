@@ -62,6 +62,7 @@ VideoPlayer *video_player_create (const VideoSource *src,
             player->decoders[AUDIO_DEC] = audio_create_decoder (src, audio_stream_index);
 
             // init video decoder
+			// TODO: add error handling
 			player->decoders[VIDEO_DEC] = video_create_decoder (src, video_stream_index);
 
             // init subtitle decoder
@@ -191,6 +192,38 @@ double video_player_get_position (const VideoPlayer *player) {
 	}
 
     return 0;
+}
+
+#pragma endregion
+
+#pragma region main
+
+void video_player_start (VideoPlayer *player) {
+
+	if (player) {
+		double tmp;
+		if (SDL_LockMutex(player->dec_lock) == 0) {
+			switch (player->state) {
+				case PLAYER_PLAYING:
+				case PLAYER_CLOSED:
+					break;
+				case PLAYER_PAUSED:
+					tmp = _GetSystemTime () - player->pause_started;
+					_ChangeClockSync (player, tmp);
+					player->state = PLAYER_PLAYING;
+					break;
+				case PLAYER_STOPPED:
+					// Fill some buffers before starting playback
+					_RunDecoder (player); 
+					_SetClockSync (player);
+					player->state = PLAYER_PLAYING;
+					break;
+			}
+
+			SDL_UnlockMutex (player->dec_lock);
+		}
+	}
+
 }
 
 #pragma endregion

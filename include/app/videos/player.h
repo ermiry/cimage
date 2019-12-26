@@ -63,4 +63,8 @@ extern double video_player_get_duration (const VideoPlayer *player);
 
 extern double video_player_get_position (const VideoPlayer *player);
 
+/*** main ***/
+
+extern void video_player_start (VideoPlayer *player);
+
 #endif
