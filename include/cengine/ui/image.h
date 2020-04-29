@@ -19,9 +19,11 @@ typedef struct Image {
 
 	UIElement *ui_element;
 
-	Sprite *sprite;
+	bool texture_reference;
 	SDL_Texture *texture;
+	SDL_Rect *texture_src_rect;
 
+	Sprite *sprite;
 	SpriteSheet *sprite_sheet;
 	u32 x_sprite_offset, y_sprite_offset;
 	
@@ -59,6 +61,17 @@ extern void ui_image_delete (void *image_ptr);
 
 // sets the image's UI position
 extern void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos, Renderer *renderer);
+
+// directly sets the image's texture
+extern void ui_image_set_texture (Image *image, SDL_Texture *texture);
+
+// sets the image's texture using a refrence to another texture; when the image gets destroyted,
+// the texture won't be deleted
+extern void ui_image_set_texture_ref (Image *image, SDL_Texture *texture_ref);
+
+// sets the image's texture's source rect (used to give an offset to the texture)
+extern void ui_image_set_texture_src_rect (Image *image,
+    int x, int y, int w, int h);
 
 // sets the image's render dimensions
 extern void ui_image_set_dimensions (Image *image, unsigned int width, unsigned int height);
@@ -131,14 +144,17 @@ extern void ui_image_remove_selected (Image *image);
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position
-extern Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer);
+// w and h for dimensions
+extern Image *ui_image_create (u32 x, u32 y, u32 w, u32 h, Renderer *renderer);
+
+extern u8 ui_image_update_texture_from_mem (Image *image, Renderer *renderer, void *mem, int mem_size);
 
 // manually creates a streaming access texture, usefull for constant updates
 extern u8 ui_image_create_streaming_texture (Image *image, Renderer *renderer, Uint32 sdl_pixel_format);
 
 // updates the streaming texture using an in memory buffer representing an image
 // NOTE: buffer is not freed
-extern u8 ui_image_update_streaming_texture_mem (Image *image, void *mem, int mem_size);
+extern u8 ui_image_update_streaming_texture_mem (Image *image, Renderer *renderer, void *mem, int mem_size);
 
 // creates an image that is ment to be updated directly and constantly using its texture
 // usefull for streaming video

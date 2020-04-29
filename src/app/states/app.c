@@ -312,4 +312,6 @@ State *app_state_new (void) {
         new_app_state->on_exit = app_on_exit;
     }
 
+    return new_app_state;
+
 }

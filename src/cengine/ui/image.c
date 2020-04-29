@@ -24,10 +24,13 @@ static Image *ui_image_new (void) {
     Image *image = (Image *) malloc (sizeof (Image));
     if (image) {
         memset (image, 0, sizeof (Image));
+
         image->ui_element = NULL;
 
-        image->sprite = NULL;
         image->texture = NULL;
+        image->texture_src_rect = NULL;
+
+        image->sprite = NULL;
         image->sprite_sheet = NULL;
 
         image->active = NULL;
@@ -55,6 +58,11 @@ void ui_image_delete (void *image_ptr) {
 
         image->ui_element = NULL;
 
+        if (image->texture && ! image->texture_reference) 
+            SDL_DestroyTexture (image->texture);
+
+        if (image->texture_src_rect) free (image->texture_src_rect);
+
         if (image->ref_sprite) {
             image->sprite = NULL;
             image->sprite_sheet = NULL;
@@ -64,8 +72,6 @@ void ui_image_delete (void *image_ptr) {
             sprite_destroy (image->sprite);
             sprite_sheet_destroy (image->sprite_sheet);
         }
-
-        if (image->texture) SDL_DestroyTexture (image->texture);
 
         if (image->overlay_texture && !image->overlay_reference) 
             SDL_DestroyTexture (image->overlay_texture);
@@ -84,6 +90,52 @@ void ui_image_delete (void *image_ptr) {
 void ui_image_set_pos (Image *image, UIRect *ref_rect, UIPosition pos, Renderer *renderer) {
 
     if (image) ui_transform_component_set_pos (image->ui_element->transform, renderer, ref_rect, pos, false);
+
+}
+
+// directly sets the image's texture
+void ui_image_set_texture (Image *image, SDL_Texture *texture) {
+
+    if (image && texture) {
+        // detsroy prevuis texture
+        if (image->texture) {
+            if (!image->texture_reference) {
+                SDL_DestroyTexture (image->texture);
+                image->texture = NULL;
+            }
+        }
+
+        image->texture = texture;
+    }
+
+}
+
+// sets the image's texture using a refrence to another texture; when the image gets destroyted,
+// the texture won't be deleted
+void ui_image_set_texture_ref (Image *image, SDL_Texture *texture_ref) {
+
+    if (image && texture_ref) {
+        ui_image_set_texture (image, texture_ref);
+        image->texture_reference = true;
+    }
+
+}
+
+// sets the image's texture's source rect (used to give an offset to the texture)
+void ui_image_set_texture_src_rect (Image *image,
+    int x, int y, int w, int h) {
+
+    if (image) {
+        if (image->texture_src_rect) free (image->texture_src_rect);
+
+        image->texture_src_rect = (SDL_Rect *) malloc (sizeof (SDL_Rect));
+        if (image->texture_src_rect) {
+            image->texture_src_rect->x = x;
+            image->texture_src_rect->y = y;
+            image->texture_src_rect->w = w;
+            image->texture_src_rect->h = h;
+        }
+    }
 
 }
 
@@ -380,15 +432,48 @@ static Image *ui_image_create_common (Renderer *renderer) {
 
 // creates a new image to be displayed from a constant source, like using a sprite loaded from a file
 // x and y for position
-Image *ui_image_create_static (u32 x, u32 y, Renderer *renderer) {
+// w and h for dimensions
+Image *ui_image_create (u32 x, u32 y, u32 w, u32 h, Renderer *renderer) {
 
     Image *image = ui_image_create_common (renderer);
     if (image) {
-        image->ui_element->transform->rect.x = x;
-        image->ui_element->transform->rect.y = y;
+        ui_transform_component_set_values (image->ui_element->transform, x, y, w, h);
     }
 
     return image;
+
+}
+
+// FIXME: 17/04/2020 -- only loading jpeg images
+u8 ui_image_update_texture_from_mem (Image *image, Renderer *renderer, void *mem, int mem_size) {
+
+    u8 retval = 1;
+
+    if (image && mem) {
+        SDL_RWops *rw = SDL_RWFromConstMem (mem, mem_size);
+        if (rw) {
+            // printf ("Is jpeg? %d\n", IMG_isJPG (rw));
+            // SDL_Surface *surface = IMG_Load_RW (rw, 1);
+            SDL_Surface *surface = IMG_LoadTyped_RW (rw, 0, "JPG");
+            if (surface) {
+                // printf ("Pixel format: %s\n", SDL_GetPixelFormatName (surface->format->format));
+                // Uint32 format = 0;
+                // SDL_QueryTexture (image->texture, &format, NULL, NULL, NULL);
+                // printf ("%s\n", SDL_GetPixelFormatName (format));
+                // printf ("surface pitch: %d\n", surface->pitch);
+
+                if (image->texture) texture_destroy (renderer, image->texture);
+
+                texture_create_from_surface (renderer, &image->texture, surface);
+
+                retval = 0;
+            }
+
+            SDL_FreeRW (rw);
+        }
+    }
+
+    return retval;
 
 }
 
@@ -407,34 +492,36 @@ u8 ui_image_create_streaming_texture (Image *image, Renderer *renderer, Uint32 s
 
 }
 
-// TODO: what about the lock texture method?
+// FIXME: 27/01/2020 -- 1:05 --video memory leak -- or at least memory is filling up preatty quickly
+// TODO: 27/01/2020 -- 00:17 -- refernce this again https://wiki.libsdl.org/SDL_UpdateTexture
 // updates the streaming texture using an in memory buffer representing an image
 // NOTE: buffer is not freed
-u8 ui_image_update_streaming_texture_mem (Image *image, void *mem, int mem_size) {
+u8 ui_image_update_streaming_texture_mem (Image *image, Renderer *renderer, void *mem, int mem_size) {
 
     u8 retval = 1;
 
     if (image && mem) {
         SDL_RWops *rw = SDL_RWFromConstMem (mem, mem_size);
-        // printf ("Is jpeg? %d\n", IMG_isJPG (rw));
-        // SDL_Surface *surface = IMG_Load_RW (rw, 1);
-        SDL_Surface *surface = IMG_LoadTyped_RW (rw, 0, "JPG");
-        // printf ("Pixel format: %s\n", SDL_GetPixelFormatName (surface->format->format));
-        // Uint32 format = 0;
-        // SDL_QueryTexture (image->texture, &format, NULL, NULL, NULL);
-        // printf ("%s\n", SDL_GetPixelFormatName (format));
-        // printf ("surface pitch: %d\n", surface->pitch);
+        if (rw) {
+            // printf ("Is jpeg? %d\n", IMG_isJPG (rw));
+            // SDL_Surface *surface = IMG_Load_RW (rw, 1);
+            SDL_Surface *surface = IMG_LoadTyped_RW (rw, 0, "JPG");
+            if (surface) {
+                // printf ("Pixel format: %s\n", SDL_GetPixelFormatName (surface->format->format));
+                // Uint32 format = 0;
+                // SDL_QueryTexture (image->texture, &format, NULL, NULL, NULL);
+                // printf ("%s\n", SDL_GetPixelFormatName (format));
+                // printf ("surface pitch: %d\n", surface->pitch);
 
-        // update the texture
-        if (!SDL_UpdateTexture (image->texture, NULL, surface->pixels, surface->pitch)) {
-            // SDL_RenderClear (main_renderer->renderer);
-            // SDL_RenderCopy (main_renderer->renderer, image->texture, NULL, &image->transform->rect);
-            // SDL_RenderPresent (main_renderer->renderer);
+                // SDL_DestroyTexture (image->texture);
+                // texture_create_from_surface (renderer, &image->texture, surface);
+                texture_update (renderer, &image->texture, surface);
 
-            retval = 0;
+                retval = 0;
+            }
+
+            SDL_FreeRW (rw);
         }
-
-        // SDL_FreeSurface (surface);
     }
 
     return retval;
@@ -461,15 +548,15 @@ void ui_image_draw (Image *image, Renderer *renderer) {
         if (SDL_HasIntersection (&image->ui_element->transform->rect, &renderer->window->screen_rect)) {
             if (image->texture) {
                 SDL_RenderCopyEx (renderer->renderer, image->texture, 
-                    NULL, &image->ui_element->transform->rect, 
-                    0, 0, image->flip);
+                    image->texture_src_rect, &image->ui_element->transform->rect, 
+                    0, 0, (const SDL_RendererFlip) image->flip);
             }
 
             else {
                 if (image->sprite) {
                     SDL_RenderCopyEx (renderer->renderer, image->sprite->texture, 
                         &image->sprite->src_rect, &image->ui_element->transform->rect, 
-                        0, 0, image->flip);
+                        0, 0, (const SDL_RendererFlip) image->flip);
                 }
                 
                 else if (image->sprite_sheet) {
@@ -478,7 +565,7 @@ void ui_image_draw (Image *image, Renderer *renderer) {
 
                     SDL_RenderCopyEx (renderer->renderer, image->sprite_sheet->texture, 
                         &image->sprite_sheet->src_rect, &image->ui_element->transform->rect, 
-                        0, 0, image->flip);
+                        0, 0, (const SDL_RendererFlip) image->flip);
                 }
             }
 
@@ -498,7 +585,7 @@ void ui_image_draw (Image *image, Renderer *renderer) {
                         if (image->overlay_texture && !image->selected) {
                             SDL_RenderCopyEx (renderer->renderer, image->overlay_texture, 
                                 NULL, &image->ui_element->transform->rect, 
-                                0, 0, image->flip);
+                                0, 0, (const SDL_RendererFlip) image->flip);
                         }
 
                         // check if the user pressed the left button over the image
@@ -550,7 +637,7 @@ void ui_image_draw (Image *image, Renderer *renderer) {
             if (image->selected && image->selected_texture) {
                 SDL_RenderCopyEx (renderer->renderer, image->selected_texture, 
                     NULL, &image->ui_element->transform->rect, 
-                    0, 0, image->flip);
+                    0, 0, (const SDL_RendererFlip) image->flip);
             }
 
             renderer->render_count += 1;

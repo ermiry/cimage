@@ -6,11 +6,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "cengine/collections/dlist.h"
+
 #include "cengine/utils/json.h"
 
 // returns an allocated string with the file extension
 // NULL if no file extension
 extern char *files_get_file_extension (const char *filename);
+
+// returns a list of strings containg the names of all the files in the directory
+extern DoubleList *files_get_from_dir (const char *dir);
 
 // opens a file with the given modes and retur a file ptr
 extern FILE *file_open (const char *filename, const char *modes, struct stat *filestatus);

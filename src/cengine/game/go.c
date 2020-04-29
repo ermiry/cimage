@@ -25,7 +25,7 @@ static bool game_objects_realloc (void) {
 
     u32 new_max_gos = curr_max_objs * 2;
 
-    gameObjects = realloc (gameObjects, new_max_gos * sizeof (GameObject *));
+    gameObjects = (GameObject **) realloc (gameObjects, new_max_gos * sizeof (GameObject *));
 
     if (gameObjects) {
         max_gos = new_max_gos;
@@ -122,7 +122,7 @@ int game_object_remove_from_tag (GameObject *go, const char *tag_name) {
         GameObjectTag *tag = game_object_tag_get_by_name (tag_name);
         if (tag) {
             // search the game object inside the tag
-            ListElement *le = dlist_get_element (tag->gos, go);
+            ListElement *le = dlist_get_element (tag->gos, go, NULL);
             if (le) {
                 void *data = dlist_remove_element (tag->gos, le);
                 if (data) retval = 0;
@@ -276,7 +276,11 @@ GameObject *game_object_remove_child (GameObject *parent, GameObject *child) {
 
 }
 
-GameObject *game_object_get_by_id (u32 id) { if (id <= curr_max_objs) return gameObjects[id]; }
+GameObject *game_object_get_by_id (u32 id) { 
+    
+    return (id <= curr_max_objs) ? gameObjects[id] : NULL;
+    
+}
 
 // mark as inactive or reusable the game object
 void game_object_destroy (GameObject *go) {
@@ -435,7 +439,7 @@ void *game_object_add_component (GameObject *go, GameComponent component) {
 
 void *game_object_get_component (GameObject *go, GameComponent component) {
 
-    if (go) return go->components[component];
+    return go ? go->components[component] : NULL;
 
 }
 
@@ -444,13 +448,13 @@ void game_object_remove_component (GameObject *go, GameComponent component) {
     if (go) {
         switch (component) {
             case TRANSFORM_COMP: 
-                transform_destroy (go->components[component]); 
+                transform_destroy ((Transform *) go->components[component]); 
                 break;
             case GRAPHICS_COMP: 
-                graphics_destroy (go->components[component]);
+                graphics_destroy ((Graphics *) go->components[component]);
                 break;
             case ANIMATOR_COMP: 
-                animator_destroy (go->components[component]);
+                animator_destroy ((Animator *) go->components[component]);
                 break;
 
             default: break;
@@ -549,7 +553,7 @@ void *game_object_add_user_component (GameObject *go, const char *component_name
 
 void *game_object_get_user_component (GameObject *go, const char *name) {
 
-    if (go && name) return (user_component_get (go->user_components, name))->component;
+    return (go && name) ? (user_component_get (go->user_components, name))->component : NULL;
         
 }
 

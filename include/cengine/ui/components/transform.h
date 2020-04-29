@@ -17,6 +17,9 @@ struct _UITransform {
     UIRect rect;
     int x_scale, y_scale;
 
+    // 06/02/2020
+    int x_offset, y_offset;
+
 };
 
 typedef struct _UITransform UITransform;
@@ -35,5 +38,7 @@ extern void ui_transform_component_set_values (UITransform *transform,
 extern void ui_transform_component_set_scale (UITransform *transform, int x_scale, int y_scale);
 
 extern UITransform *ui_transform_component_create (int x, int y, int w, int h);
+
+extern void ui_transform_component_print (UITransform *trans);
 
 #endif

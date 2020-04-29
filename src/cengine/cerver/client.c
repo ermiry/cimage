@@ -24,6 +24,7 @@
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
+int client_disconnect (Client *client);
 int client_connection_end (Client *client, Connection *connection);
 Connection *client_connection_get_by_socket (Client *client, i32 sock_fd);
 
@@ -141,7 +142,7 @@ static u8 client_init (Client *client) {
     u8 retval = 1;
 
     if (client) {
-        client->connections = dlist_init (connection_delete, NULL);
+        client->connections = dlist_init (connection_delete, connection_comparator_by_sock_fd);
         client_events_init (client);
         client->stats = client_stats_new ();
 
@@ -185,13 +186,7 @@ u8 client_teardown (Client *client) {
     u8 retval = 1;
 
     if (client) {
-        // end any ongoing connection
-        for (ListElement *le = dlist_start (client->connections); le; le = le->next) {
-            connection_end (client, (Connection *) le->data);
-            le->data = NULL;
-        }
-
-        client->running = false;
+        client_disconnect (client);
 
         client_delete (client);
 
@@ -284,6 +279,38 @@ int client_connection_register (Client *client, Connection *connection) {
 
 }
 
+// this is a blocking method and ONLY works for cerver packets
+// connects the client connection and makes a first request to the cerver
+// then listen for packets until the target one is received, 
+// then it returns the packet data as it is
+// returns 0 on success, 1 on error
+int client_connection_request_to_cerver (Client *client, Connection *connection, Packet *request_packet) {
+
+    int retval = 1;
+
+    if (client && connection) {
+        connection->sock_receive = sock_receive_new ();
+        if (!connection_start (connection)) {
+            client_start (client);
+            // connection->active = true;
+
+            // send the request to the cerver
+            packet_set_network_values (request_packet, client, connection);
+            packet_send (request_packet, 0, NULL, false);
+            // packet_delete (request_packet);
+
+            // read incoming buffer from cerver
+            while (client->running && connection->connected) 
+                client_receive (client, connection);
+
+            retval = 0;
+        }
+    }
+
+    return retval;
+
+}
+
 // starts a client connection
 // returns 0 on success, 1 on error
 int client_connection_start (Client *client, Connection *connection) {
@@ -294,7 +321,8 @@ int client_connection_start (Client *client, Connection *connection) {
         if (!connection_start (connection)) {
             client_event_trigger (client, EVENT_CONNECTED);
             connection->connected = true;
-            thread_create_detachable ((void *(*)(void *)) client_connection_update, 
+            time (&connection->connected_timestamp);
+            thread_create_detachable ((void *(*)(void *)) connection_update, 
                 client_connection_aux_new (client, connection));
             client_start (client);
             retval = 0;
@@ -316,15 +344,59 @@ int client_connection_end (Client *client, Connection *connection) {
     int retval = 1;
 
     if (client && connection) {
-        connection_end (client, connection);
+        connection_end (connection);
 
-        connection_delete (dlist_remove_element (client->connections, 
-            dlist_get_element (client->connections, connection)));
+        // connection_delete (dlist_remove_element (client->connections, 
+        //     dlist_get_element (client->connections, connection, NULL)));
+        connection_delete (dlist_remove (client->connections, connection, NULL));
 
         retval = 0;
     }
 
     return retval;
+
+}
+
+// terminates all of the client connections and deletes them
+// return 0 on success, 1 on error
+int client_disconnect (Client *client) {
+
+    int retval = 1;
+
+    if (client) {
+        // end any ongoing connection
+        for (ListElement *le = dlist_start (client->connections); le; le = le->next) {
+            connection_end ((Connection *) le->data);
+        }
+
+        dlist_reset (client->connections);
+
+        // reset client
+        client->running = false;
+        client->time_started = 0;
+
+        retval = 0;
+    }
+
+    return retval;
+
+}
+
+// the client got disconnected from the cerver, so correctly clear our data
+void client_got_disconnected (Client *client) {
+
+    if (client) {
+        // close any ongoing connection
+        for (ListElement *le = dlist_start (client->connections); le; le = le->next) {
+            connection_close ((Connection *) le->data);
+        }
+
+        dlist_reset (client->connections);
+
+        // reset client
+        client->running = false;
+        client->time_started = 0;
+    }
 
 }
 
@@ -393,7 +465,7 @@ u8 client_game_create_lobby (Client *owner, Connection *connection,
             stype, sizeof (SStringS));
         if (packet) {
             packet_set_network_values (packet, owner, connection);
-            retval = packet_send (packet, 0, NULL);
+            retval = packet_send (packet, 0, NULL, false);
             packet_delete (packet);
         }
 
@@ -430,7 +502,7 @@ u8 client_game_join_lobby (Client *client, Connection *connection,
             &lobby_join, sizeof (LobbyJoin));
         if (packet) {
             packet_set_network_values (packet, client, connection);
-            retval = packet_send (packet, 0, NULL);
+            retval = packet_send (packet, 0, NULL, false);
             packet_delete (packet);
         }
     }
@@ -455,7 +527,7 @@ u8 client_game_leave_lobby (Client *client, Connection *connection,
             &id, sizeof (SStringS));
         if (packet) {
             packet_set_network_values (packet, client, connection);
-            retval = packet_send (packet, 0, NULL);
+            retval = packet_send (packet, 0, NULL, false);
             packet_delete (packet);
         }
     }
@@ -480,7 +552,7 @@ u8 client_game_start_lobby (Client *client, Connection *connection,
             &id, sizeof (SStringS));
         if (packet) {
             packet_set_network_values (packet, client, connection);
-            retval = packet_send (packet, 0, NULL);
+            retval = packet_send (packet, 0, NULL, false);
             packet_delete (packet);
         }
     }

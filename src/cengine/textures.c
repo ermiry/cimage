@@ -1,6 +1,8 @@
 #include <stdlib.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rwops.h>
+#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_image.h>
 
 #include "cengine/types/types.h"
@@ -16,6 +18,7 @@
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
+// creates a new texture based on a surface
 void texture_create_from_surface (Renderer *renderer, SDL_Texture **texture, SDL_Surface *surface) {
 
     if (renderer && texture && surface) {
@@ -28,8 +31,33 @@ void texture_create_from_surface (Renderer *renderer, SDL_Texture **texture, SDL
         }
 
         else {
-            // send image to renderer queue
-            renderer_queue_push (renderer, surface_texture_new (surface, texture));
+            // send texture to renderer queue
+            renderer_load_queue_push (renderer, surface_texture_new (surface, texture, false));
+        }
+    }
+
+}
+
+// creates a new texture based on a memory buffer represeinting an image
+void texture_create_from_mem_image (Renderer *renderer, SDL_Texture **texture, 
+    const void *mem, int mem_size, 
+    const char *image_type) {
+
+    if (renderer && texture && mem && image_type) {
+        SDL_RWops *rw = SDL_RWFromConstMem (mem, mem_size);
+        if (rw) {
+            SDL_Surface *surface = IMG_LoadTyped_RW (rw, 0, image_type);
+            if (surface) {
+                // printf ("Pixel format: %s\n", SDL_GetPixelFormatName (surface->format->format));
+                // Uint32 format = 0;
+                // SDL_QueryTexture (image->texture, &format, NULL, NULL, NULL);
+                // printf ("%s\n", SDL_GetPixelFormatName (format));
+                // printf ("surface pitch: %d\n", surface->pitch);
+
+                texture_create_from_surface (renderer, texture, surface);
+            }
+
+            SDL_FreeRW (rw);
         }
     }
 
@@ -53,8 +81,8 @@ ImageData *texture_load (Renderer *renderer, const char *filename, SDL_Texture *
             }
 
             else {
-                // send image to renderer queue
-                renderer_queue_push (renderer, surface_texture_new (temp_surface, texture));
+                // send texture to renderer queue
+                renderer_load_queue_push (renderer, surface_texture_new (temp_surface, texture, false));
             }
         }
 
@@ -68,7 +96,50 @@ ImageData *texture_load (Renderer *renderer, const char *filename, SDL_Texture *
 
 }
 
-void texture_get_dimensions (SDL_Texture *texture, u32 *w, u32 *h) {
+void texture_update (Renderer *renderer, SDL_Texture **texture, SDL_Surface *surface) {
+
+    if (renderer && texture && surface) {
+        pthread_t thread_id = pthread_self ();
+        // printf ("Updating texture in thread: %ld\n", thread_id);
+        if (thread_id == renderer->thread_id) {
+            SDL_UpdateTexture (*texture, NULL, surface->pixels, surface->pitch);
+            SDL_FreeSurface (surface);
+        }
+
+        else {
+            // send texture to renderer queue
+            renderer_load_queue_push (renderer, surface_texture_new (surface, texture, true));
+        }
+    }
+
+}
+
+// 27/01/2020 -- 7:11 -- wrapper method for SDL_DestroyTexture () as it is not thread safe
+// this method should be called instead of SDL_DestroyTexture () to avoid video memory leaks
+void texture_destroy (Renderer *renderer, SDL_Texture *texture) {
+
+    if (renderer && texture) {
+        pthread_t thread_id = pthread_self ();
+        // printf ("Destroying texture in thread: %ld\n", thread_id);
+        if (thread_id == renderer->thread_id) {
+            SDL_DestroyTexture (texture);
+        }
+
+        else {
+            // send texture to destroy queue
+            renderer_destroy_queue_push (renderer, texture);
+        }
+    }
+
+}
+
+void texture_destroy_wrapper (void *texture_ptr) {
+
+    if (texture_ptr) SDL_DestroyTexture ((SDL_Texture *) texture_ptr);
+
+}
+
+void texture_get_dimensions (SDL_Texture *texture, int *w, int *h) {
 
     if (texture) SDL_QueryTexture (texture, NULL, NULL, w, h);
 

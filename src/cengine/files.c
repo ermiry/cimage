@@ -5,6 +5,10 @@
 #define _XOPEN_SOURCE 700
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
+
+#include "cengine/types/string.h"
+#include "cengine/collections/dlist.h"
 
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
@@ -17,7 +21,7 @@ char *files_get_file_extension (const char *filename) {
     char *retval = NULL;
 
     if (filename) {
-        char *ptr = strrchr (filename, '.');
+        char *ptr = strrchr ((char *) filename, '.');
         if (ptr) {
             *ptr++;
             size_t ext_len = 0;
@@ -36,6 +40,44 @@ char *files_get_file_extension (const char *filename) {
     }
 
     return retval;
+
+}
+
+// returns a list of strings containg the names of all the files in the directory
+DoubleList *files_get_from_dir (const char *dir) {
+
+    DoubleList *images = NULL;
+
+    if (dir) {
+        DIR *dp;
+        struct dirent *ep;
+
+		images = dlist_init (str_delete, str_comparator);
+
+        dp = opendir (dir);
+        if (dp) {
+            String *file = NULL;
+            while ((ep = readdir (dp)) != NULL) {
+                if (strcmp (ep->d_name, ".") && strcmp (ep->d_name, "..")) {
+                    file = str_create ("%s/%s", dir, ep->d_name);
+
+                    dlist_insert_after (images, dlist_end (images), file);
+                }
+            }
+
+            (void) closedir (dp);
+        }
+
+        else {
+			char *status = c_string_create ("Failed to open dir %s", dir);
+			if (status) {
+				cengine_log_error (status);
+				free (status);
+			}
+        }
+    }
+
+    return images;
 
 }
 

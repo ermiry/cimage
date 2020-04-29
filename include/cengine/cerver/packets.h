@@ -2,6 +2,7 @@
 #define _CERVER_PACKETS_H_
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
@@ -16,6 +17,8 @@ struct _Connection;
 
 typedef u32 ProtocolID;
 
+extern ProtocolID packets_get_protocol_id (void);
+
 extern void packets_set_protocol_id (ProtocolID protocol_id);
 
 typedef struct ProtocolVersion {
@@ -25,6 +28,8 @@ typedef struct ProtocolVersion {
 	
 } ProtocolVersion;
 
+extern ProtocolVersion packets_get_protocol_version (void);
+
 extern void packets_set_protocol_version (ProtocolVersion version);
 
 // these indicate what type of packet we are sending/recieving
@@ -32,7 +37,9 @@ typedef enum PacketType {
 
     CERVER_PACKET       = 0,
     CLIENT_PACKET       = 1,
+
     ERROR_PACKET        = 2,
+
 	REQUEST_PACKET      = 3,
     AUTH_PACKET         = 4,
     GAME_PACKET         = 5,
@@ -83,23 +90,17 @@ struct _PacketHeader {
 
 typedef struct _PacketHeader PacketHeader;
 
+extern void packet_header_print (PacketHeader *header);
+
 // allocates space for the dest packet header and copies the data from source
 // returns 0 on success, 1 on error
 extern u8 packet_header_copy (PacketHeader **dest, PacketHeader *source);
 
-// these indicate the data and more info about the packet type
 typedef enum RequestType {
 
-    CLIENT_CLOSE_CONNECTION     = 2,
-    CLIENT_DISCONNET            = 3,
-
-    REQ_GET_FILE                = 4,
-    POST_SEND_FILE              = 5,
+    REQ_GET_FILE                = 1,
+    POST_SEND_FILE              = 2,
     
-    REQ_AUTH_CLIENT             = 6,
-    CLIENT_AUTH_DATA            = 7,
-    SUCCESS_AUTH                = 8,
-
 } RequestType;
 
 typedef enum CerverPacket {
@@ -111,6 +112,22 @@ typedef enum CerverPacket {
     CERVER_GAME_STATS           = 3
 
 } CerverPacket;
+
+typedef enum ClientPacket {
+
+	CLIENT_CLOSE_CONNECTION     = 1,
+	CLIENT_DISCONNET            = 2,
+
+} ClientPacket;
+
+typedef enum AuthPacket {
+
+    REQ_AUTH_CLIENT             = 1,
+
+    CLIENT_AUTH_DATA            = 2,
+    SUCCESS_AUTH                = 3,
+
+} AuthPacket;
 
 typedef enum GamePacket {
 
@@ -149,11 +166,13 @@ struct _Packet {
     size_t data_size;
     void *data;
     char *data_end;
+    bool data_ref;
 
     // the actual packet to be sent
     PacketHeader *header;
     size_t packet_size;
     void *packet;
+    bool packet_ref;
 
 };
 
@@ -179,14 +198,27 @@ extern u8 packet_set_data (Packet *packet, void *data, size_t data_size);
 // appends the data to the end if the packet already has data
 // if the packet is empty, creates a new buffer
 // it creates a new copy of the data and the original can be safely freed
+// this does not work if the data has been set using a reference
 extern u8 packet_append_data (Packet *packet, void *data, size_t data_size);
+
+// sets a reference to a data buffer to send
+// data will not be copied into the packet and will not be freed after use
+// this method is usefull for example if you just want to send a raw json packet to a non-cerver
+// use this method with packet_send () with the raw flag on
+extern u8 packet_set_data_ref (Packet *packet, void *data, size_t data_size);
 
 // sets a the packet's packet using by copying the passed data
 // deletes the previuos packet's packet
 // returns 0 on succes, 1 on error
 extern u8 packet_set_packet (Packet *packet, void *data, size_t data_size);
 
+// sets a reference to a data buffer to send as the packet
+// data will not be copied into the packet and will not be freed after use
+// usefull when you need to generate your own cerver type packet by hand
+extern u8 packet_set_packet_ref (Packet *packet, void *data, size_t packet_size);
+
 // prepares the packet to be ready to be sent
+// WARNING: dont call this method if you have set the packet directly
 extern u8 packet_generate (Packet *packet);
 
 // generates a simple request packet of the requested type reday to be sent, 
@@ -194,19 +226,13 @@ extern u8 packet_generate (Packet *packet);
 extern Packet *packet_generate_request (PacketType packet_type, u32 req_type, 
     void *data, size_t data_size);
 
-// sends a packet using the tcp protocol and the packet sock fd
-// returns 0 on success, 1 on error
-extern u8 packet_send_tcp (const Packet *packet, int flags, size_t *total_sent);
-
-// sends a packet using the udp protocol
-// returns 0 on success, 1 on error
-extern u8 packet_send_udp (const void *packet, size_t packet_size);
-
 // sends a packet using its network values
+// raw flag to send a raw packet (only the data that was set to the packet, without any header)
 // returns 0 on success, 1 on error
-extern u8 packet_send (const Packet *packet, int flags, size_t *total_sent);
+extern u8 packet_send (const Packet *packet, int flags, size_t *total_sent, bool raw);
 
-// check for packets with bad size, protocol, version, etc
+// check if packet has a compatible protocol id and a version
+// returns 0 on success, 1 on error
 extern u8 packet_check (Packet *packet);
 
 #endif

@@ -233,8 +233,8 @@ void video_player_start (VideoPlayer *player) {
 					break;
 				case PLAYER_STOPPED:
 					// Fill some buffers before starting playback
-					_RunDecoder (player); 
-					_SetClockSync (player);
+					// _RunDecoder (player); 
+					// _SetClockSync (player);
 					player->state = PLAYER_PLAYING;
 					break;
 			}
@@ -256,9 +256,9 @@ void video_player_stop (VideoPlayer *player) {
 				case PLAYER_PLAYING:
 				case PLAYER_PAUSED:
 					player->state = PLAYER_STOPPED;
-					for(int i = 0; i < DECODER_COUNT; i++) {
-						Kit_ClearDecoderBuffers (player->decoders[i]);
-					}
+					// for(int i = 0; i < DECODER_COUNT; i++) {
+					// 	Kit_ClearDecoderBuffers (player->decoders[i]);
+					// }
 					break;
 			}
 
