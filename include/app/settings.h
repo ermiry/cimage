@@ -3,7 +3,7 @@
 
 #include "cengine/types/types.h"
 
-#include "app/videos/settings.h"
+// #include "app/videos/settings.h"
 
 typedef struct Settings {
 
@@ -11,7 +11,7 @@ typedef struct Settings {
 	u32 screen_height;
 	u32 fps_limit;
 
-	VideoSettings *video_settings;
+	// VideoSettings *video_settings;
 
 } Settings;
 

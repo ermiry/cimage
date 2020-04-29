@@ -414,7 +414,7 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
     u32 panel_height = (screen_height / n_rows) * n_actual_rows;
 
     images_panel = ui_panel_create (100, 0, panel_width, panel_height, UI_POS_FREE, main_renderer);
-    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID);
+    ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, main_renderer);
 
     u32 cell_width = (screen_width - 100) / n_cols;
     u32 cell_height = (screen_height / n_rows);
@@ -453,7 +453,7 @@ void app_ui_image_select (void *media_item_ptr) {
 
         // if (img->selected) dlist_remove (cimage->selected_images, img);
         if (item->selected) {
-            dlist_remove_element (cimage->selected_images, dlist_get_element (cimage->selected_images, item));
+            dlist_remove_element (cimage->selected_images, dlist_get_element (cimage->selected_images, item, NULL));
             item->selected = false;
         } 
         
@@ -535,7 +535,7 @@ void app_ui_image_display_in_window (void *item_ptr) {
                 item->filename->str, window_size, 0);
 
             // load a new image
-            Image *new_image = ui_image_create_static (0, 0, renderer);
+            Image *new_image = ui_image_create (0, 0, 0, 0, renderer);
             ui_image_set_pos (new_image, NULL, UI_POS_LEFT_UPPER_CORNER, renderer);
             ui_image_set_sprite (new_image, renderer, item->image->sprite->img_data->filename->str);
             ui_image_set_dimensions (new_image, renderer->window->window_size.width, renderer->window->window_size.height);
@@ -548,7 +548,7 @@ void app_ui_image_display_in_window (void *item_ptr) {
 void app_ui_image_display (Image *image) {
 
     if (image) {
-        ui_panel_layout_add_element (images_panel, image->ui_element);
+        ui_panel_layout_add_element_at_end (images_panel, image->ui_element);
     }
 
 }
@@ -560,7 +560,7 @@ void app_ui_image_create (MediaItem *image_item) {
     if (image_item) {
         Renderer *main_renderer = renderer_get_by_name ("main");
 
-        Image *image = ui_image_create_static (0, 0, main_renderer);
+        Image *image = ui_image_create (0, 0, 0, 0, main_renderer);
         ui_image_set_pos (image, NULL, UI_POS_MIDDLE_CENTER, main_renderer);
         ui_image_set_sprite (image, main_renderer, image_item->path->str);
         ui_image_set_ouline_colour (image, RGBA_WHITE);
