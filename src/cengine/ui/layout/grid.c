@@ -528,13 +528,26 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                     &x_size, &y_size,
                     &x_padding, & y_padding);
 
+                // printf ("x_size: %d, y_size: %d\n", x_size, y_size);
+                // printf ("x_padding: %d, y_padding: %d\n", x_padding, y_padding);
+
                 ui_layout_grid_set_element_pos (grid, 
                     grid_element,
                     x_size, y_size,
                     grid->x_count, grid->y_count,
                     x_padding, y_padding);
 
-                grid->x_count += 1;
+                // printf ("x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+
+                // ui_layout_grid_update_all_elements_pos (grid);
+
+                // grid->x_count += 1;
+
+                if (grid->x_count < (grid->cols - 1)) grid->x_count += 1;
+                else {
+                    grid->x_count = 0;
+                    grid->y_count += 1;
+                }
 
                 // update element size if necesary
                 switch (grid_element->ui_element->type) {
@@ -624,18 +637,18 @@ void ui_layout_grid_destroy_ui_elements (GridLayout *grid) {
 static void ui_layout_grid_scroll_up_actual (GridLayout *grid, int amount) {
 
     if (grid) {
-        printf ("up!\n");
+        // printf ("up!\n");
         // printf ("+%d\n", amount);
 
         if (dlist_size (grid->elements) > 0) {
             // check if the elements fill all the panel to even allow scrolling
             u32 total_elements_height = grid->cell_height * dlist_size (grid->elements);
-                    if (total_elements_height > grid->transform->rect.h) {
-                        // check for the first element position
-                        GridElement *first_element = (GridElement *) (dlist_start (grid->elements)->data);
-                        if (first_element->ui_element->transform->rect.y < 0) {
-                            UIElement *ui_element = NULL;
-                            GridElement *grid_element = NULL;
+            if (total_elements_height > grid->transform->rect.h) {
+                // check for the first element position
+                GridElement *first_element = (GridElement *) (dlist_start (grid->elements)->data);
+                if (first_element->ui_element->transform->rect.y < 0) {
+                    UIElement *ui_element = NULL;
+                    GridElement *grid_element = NULL;
                     for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
                         grid_element = (GridElement *) le->data;
 
@@ -643,21 +656,21 @@ static void ui_layout_grid_scroll_up_actual (GridLayout *grid, int amount) {
 
                         ui_element = grid_element->ui_element;
                         switch (ui_element->type) {
-                                    case UI_INPUT:
-                                        ui_input_field_placeholder_text_pos_update ((InputField *) ui_element->element);
-                                        ui_input_field_text_pos_update ((InputField *) ui_element->element);
-                                        break;
+                            case UI_INPUT:
+                                ui_input_field_placeholder_text_pos_update ((InputField *) ui_element->element);
+                                ui_input_field_text_pos_update ((InputField *) ui_element->element);
+                                break;
 
-                                    case UI_PANEL: 
-                                        ui_panel_children_update_pos ((Panel *) ui_element->element); 
-                                        break;
+                            case UI_PANEL: 
+                                ui_panel_children_update_pos ((Panel *) ui_element->element); 
+                                break;
 
-                                    case UI_TEXTBOX:
-                                        ui_textbox_update_text_pos ((TextBox *) ui_element->element);
-                                        break;
-                                }
-                            }
+                            case UI_TEXTBOX:
+                                ui_textbox_update_text_pos ((TextBox *) ui_element->element);
+                                break;
                         }
+                    }
+                }
             }
         }
     }
@@ -667,16 +680,16 @@ static void ui_layout_grid_scroll_up_actual (GridLayout *grid, int amount) {
 static void ui_layout_grid_scroll_down_actual (GridLayout *grid, int amount) {
 
     if (grid) {
-        printf ("down!\n");
+        // printf ("down!\n");
         // printf ("+%d\n", *amount);
 
         if (dlist_size (grid->elements) > 0) {
-                    // check the pos of the last element
-                    GridElement *last_element = (GridElement *) (dlist_end (grid->elements)->data);
-                    u32 edge = grid->transform->rect.h - grid->cell_height;
-                    if (last_element->ui_element->transform->rect.y > edge) {
-                        UIElement *ui_element = NULL;
-                        GridElement *grid_element = NULL;
+            // check the pos of the last element
+            GridElement *last_element = (GridElement *) (dlist_end (grid->elements)->data);
+            u32 edge = grid->transform->rect.h - grid->cell_height;
+            if (last_element->ui_element->transform->rect.y > edge) {
+                UIElement *ui_element = NULL;
+                GridElement *grid_element = NULL;
                 for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
                     grid_element = (GridElement *) le->data;
 
@@ -684,26 +697,27 @@ static void ui_layout_grid_scroll_down_actual (GridLayout *grid, int amount) {
 
                     ui_element = grid_element->ui_element;
                     switch (ui_element->type) {
-                                case UI_INPUT:
-                                    ui_input_field_placeholder_text_pos_update ((InputField *) ui_element->element);
-                                    ui_input_field_text_pos_update ((InputField *) ui_element->element);
-                                    break;
+                        case UI_INPUT:
+                            ui_input_field_placeholder_text_pos_update ((InputField *) ui_element->element);
+                            ui_input_field_text_pos_update ((InputField *) ui_element->element);
+                            break;
 
-                                case UI_PANEL: 
-                                    ui_panel_children_update_pos ((Panel *) ui_element->element); 
-                                    break;
+                        case UI_PANEL: 
+                            ui_panel_children_update_pos ((Panel *) ui_element->element); 
+                            break;
 
-                                case UI_TEXTBOX:
-                                    ui_textbox_update_text_pos ((TextBox *) ui_element->element);
-                                    break;
-                            }
-                        }
+                        case UI_TEXTBOX:
+                            ui_textbox_update_text_pos ((TextBox *) ui_element->element);
+                            break;
+                    }
+                }
             }
         }
     }
 
 }
 
+// triggered on mouse scroll up
 static void ui_layout_grid_scroll_up_event (void *event_data) {
 
     if (event_data) {
@@ -723,6 +737,7 @@ static void ui_layout_grid_scroll_up_event (void *event_data) {
 
 }
 
+// triggered on mouse scroll down
 static void ui_layout_grid_scroll_down_event (void *event_data) {
 
     if (event_data) {
@@ -738,6 +753,24 @@ static void ui_layout_grid_scroll_down_event (void *event_data) {
                 ui_layout_grid_scroll_down_actual (grid, *amount);
             }
         }
+    }
+
+}
+
+// public method to be used by user,s like to register a key to scroll up the grid
+void ui_layout_grid_scroll_up (GridLayout *grid, int amount) {
+
+    if (grid) {
+        ui_layout_grid_scroll_up_actual (grid, amount);
+    }
+
+}
+
+// public method to be used by user,s like to register a key to scroll down the grid
+void ui_layout_grid_scroll_down (GridLayout *grid, int amount) {
+
+    if (grid) {
+        ui_layout_grid_scroll_down_actual (grid, amount);
     }
 
 }

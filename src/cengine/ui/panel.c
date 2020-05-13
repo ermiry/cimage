@@ -112,7 +112,7 @@ void ui_panel_child_update_pos (Panel *panel, UIElement *child) {
                     &panel->ui_element->transform->rect, 
                     child->transform->pos, 
                     NULL);
-            }
+            } break;
 
             case UI_INPUT: {
                 // FIXME: 04/02/2020 -- 18:03 -- update children's pos

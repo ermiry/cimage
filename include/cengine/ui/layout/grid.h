@@ -113,4 +113,12 @@ extern void ui_layout_grid_remove_ui_elements (GridLayout *grid);
 // destroys the ui elements inside the grid
 extern void ui_layout_grid_destroy_ui_elements (GridLayout *grid);
 
+/*** scrolling ***/
+
+// public method to be used by user,s like to register a key to scroll up the grid
+extern void ui_layout_grid_scroll_up (GridLayout *grid, int amount);
+
+// public method to be used by user,s like to register a key to scroll down the grid
+extern void ui_layout_grid_scroll_down (GridLayout *grid, int amount);
+
 #endif
