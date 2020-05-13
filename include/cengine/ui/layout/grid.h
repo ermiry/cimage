@@ -56,6 +56,9 @@ typedef struct GridLayout {
 
 extern void ui_layout_grid_delete (void *grid_ptr);
 
+// get the amount of elements that are inside the grid
+extern size_t ui_layout_grid_get_elements_count (GridLayout *grid);
+
 // sets the number of columns and rows available for the grid
 extern void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows);
 

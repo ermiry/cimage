@@ -103,6 +103,13 @@ void ui_layout_grid_delete (void *grid_ptr) {
 
 }
 
+// get the amount of elements that are inside the grid
+size_t ui_layout_grid_get_elements_count (GridLayout *grid) {
+
+    return grid ? grid->elements->size : 0;
+
+}
+
 // sets the preferred number of columns and rows available for the grid
 void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows) {
 
