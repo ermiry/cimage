@@ -1,3 +1,4 @@
+#include "cengine/version.h"
 #include "cengine/cengine.h"
 #include "cengine/manager/manager.h"
 
@@ -5,6 +6,8 @@
 #include "app/states/app.h"
 
 int main (void) {
+
+    cengine_version_print_full ();
 
     running = !cimage_init () ? true : false;
 
