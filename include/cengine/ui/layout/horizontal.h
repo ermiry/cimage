@@ -40,6 +40,9 @@ typedef struct HorizontalLayout {
 
 extern void ui_layout_horizontal_delete (void *horizontal_ptr);
 
+// get the amount of elements that are inside the horizontal layout
+extern size_t ui_layout_horizontal_get_elements_count (HorizontalLayout *horizontal);
+
 // sets a preffered width for your elements
 // if there are more elements than horizontal layout width / element width,
 // scrolling needs to be set, otherwise, remaining elements wont be displayed

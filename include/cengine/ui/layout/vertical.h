@@ -36,6 +36,9 @@ typedef struct VerticalLayout {
 
 extern void ui_layout_vertical_delete (void *horizontal_ptr);
 
+// get the amount of elements that are inside the vertical layout
+extern size_t ui_layout_vertical_get_elements_count (VerticalLayout *vertical);
+
 // sets a preffered height for your elements
 // if there are more elements than vertical layout height / element height cna manage
 // scrolling needs to be set, otherwise, remaining elements wont be displayed

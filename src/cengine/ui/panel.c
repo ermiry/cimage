@@ -224,6 +224,33 @@ void ui_panel_remove_outline (Panel *panel) {
 
 }
 
+// get the amount of elements that are inside the panel's layout
+size_t ui_panel_layout_get_elements_count (Panel *panel) {
+
+    size_t retval = 0;
+
+    if (panel) {
+        if (panel->layout) {
+            switch (panel->layout_type) {
+                case LAYOUT_TYPE_HORIZONTAL: 
+                    retval = ui_layout_horizontal_get_elements_count ((HorizontalLayout *) panel->layout);
+                    break;
+                case LAYOUT_TYPE_VERTICAL:
+                    retval = ui_layout_vertical_get_elements_count ((VerticalLayout *) panel->layout);
+                    break;
+                case LAYOUT_TYPE_GRID: 
+                    retval = ui_layout_grid_get_elements_count ((GridLayout *) panel->layout);
+                    break;
+
+                default: break;
+            }
+        }
+    }
+
+    return retval;
+
+}
+
 // sets the layout for the panel
 void ui_panel_layout_set (Panel *panel, LayoutType type, Renderer *renderer) {
 
