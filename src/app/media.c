@@ -248,36 +248,35 @@ void media_folder_select (void *args) {
 
 #pragma region operations
 
-// FIXME: refactor this method
 // gets executed on every input on the search input
 void media_search (void *args) {
 
     if (args) {
-        // InputField *search_input = (InputField *) args;
+        InputField *search_input = (InputField *) args;
 
-        // // remove all images from the grid
-        // GridLayout *grid = (GridLayout *) images_panel->layout;
-        // ui_layout_grid_remove_ui_elements (grid);
+        // remove all images from the grid
+        GridLayout *grid = (GridLayout *) images_panel->layout;
+        ui_layout_grid_remove_ui_elements (grid);
 
-        // String *query = str_new (search_input->text->text->str);
+        String *query = str_new (search_input->text->text->str);
 
-        // // search all the images that matches our query letter by letter
-        // MediaItem *item = NULL;
-        // for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
-        //     item = (MediaItem *) le->data;
+        // search all the images that matches our query letter by letter
+        MediaItem *item = NULL;
+        for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
+            item = (MediaItem *) le->data;
 
-        //     ui_element_set_active (item->image->ui_element, false);
+            ui_element_set_active (item->image->ui_element, false);
 
-        //     if (!strncasecmp (query->str, item->filename->str, query->len)) {
-        //         // add this image for display
-        //         ui_layout_grid_add_element (grid, item->image->ui_element);
-        //         ui_element_set_active (item->image->ui_element, true);
-        //     }
-        // }
+            if (!strncasecmp (query->str, item->filename->str, query->len)) {
+                // add this image for display
+                ui_layout_grid_add_element_at_end (grid, item->image->ui_element);
+                ui_element_set_active (item->image->ui_element, true);
+            }
+        }
 
-        // // TODO: update status bar with counter
+        // TODO: update status bar with counter
 
-        // str_delete (query);
+        str_delete (query);
     }
 
 }
