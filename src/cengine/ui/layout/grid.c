@@ -186,8 +186,7 @@ void ui_layout_grid_set_scroll_sensitivity (GridLayout *grid, u32 sensitivity) {
 
 }
 
-// FIXME: 22:35 -- 05/02/2020 - current method was designed to work for cimage images!
-static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *element) {
+static void ui_layout_grid_update_image_size (GridLayout *grid, GridElement *element) {
 
     if (grid && element) {
         u32 max_width = grid->cell_width - grid->cell_padding_x;      // Max width for the image
@@ -291,7 +290,7 @@ GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h, Renderer *rendere
 
         grid->transform = ui_transform_component_create (x, y, w, h);
 
-        grid->elements = dlist_init (grid_element_delete, NULL);
+        grid->elements = dlist_init (grid_element_delete, grid_element_comparator_by_ui_element);
     }
 
     return grid;
@@ -478,7 +477,14 @@ u8 ui_layout_grid_add_element_at_pos (GridLayout *grid, UIElement *ui_element, u
                 else {
                     grid->x_count = 0;
                     grid->y_count += 1;
-                } 
+                }
+
+                // update element size if necesary
+                switch (grid_element->ui_element->type) {
+                    case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
+
+                    default: break;
+                }
 
                 retval = 0;
             }
@@ -530,6 +536,13 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                     x_padding, y_padding);
 
                 grid->x_count += 1;
+
+                // update element size if necesary
+                switch (grid_element->ui_element->type) {
+                    case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
+
+                    default: break;
+                }
 
                 retval = 0;
             }
