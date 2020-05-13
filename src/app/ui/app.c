@@ -349,54 +349,6 @@ void app_ui_end (void) {
 
 #pragma region images
 
-void app_ui_images_move_up (u32 movement) {
-
-    if (images_panel) {
-        Renderer *main_renderer = renderer_get_by_name ("main");
-        u32 screen_height = main_renderer->window->window_size.height;
-
-        GridLayout *grid = (GridLayout *) images_panel->layout;
-        if ((abs (images_panel->ui_element->transform->rect.y) + grid->cell_height) < (images_panel->ui_element->transform->rect.h)) {
-            images_panel->ui_element->transform->rect.y -= movement;
-            grid->transform->rect.y -= movement;
-
-            GridElement *grid_element = NULL;
-            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-                grid_element = (GridElement *) le->data;
-                grid_element->ui_element->transform->rect.y -= movement;
-            }
-        }
-    }
-
-}
-
-void app_ui_images_move_down (u32 movement) {
-
-    if (images_panel) {
-        Renderer *main_renderer = renderer_get_by_name ("main");
-        u32 screen_height = main_renderer->window->window_size.height;
-
-        if (images_panel->ui_element->transform->rect.y < 0) {
-            images_panel->ui_element->transform->rect.y += movement;
-            GridLayout *grid = (GridLayout *) images_panel->layout;
-            grid->transform->rect.y += movement;
-
-            GridElement *grid_element = NULL;
-            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-                grid_element = (GridElement *) le->data;
-                grid_element->ui_element->transform->rect.y += movement;
-            }
-        }
-
-        else {
-            images_panel->ui_element->transform->rect.y = 0;
-            GridLayout *grid = (GridLayout *) images_panel->layout;
-            grid->transform->rect.y = 0;
-        }
-    }
-
-}
-
 // prepare the ui for the images to be displayed
 void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 

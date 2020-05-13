@@ -34,10 +34,6 @@ extern void app_ui_statusbar_set_selected_text (const char *text);
 
 extern Panel *images_panel;
 
-extern void app_ui_images_move_up (u32 movement);
-
-extern void app_ui_images_move_down (u32 movement);
-
 // prepare the ui for the images to be displayed
 extern void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows);
 
