@@ -110,6 +110,16 @@ size_t ui_layout_grid_get_elements_count (GridLayout *grid) {
 
 }
 
+// get the current grid's size, cols and rows
+void ui_layout_grid_get_size (GridLayout *grid, u32 *cols, u32 *rows) {
+
+    if (grid) {
+        *cols = grid->x_count;
+        *rows = grid->y_count;
+    }
+
+}
+
 // sets the preferred number of columns and rows available for the grid
 void ui_layout_grid_set_grid (GridLayout *grid, u32 cols, u32 rows) {
 
