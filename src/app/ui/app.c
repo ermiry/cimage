@@ -167,6 +167,8 @@ static void actionsbar_end (void) {
 
 #pragma endregion
 
+#define STATUS_BAR_HEIGHT           50
+
 static void statusbar_init (void) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -178,7 +180,7 @@ static void statusbar_init (void) {
 
     RGBA_Color statusbar_color = { .r = 37, .g = 44, .b = 54, .a = 245 };
     statusbar = ui_panel_create (sidebar->ui_element->transform->rect.w, 0, 
-        screen_width - sidebar->ui_element->transform->rect.w, 50,
+        screen_width - sidebar->ui_element->transform->rect.w, STATUS_BAR_HEIGHT,
         UI_POS_LEFT_BOTTOM_CORNER, main_renderer);
     ui_panel_set_bg_colour (statusbar, main_renderer, statusbar_color);
     ui_element_set_layer (main_renderer->ui, statusbar->ui_element, "top");
@@ -411,17 +413,26 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
     n_actual_rows += 1;
 
     u32 panel_width = (screen_width - 100);
-    u32 panel_height = (screen_height / n_rows) * n_actual_rows;
+    // u32 panel_height = (screen_height / n_rows) * n_actual_rows;
+    u32 panel_height = screen_height - ACTIONSBAR_HEIGHT - STATUS_BAR_HEIGHT;
+    printf ("app_ui_images_set_ui_elements () - panel_width: %d - panel_height: %d\n", panel_width, panel_height);
 
-    images_panel = ui_panel_create (100, 0, panel_width, panel_height, UI_POS_FREE, main_renderer);
+    // set images panel grid layout for images
+    images_panel = ui_panel_create (SIDEBAR_WIDTH, ACTIONSBAR_HEIGHT, panel_width, panel_height, UI_POS_FREE, main_renderer);
     ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, main_renderer);
 
     u32 cell_width = (screen_width - 100) / n_cols;
     u32 cell_height = (screen_height / n_rows);
+    printf ("app_ui_images_set_ui_elements () - cell width: %d - cell height: %d\n", cell_width, cell_height);
 
     GridLayout *grid = (GridLayout *) images_panel->layout;
-    ui_layout_grid_set_grid (grid, n_cols, n_actual_rows);
+    ui_layout_grid_set_x_axis_alignment (grid, ALIGN_KEEP_SIZE);
+	ui_layout_grid_set_y_axis_alignment (grid, ALIGN_KEEP_SIZE);
+	ui_layout_grid_set_elements_x_row (grid, n_cols);
+	ui_layout_grid_set_elements_x_col (grid, n_actual_rows);
     ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
+	ui_layout_grid_toggle_scrolling (grid, true);
+	ui_layout_grid_set_scroll_sensitivity (grid, 20);
 
 }
 
