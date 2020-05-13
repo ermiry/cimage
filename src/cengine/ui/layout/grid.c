@@ -47,6 +47,23 @@ static void grid_element_delete_full (void *grid_element_ptr) {
 
 }
 
+static int grid_element_comparator_by_ui_element (const void *a, const void *b) {
+
+    if (a && b) {
+        GridElement *grid_element_a = (GridElement *) a;
+        GridElement *grid_element_b = (GridElement *) b;
+
+        if (grid_element_a->ui_element->id < grid_element_b->ui_element->id) return -1;
+        else if (grid_element_a->ui_element->id == grid_element_b->ui_element->id) return 0;
+        else return 1;
+    }
+
+    if (a && !b) return -1;
+    else if (!a && b) return 1;
+    return 0;
+
+}
+
 static GridLayout *ui_layout_grid_new (void) {
 
     GridLayout *grid = (GridLayout *) malloc (sizeof (GridLayout));
@@ -536,11 +553,31 @@ UIElement *ui_layout_grid_get_element_at (GridLayout *grid, unsigned int pos) {
 }
 
 // removes an element from the grid
-void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element) {
+u8 ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element) {
 
-    if (grid) {
-        // FIXME:
+    u8 retval = 1;
+
+    if (grid && ui_element) {
+        GridElement *grid_element = (GridElement *) dlist_remove (grid->elements, ui_element, NULL);
+        if (grid_element) {
+            if (grid->x_count == 0) {
+                grid->x_count = (grid->cols - 1);
+                grid->y_count -= 1;
+            }
+
+            else {
+                grid->x_count -= 1;
+            }
+
+            ui_layout_grid_update_all_elements_pos (grid);
+
+            grid_element_delete (grid_element);
+
+            retval = 0;
+        }
     }
+
+    return retval;
 
 }
 

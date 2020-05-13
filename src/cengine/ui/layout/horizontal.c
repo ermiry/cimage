@@ -208,12 +208,18 @@ UIElement *ui_layout_horizontal_get_element_at (HorizontalLayout *horizontal, un
 }
 
 // removes an element from the horizontal layout group
-void ui_layout_horizontal_remove (HorizontalLayout *horizontal, UIElement *ui_element) {
+u8 ui_layout_horizontal_remove (HorizontalLayout *horizontal, UIElement *ui_element) {
+
+    u8 retval = 1;
 
     if (horizontal && ui_element) {
-        dlist_remove (horizontal->ui_elements, ui_element, NULL);
-        ui_layout_horizontal_update (horizontal);
+        if (dlist_remove (horizontal->ui_elements, ui_element, NULL)) {
+            ui_layout_horizontal_update (horizontal);
+            retval = 0;
+        }
     }
+
+    return retval;
 
 }
 

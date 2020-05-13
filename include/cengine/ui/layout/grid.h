@@ -105,7 +105,7 @@ extern u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_ele
 extern UIElement *ui_layout_grid_get_element_at (GridLayout *grid, unsigned int pos);
 
 // removes an element from the grid
-extern void ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element);
+extern u8 ui_layout_grid_remove_element (GridLayout *grid, UIElement *ui_element);
 
 // removes all ui elements from the grid layout without destroying them
 extern void ui_layout_grid_remove_ui_elements (GridLayout *grid);

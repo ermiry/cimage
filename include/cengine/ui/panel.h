@@ -96,7 +96,7 @@ extern void ui_panel_layout_add_element_at_end (Panel *panel, UIElement *ui_elem
 extern UIElement *ui_panel_layout_get_element_at (Panel *panel, unsigned int pos);
 
 // removes a ui element form the panel layout
-extern void ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element);
+extern u8 ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element);
 
 // adds a new child to the panel
 extern void ui_panel_child_add (Panel *panel, UIElement *ui_element);

@@ -210,12 +210,18 @@ UIElement *ui_layout_vertical_get_element_at (VerticalLayout *vertical, unsigned
 }
 
 // removes an element from the vertical layout group
-void ui_layout_vertical_remove (VerticalLayout *vertical, UIElement *ui_element) {
+u8 ui_layout_vertical_remove (VerticalLayout *vertical, UIElement *ui_element) {
+
+    u8 retval = 1;
 
     if (vertical && ui_element) {
-        dlist_remove (vertical->ui_elements, ui_element, NULL);
-        ui_layout_vertical_update (vertical);
+        if (dlist_remove (vertical->ui_elements, ui_element, NULL)) {
+            ui_layout_vertical_update (vertical);
+            retval = 0;
+        }
     }
+
+    return retval;
 
 }
 

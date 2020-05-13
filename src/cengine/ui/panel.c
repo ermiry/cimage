@@ -363,19 +363,21 @@ UIElement *ui_panel_layout_get_element_at (Panel *panel, unsigned int pos) {
 }
 
 // removes a ui element form the panel layout
-void ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element) {
+u8 ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element) {
+
+    u8 retval = 1;
 
     if (panel && ui_element) {
         if (panel->layout) {
             switch (panel->layout_type) {
                 case LAYOUT_TYPE_HORIZONTAL: 
-                    ui_layout_horizontal_remove ((HorizontalLayout *) panel->layout, ui_element);
+                    retval = ui_layout_horizontal_remove ((HorizontalLayout *) panel->layout, ui_element);
                     break;
                 case LAYOUT_TYPE_VERTICAL: 
-                    ui_layout_vertical_remove ((VerticalLayout *) panel->layout, ui_element);
+                    retval = ui_layout_vertical_remove ((VerticalLayout *) panel->layout, ui_element);
                     break;
                 case LAYOUT_TYPE_GRID: 
-                    ui_layout_grid_remove_element ((GridLayout *) panel->layout, ui_element); 
+                    retval = ui_layout_grid_remove_element ((GridLayout *) panel->layout, ui_element); 
                     break;
 
                 default: break;
@@ -385,6 +387,8 @@ void ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element) {
             ui_panel_child_remove (panel, ui_element);
         }
     }
+
+    return retval;
 
 }
 

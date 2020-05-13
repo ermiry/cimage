@@ -74,6 +74,6 @@ extern u8 ui_layout_horizontal_add_at_end (HorizontalLayout *horizontal, UIEleme
 extern UIElement *ui_layout_horizontal_get_element_at (HorizontalLayout *horizontal, unsigned int pos);
 
 // removes an element from the horizontal layout group
-extern void ui_layout_horizontal_remove (HorizontalLayout *horizontal, UIElement *ui_element);
+extern u8 ui_layout_horizontal_remove (HorizontalLayout *horizontal, UIElement *ui_element);
 
 #endif
