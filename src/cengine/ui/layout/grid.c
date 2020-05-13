@@ -12,12 +12,11 @@
 #include "cengine/ui/layout/align.h"
 #include "cengine/ui/image.h"
 
-// FIXME:!!!
 #include "cengine/ui/textbox.h"
 #include "cengine/ui/panel.h"
 
-static void ui_layout_grid_scroll_up (void *event_data);
-static void ui_layout_grid_scroll_down (void *event_data);
+static void ui_layout_grid_scroll_up_event (void *event_data);
+static void ui_layout_grid_scroll_down_event (void *event_data);
 
 static GridElement *grid_element_new (UIElement *ui_element, u32 width, u32 height) {
 
@@ -170,8 +169,8 @@ void ui_layout_grid_toggle_scrolling (GridLayout *grid, bool enable) {
 
     if (grid) {
         // register this grid layout to listen for the scroll event
-        cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_grid_scroll_up, grid);
-        cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_grid_scroll_down, grid);
+        cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_grid_scroll_up_event, grid);
+        cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_grid_scroll_down_event, grid);
 
         grid->scroll_sensitivity = GRID_LAYOUT_DEFAULT_SCROLL;
         grid->scrolling = enable;
@@ -622,36 +621,28 @@ void ui_layout_grid_destroy_ui_elements (GridLayout *grid) {
 
 #pragma region scrolling
 
-static void ui_layout_grid_scroll_up (void *event_data) {
+static void ui_layout_grid_scroll_up_actual (GridLayout *grid, int amount) {
 
-    if (event_data) {
-        EventActionData *event_action_data = (EventActionData *) event_data;
+    if (grid) {
+        printf ("up!\n");
+        // printf ("+%d\n", amount);
 
-        int *amount = (int *) event_action_data->event_data;
-        GridLayout *grid = (GridLayout *) event_action_data->action_args;
-
-        if (grid->renderer->window->mouse) {
-            // check if the mouse is in the button
-            if (mousePos.x >= grid->transform->rect.x && mousePos.x <= (grid->transform->rect.x + grid->transform->rect.w) && 
-                mousePos.y >= grid->transform->rect.y && mousePos.y <= (grid->transform->rect.y + grid->transform->rect.h)) {
-                // printf ("+%d\n", *amount);
-
-                if (dlist_size (grid->elements) > 0) {
-                    // check if the elements fill all the panel to even allow scrolling
-                    u32 total_elements_height = grid->cell_height * dlist_size (grid->elements);
+        if (dlist_size (grid->elements) > 0) {
+            // check if the elements fill all the panel to even allow scrolling
+            u32 total_elements_height = grid->cell_height * dlist_size (grid->elements);
                     if (total_elements_height > grid->transform->rect.h) {
                         // check for the first element position
                         GridElement *first_element = (GridElement *) (dlist_start (grid->elements)->data);
                         if (first_element->ui_element->transform->rect.y < 0) {
                             UIElement *ui_element = NULL;
                             GridElement *grid_element = NULL;
-                            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-                                grid_element = (GridElement *) le->data;
+                    for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                        grid_element = (GridElement *) le->data;
 
-                                grid_element->ui_element->transform->rect.y += (*amount * grid->scroll_sensitivity);
+                        grid_element->ui_element->transform->rect.y += (amount * grid->scroll_sensitivity);
 
-                                ui_element = grid_element->ui_element;
-                                switch (ui_element->type) {
+                        ui_element = grid_element->ui_element;
+                        switch (ui_element->type) {
                                     case UI_INPUT:
                                         ui_input_field_placeholder_text_pos_update ((InputField *) ui_element->element);
                                         ui_input_field_text_pos_update ((InputField *) ui_element->element);
@@ -667,42 +658,32 @@ static void ui_layout_grid_scroll_up (void *event_data) {
                                 }
                             }
                         }
-                    }
-                }
             }
         }
     }
 
 }
 
-static void ui_layout_grid_scroll_down (void *event_data) {
+static void ui_layout_grid_scroll_down_actual (GridLayout *grid, int amount) {
 
-    if (event_data) {
-        EventActionData *event_action_data = (EventActionData *) event_data;
+    if (grid) {
+        printf ("down!\n");
+        // printf ("+%d\n", *amount);
 
-        int *amount = (int *) event_action_data->event_data;
-        GridLayout *grid = (GridLayout *) event_action_data->action_args;
-
-        if (grid->renderer->window->mouse) {
-            // check if the mouse is in the button
-            if (mousePos.x >= grid->transform->rect.x && mousePos.x <= (grid->transform->rect.x + grid->transform->rect.w) && 
-                mousePos.y >= grid->transform->rect.y && mousePos.y <= (grid->transform->rect.y + grid->transform->rect.h)) {
-                // printf ("+%d\n", *amount);
-
-                if (dlist_size (grid->elements) > 0) {
+        if (dlist_size (grid->elements) > 0) {
                     // check the pos of the last element
                     GridElement *last_element = (GridElement *) (dlist_end (grid->elements)->data);
                     u32 edge = grid->transform->rect.h - grid->cell_height;
                     if (last_element->ui_element->transform->rect.y > edge) {
                         UIElement *ui_element = NULL;
                         GridElement *grid_element = NULL;
-                        for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-                            grid_element = (GridElement *) le->data;
+                for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                    grid_element = (GridElement *) le->data;
 
-                            grid_element->ui_element->transform->rect.y += (*amount * grid->scroll_sensitivity);
+                    grid_element->ui_element->transform->rect.y += (amount * grid->scroll_sensitivity);
 
-                            ui_element = grid_element->ui_element;
-                            switch (ui_element->type) {
+                    ui_element = grid_element->ui_element;
+                    switch (ui_element->type) {
                                 case UI_INPUT:
                                     ui_input_field_placeholder_text_pos_update ((InputField *) ui_element->element);
                                     ui_input_field_text_pos_update ((InputField *) ui_element->element);
@@ -717,8 +698,44 @@ static void ui_layout_grid_scroll_down (void *event_data) {
                                     break;
                             }
                         }
-                    }
-                }
+            }
+        }
+    }
+
+}
+
+static void ui_layout_grid_scroll_up_event (void *event_data) {
+
+    if (event_data) {
+        EventActionData *event_action_data = (EventActionData *) event_data;
+
+        int *amount = (int *) event_action_data->event_data;
+        GridLayout *grid = (GridLayout *) event_action_data->action_args;
+
+        if (grid->renderer->window->mouse) {
+            // check if the mouse is hovering the panel
+            if (mousePos.x >= grid->transform->rect.x && mousePos.x <= (grid->transform->rect.x + grid->transform->rect.w) && 
+                mousePos.y >= grid->transform->rect.y && mousePos.y <= (grid->transform->rect.y + grid->transform->rect.h)) {
+                ui_layout_grid_scroll_up_actual (grid, *amount);
+            }
+        }
+    }
+
+}
+
+static void ui_layout_grid_scroll_down_event (void *event_data) {
+
+    if (event_data) {
+        EventActionData *event_action_data = (EventActionData *) event_data;
+
+        int *amount = (int *) event_action_data->event_data;
+        GridLayout *grid = (GridLayout *) event_action_data->action_args;
+
+        if (grid->renderer->window->mouse) {
+            // check if the mouse is in the button
+            if (mousePos.x >= grid->transform->rect.x && mousePos.x <= (grid->transform->rect.x + grid->transform->rect.w) && 
+                mousePos.y >= grid->transform->rect.y && mousePos.y <= (grid->transform->rect.y + grid->transform->rect.h)) {
+                ui_layout_grid_scroll_down_actual (grid, *amount);
             }
         }
     }
