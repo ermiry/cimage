@@ -24,6 +24,9 @@ extern void app_ui_actionsbar_hide (void);
 
 /*** statusbar ***/
 
+// sets the total number of images being displayed in the status bar text
+extern int app_ui_statusbar_total_set (u32 total);
+
 extern void app_ui_statusbar_show (const char *foldername, u32 total);
 
 extern void app_ui_statusbar_hide (void);

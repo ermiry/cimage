@@ -26,15 +26,12 @@ Panel *images_panel = NULL;
 static Button *open_folder_button = NULL;
 static TextBox *open_folder_text = NULL;
 
-static Panel *statusbar = NULL;
-static TextBox *statusbar_foldername = NULL;
-static TextBox *statusbar_selected = NULL;
-static TextBox *statusbar_total = NULL;
-
 static SDL_Texture *overlay_texture = NULL;
 static SDL_Texture *selected_texture = NULL;
 
 /*** sidebar ***/
+
+#pragma region sidebar
 
 #define SIDEBAR_WIDTH           100
 
@@ -84,7 +81,11 @@ static void sidebar_end (void) {
 
 }
 
-# pragma region actions
+#pragma endregion
+
+/*** actions bar ***/
+
+#pragma region actions
 
 #define ACTIONSBAR_HEIGHT           50
 
@@ -167,7 +168,36 @@ static void actionsbar_end (void) {
 
 #pragma endregion
 
+#pragma region status
+
+static Panel *statusbar = NULL;
+static TextBox *statusbar_foldername = NULL;
+static TextBox *statusbar_selected = NULL;
+static TextBox *statusbar_total = NULL;
+
 #define STATUS_BAR_HEIGHT           50
+
+// sets the total number of images being displayed in the status bar text
+int app_ui_statusbar_total_set (u32 total) {
+
+    int retval = 1;
+
+    if (statusbar_total) {
+        char *status = c_string_create ("Total: %d", total);
+        if (status) {
+            printf ("%s\n", status);
+            ui_textbox_update_text (statusbar_total, renderer_get_by_name ("main"), status);
+            // ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
+
+            free (status);
+
+            retval = 0 ;
+        }
+    }
+
+    return retval;
+
+}
 
 static void statusbar_init (void) {
 
@@ -269,6 +299,8 @@ static void statusbar_end (void) {
     if (statusbar_total) ui_element_destroy (statusbar_total->ui_element);
 
 }
+
+#pragma endregion
 
 #include "cengine/ui/dropdown.h"
 

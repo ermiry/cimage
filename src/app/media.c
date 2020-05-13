@@ -274,7 +274,8 @@ void media_search (void *args) {
             }
         }
 
-        // TODO: update status bar with counter
+        // update images count in status bar
+        app_ui_statusbar_total_set (ui_layout_grid_get_elements_count (grid));
 
         str_delete (query);
     }
