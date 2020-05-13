@@ -155,6 +155,13 @@ static void *media_load (void *folder_name_ptr) {
                     app_ui_image_create (((MediaItem *) le->data));
                     app_ui_image_display (((MediaItem *) le->data)->image);
                 }
+
+                // printf ("\n\n\n");
+                // UIElement *ui_element = NULL;
+                // for (ListElement *le = dlist_start (images_panel->children); le; le = le->next) {
+                //     ui_element = (UIElement *) le->data;
+                //     printf ("x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+                // }
             }
             
             else {
