@@ -386,8 +386,8 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
 
-    u32 screen_width = main_renderer->window->window_size.width;
-    u32 screen_height = main_renderer->window->window_size.height;
+    u32 window_width = main_renderer->window->window_size.width;
+    u32 window_height = main_renderer->window->window_size.height;
 
     // remove past buttons
     open_folder_button->ui_element->active = false;
@@ -396,22 +396,25 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
     u32 n_actual_rows = n_images / n_cols;         // total rows for the layout
     n_actual_rows += 1;
 
-    u32 panel_width = (screen_width - 100);
-    // u32 panel_height = (screen_height / n_rows) * n_actual_rows;
-    u32 panel_height = screen_height - ACTIONSBAR_HEIGHT - STATUS_BAR_HEIGHT;
-    printf ("app_ui_images_set_ui_elements () - panel_width: %d - panel_height: %d\n", panel_width, panel_height);
+    u32 panel_width = (window_width - 100);
+    u32 panel_height = window_height - ACTIONSBAR_HEIGHT - STATUS_BAR_HEIGHT;
+    printf ("\nSTART: app_ui_images_set_ui_elements () - panel_width: %d - panel_height: %d\n", panel_width, panel_height);
 
     // set images panel grid layout for images
     images_panel = ui_panel_create (SIDEBAR_WIDTH, ACTIONSBAR_HEIGHT, panel_width, panel_height, UI_POS_FREE, main_renderer);
     ui_panel_layout_set (images_panel, LAYOUT_TYPE_GRID, main_renderer);
 
-    u32 cell_width = (screen_width - 100) / n_cols;
-    u32 cell_height = (screen_height / n_rows);
-    printf ("app_ui_images_set_ui_elements () - cell width: %d - cell height: %d\n", cell_width, cell_height);
+    u32 cell_width = (window_width - 100) / n_cols;
+    u32 cell_height = (window_height / n_rows);
+    //  printf ("\nSTART: cols %d - rows %d\n", n_cols, n_rows);
+    // printf ("\nSTART: cell_width %d - cell_height %d\n", cell_width, cell_height);
 
+    // 14/05/2020 - just like when creating an array in c, we only care about the col count (x)
+    // the row count is pretty much irrelevant
     GridLayout *grid = (GridLayout *) images_panel->layout;
     ui_layout_grid_set_x_axis_alignment (grid, ALIGN_KEEP_SIZE);
 	ui_layout_grid_set_y_axis_alignment (grid, ALIGN_KEEP_SIZE);
+    ui_layout_grid_set_grid (grid, n_cols, n_actual_rows);
 	ui_layout_grid_set_elements_x_row (grid, n_cols);
 	ui_layout_grid_set_elements_x_col (grid, n_actual_rows);
     ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
