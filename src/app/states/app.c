@@ -120,6 +120,9 @@ static void main_renderer_update (void *args) {
 
 extern Panel *images_panel;
 
+static int zoom_level = 0;
+
+// TODO: display zoom level in status bar
 void zoom_more (void *args) {
 
     // get window with keyboard focus
@@ -132,13 +135,31 @@ void zoom_more (void *args) {
     if (!strcmp (window->renderer->name->str, "main")) {
         if (images_panel) {
             GridLayout *grid =  (GridLayout *) images_panel->layout;
-            ui_layout_grid_update_dimensions (grid, grid->cols - 1, grid->rows - 1);
-            // printf ("+\n");
+
+            if ((grid->cols - 1) > 1) {
+                Renderer *main_renderer = renderer_get_by_name ("main");
+
+                u32 window_width = main_renderer->window->window_size.width;
+                u32 window_height = main_renderer->window->window_size.height;
+
+                zoom_level -= 1;
+
+                u32 cols = (grid->cols - 1);
+                u32 rows = 4 + zoom_level;
+                // printf ("\n\ncols %d - rows %d\n\n", cols, rows);
+
+                u32 cell_width = (window_width - 100) / cols;
+                u32 cell_height = (window_height / rows);
+
+                ui_layout_grid_update_size (grid, cols, cell_width, cell_height);
+                printf ("+\n");
+            }
         }
     }
 
 }
 
+// TODO: display zoom level in status bar
 void zoom_less (void *args) {
 
     // get window with keyboard focus
@@ -151,8 +172,26 @@ void zoom_less (void *args) {
     if (!strcmp (window->renderer->name->str, "main")) {
         if (images_panel) {
             GridLayout *grid =  (GridLayout *) images_panel->layout;
-            ui_layout_grid_update_dimensions (grid, grid->cols + 1, grid->rows + 1);
-            // printf ("-\n");
+
+            if ((grid->cols + 1) < 20) {
+                Renderer *main_renderer = renderer_get_by_name ("main");
+
+                u32 window_width = main_renderer->window->window_size.width;
+                u32 window_height = main_renderer->window->window_size.height;
+                
+                zoom_level += 1;
+
+                u32 cols = (grid->cols + 1);
+                u32 rows = 4 + zoom_level;
+                // printf ("\n\ncols %d - rows %d\n\n", cols, rows);
+
+                u32 cell_width = (window_width - 100) / cols;
+                u32 cell_height = (window_height / rows);
+
+                ui_layout_grid_update_size (grid, cols, cell_width, cell_height);
+
+                printf ("-\n");
+            }
         }
     }
 
