@@ -136,7 +136,8 @@ void zoom_more (void *args) {
         if (images_panel) {
             GridLayout *grid =  (GridLayout *) images_panel->layout;
 
-            if ((grid->cols - 1) > 1) {
+            // FIXME: 14/05/2020 -- scroll not working with (grid->cols - 1) > 1
+            if ((grid->cols - 1) > 2) {
                 Renderer *main_renderer = renderer_get_by_name ("main");
 
                 u32 window_width = main_renderer->window->window_size.width;

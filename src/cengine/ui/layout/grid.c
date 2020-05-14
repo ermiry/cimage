@@ -98,6 +98,9 @@ static void grid_element_update_ui_elements_pos (GridElement *grid_element) {
         UIElement *ui_element = grid_element->ui_element;
 
         if (ui_element) {
+            // ui_element->transform->rect.x = grid_element->transform->rect.x;
+            // ui_element->transform->rect.y = grid_element->transform->rect.y;
+
             // printf ("BEFORE: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
 
             UITransform *trans = ui_transform_component_create (
@@ -106,13 +109,14 @@ static void grid_element_update_ui_elements_pos (GridElement *grid_element) {
             );
 
             if (trans) {
-                 ui_transform_component_set_pos (
+                ui_transform_component_set_pos (
                     // ((Image *) grid_element->ui_element)->ui_element->transform, 
                     trans,
                     NULL, 
                     &grid_element->transform->rect, 
                     UI_POS_MIDDLE_CENTER, 
-                    false);
+                    false
+                );
 
                 ui_element->transform->rect.x = trans->rect.x;
                 ui_element->transform->rect.y = trans->rect.y;
@@ -553,6 +557,14 @@ int ui_layout_grid_update_size (GridLayout *grid, u32 cols, u32 cell_width, u32 
 
             ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
             // printf ("\ncell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
+
+            GridElement *grid_element = NULL;
+            for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+                grid_element = (GridElement *) le->data;
+
+                grid_element->transform->rect.w = cell_width;
+                grid_element->transform->rect.h = cell_height;
+            }
 
             ui_layout_grid_update_all_elements_size (grid);
 
