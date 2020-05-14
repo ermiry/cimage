@@ -313,6 +313,39 @@ GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h, Renderer *rendere
 
 }
 
+// 14/05/2020 -- 13:44- working for images in cimage
+// updates the grid with a new size (cols and rows)
+// returns 0 on success update, 1 on failure
+int ui_layout_grid_update_size (GridLayout *grid, u32 cols, u32 cell_width, u32 cell_height) {
+
+    int retval = 1;
+
+    if (grid) {
+        if (grid->elements) {
+            // printf ("\nBEFORE: cols %d - rows %d\n", grid->cols, grid->rows);
+            // printf ("\nBEFORE: cell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
+
+            grid->cols = cols;
+            // grid->rows = rows;       // we dont care about rows
+
+            // printf ("\n\ncols %d - rows %d\n\n", grid->cols, grid->rows);
+
+            grid->n_elements_x_row = cols;
+            // grid->n_elements_x_col = rows;
+
+            ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
+            // printf ("\ncell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
+
+            ui_layout_grid_update_all_elements_size (grid);
+
+            ui_layout_grid_update_all_elements_pos (grid);
+        }
+    }
+
+    return retval;
+
+}
+
 static void ui_layout_grid_get_layout_values (GridLayout *grid,
     u32 *x_size, u32 *y_size,
     u32 *x_padding, u32 *y_padding) {

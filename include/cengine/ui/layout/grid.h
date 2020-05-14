@@ -89,13 +89,13 @@ extern void ui_layout_grid_toggle_scrolling (GridLayout *grid, bool enable);
 // sets how fast the elements move when scrolling, the default is a value of 5
 extern void ui_layout_grid_set_scroll_sensitivity (GridLayout *grid, u32 sensitivity);
 
-// updates the grid with a new size
-// returns 0 on success update, 1 on failure
-extern int ui_layout_grid_update_dimensions (GridLayout *grid, u32 cols, u32 rows);
-
 // creates a new grid layout
 // x and y for position, w and h for dimensions
 extern GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h, struct _Renderer *renderer);
+
+// updates the grid with a new size (cols and rows)
+// returns 0 on success update, 1 on failure
+extern int ui_layout_grid_update_size (GridLayout *grid, u32 cols, u32 cell_width, u32 cell_height);
 
 // adds a new element to the grid in the specified pos (0 indexed)
 // if its greater than the current size, it will be added at the end
