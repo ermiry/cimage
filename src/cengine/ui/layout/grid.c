@@ -204,117 +204,6 @@ void ui_layout_grid_set_scroll_sensitivity (GridLayout *grid, u32 sensitivity) {
 
 }
 
-static void ui_layout_grid_update_image_size (GridLayout *grid, GridElement *element) {
-
-    if (grid && element) {
-        u32 max_width = grid->cell_width - grid->cell_padding_x;      // Max width for the image
-        u32 max_height = grid->cell_height - grid->cell_padding_y;    // Max height for the image
-        float ratio = 0;                            // Used for aspect ratio
-        u32 width = element->original_width;        // Current image width
-        u32 height = element->original_height;      // Current image height
-
-        u32 new_width = element->original_width;
-        u32 new_height = element->original_height;
-
-        // Check if the current width is larger than the max
-        if (width > max_width) {
-            ratio = (float) max_width / width;      // get ratio for scaling image
-            new_width = max_width;                  // Set new width
-            new_height *= ratio;                    // Scale height based on ratio
-            height = height * ratio;                // Reset height to match scaled image
-            width = width * ratio;                  // Reset width to match scaled image
-        }
-
-        // Check if current height is larger than max
-        if (height > max_height) {
-            ratio = (float) max_height / height;    // get ratio for scaling image
-            new_height = max_height;                // Set new height
-            new_width *= ratio;                     // Scale width based on ratio
-            width = width * ratio;                  // Reset width to match scaled image
-            height = height * ratio;                // Reset height to match scaled image
-        }
-
-        // printf ("new: %d x %d\n", element->trans->rect.w, element->trans->rect.h);
-        element->ui_element->transform->rect.w = new_width;
-        element->ui_element->transform->rect.h = new_height;
-    }
-
-}
-
-static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *grid_element) {
-
-    if (grid && grid_element) {
-        switch (grid_element->ui_element->type) {
-            case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
-
-            default: break;
-        }
-    }
-
-}
-
-static void ui_layout_grid_update_all_elements_size (GridLayout *grid) {
-
-    if (grid) {
-        GridElement *grid_element = NULL;
-        for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-            ui_layout_grid_update_element_size (grid, (GridElement *) le->data);
-        }
-    }
-
-}
-
-// creates a new grid layout
-// x and y for position, w and h for dimensions
-GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h, Renderer *renderer) {
-
-    GridLayout *grid = ui_layout_grid_new ();
-
-    if (grid) {
-        grid->renderer = renderer;
-
-        grid->transform = ui_transform_component_create (x, y, w, h);
-
-        grid->elements = dlist_init (grid_element_delete, grid_element_comparator_by_ui_element);
-    }
-
-    return grid;
-
-}
-
-// 14/05/2020 -- 13:44- working for images in cimage
-// updates the grid with a new size (cols and rows)
-// returns 0 on success update, 1 on failure
-int ui_layout_grid_update_size (GridLayout *grid, u32 cols, u32 cell_width, u32 cell_height) {
-
-    int retval = 1;
-
-    if (grid) {
-        if (grid->elements) {
-            // printf ("\nBEFORE: cols %d - rows %d\n", grid->cols, grid->rows);
-            // printf ("\nBEFORE: cell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
-
-            grid->cols = cols;
-            // grid->rows = rows;       // we dont care about rows
-
-            // printf ("\n\ncols %d - rows %d\n\n", grid->cols, grid->rows);
-
-            grid->n_elements_x_row = cols;
-            // grid->n_elements_x_col = rows;
-
-            ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
-            // printf ("\ncell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
-
-            ui_layout_grid_update_all_elements_size (grid);
-
-            ui_layout_grid_update_all_elements_pos (grid);
-        }
-    }
-
-    return retval;
-
-}
-
 static void ui_layout_grid_get_layout_values (GridLayout *grid,
     u32 *x_size, u32 *y_size,
     u32 *x_padding, u32 *y_padding) {
@@ -474,6 +363,117 @@ static void ui_layout_grid_update_all_elements_pos (GridLayout *grid) {
             }
         }
     }
+
+}
+
+static void ui_layout_grid_update_image_size (GridLayout *grid, GridElement *element) {
+
+    if (grid && element) {
+        u32 max_width = grid->cell_width - grid->cell_padding_x;      // Max width for the image
+        u32 max_height = grid->cell_height - grid->cell_padding_y;    // Max height for the image
+        float ratio = 0;                            // Used for aspect ratio
+        u32 width = element->original_width;        // Current image width
+        u32 height = element->original_height;      // Current image height
+
+        u32 new_width = element->original_width;
+        u32 new_height = element->original_height;
+
+        // Check if the current width is larger than the max
+        if (width > max_width) {
+            ratio = (float) max_width / width;      // get ratio for scaling image
+            new_width = max_width;                  // Set new width
+            new_height *= ratio;                    // Scale height based on ratio
+            height = height * ratio;                // Reset height to match scaled image
+            width = width * ratio;                  // Reset width to match scaled image
+        }
+
+        // Check if current height is larger than max
+        if (height > max_height) {
+            ratio = (float) max_height / height;    // get ratio for scaling image
+            new_height = max_height;                // Set new height
+            new_width *= ratio;                     // Scale width based on ratio
+            width = width * ratio;                  // Reset width to match scaled image
+            height = height * ratio;                // Reset height to match scaled image
+        }
+
+        // printf ("new: %d x %d\n", element->trans->rect.w, element->trans->rect.h);
+        element->ui_element->transform->rect.w = new_width;
+        element->ui_element->transform->rect.h = new_height;
+    }
+
+}
+
+static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *grid_element) {
+
+    if (grid && grid_element) {
+        switch (grid_element->ui_element->type) {
+            case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
+
+            default: break;
+        }
+    }
+
+}
+
+static void ui_layout_grid_update_all_elements_size (GridLayout *grid) {
+
+    if (grid) {
+        GridElement *grid_element = NULL;
+        for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+            ui_layout_grid_update_element_size (grid, (GridElement *) le->data);
+        }
+    }
+
+}
+
+// creates a new grid layout
+// x and y for position, w and h for dimensions
+GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h, Renderer *renderer) {
+
+    GridLayout *grid = ui_layout_grid_new ();
+
+    if (grid) {
+        grid->renderer = renderer;
+
+        grid->transform = ui_transform_component_create (x, y, w, h);
+
+        grid->elements = dlist_init (grid_element_delete, grid_element_comparator_by_ui_element);
+    }
+
+    return grid;
+
+}
+
+// 14/05/2020 -- 13:44- working for images in cimage
+// updates the grid with a new size (cols and rows)
+// returns 0 on success update, 1 on failure
+int ui_layout_grid_update_size (GridLayout *grid, u32 cols, u32 cell_width, u32 cell_height) {
+
+    int retval = 1;
+
+    if (grid) {
+        if (grid->elements) {
+            // printf ("\nBEFORE: cols %d - rows %d\n", grid->cols, grid->rows);
+            // printf ("\nBEFORE: cell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
+
+            grid->cols = cols;
+            // grid->rows = rows;       // we dont care about rows
+
+            // printf ("\n\ncols %d - rows %d\n\n", grid->cols, grid->rows);
+
+            grid->n_elements_x_row = cols;
+            // grid->n_elements_x_col = rows;
+
+            ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
+            // printf ("\ncell_width %d - cell_height %d\n", grid->cell_width, grid->cell_height);
+
+            ui_layout_grid_update_all_elements_size (grid);
+
+            ui_layout_grid_update_all_elements_pos (grid);
+        }
+    }
+
+    return retval;
 
 }
 
