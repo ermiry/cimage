@@ -16,9 +16,17 @@ struct _Renderer;
 
 typedef struct GridElement {
 
-    UIElement *ui_element;
-    u32 original_width, original_height;
+    UITransform *transform;
+
+    // position in the grid
     u32 x, y;
+
+    // the ui element inside the grid element
+    UIElement *ui_element;
+
+    // used for correctly scaling images
+    u32 ui_element_original_width;
+    u32 ui_element_original_height;
 
 } GridElement;
 

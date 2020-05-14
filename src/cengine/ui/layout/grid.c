@@ -22,16 +22,20 @@ static void ui_layout_grid_scroll_down_event (void *event_data);
 
 #pragma region grid element
 
-static GridElement *grid_element_new (UIElement *ui_element, u32 width, u32 height) {
+static GridElement *grid_element_new (void) {
 
-    GridElement *element = (GridElement *) malloc (sizeof (GridElement));
-    if (element) {
-        element->ui_element = ui_element;
-        element->original_width = width;
-        element->original_height = height;
+    GridElement *grid_element = (GridElement *) malloc (sizeof (GridElement));
+    if (grid_element) {
+        grid_element->transform = NULL;
+
+        grid_element->x = grid_element->y = 0;
+
+        grid_element->ui_element = NULL;
+        grid_element->ui_element_original_width = 0;
+        grid_element->ui_element_original_height = 0;
     }
 
-    return element;
+    return grid_element;
 
 }
 
@@ -64,6 +68,25 @@ static int grid_element_comparator_by_ui_element (const void *a, const void *b) 
     if (a && !b) return -1;
     else if (!a && b) return 1;
     return 0;
+
+}
+
+static GridElement *grid_element_create (GridLayout *grid, 
+    UIElement *ui_element, u32 ui_element_width, u32 ui_element_height) {
+
+    GridElement *grid_element = (GridElement *) malloc (sizeof (GridElement));
+    if (grid_element) {
+        grid_element->transform = ui_transform_component_create (
+            0, 0,                                       // pos
+            grid->cell_width, grid->cell_height         // size
+        );
+
+        grid_element->ui_element = ui_element;
+        grid_element->ui_element_original_width = ui_element_width;
+        grid_element->ui_element_original_height = ui_element_height;
+    }
+
+    return grid_element;
 
 }
 
@@ -289,50 +312,53 @@ static void ui_layout_grid_set_element_pos (GridLayout *grid,
     u32 x_padding, u32 y_padding) {
 
     if (grid && grid_element) {
-        UITransform *transform = grid_element->ui_element->transform;
+        UITransform *transform = grid_element->transform;
+        // UITransform *transform = grid_element->ui_element->transform;
 
-        switch (grid->align_x) {
-            case ALIGN_KEEP_SIZE: {
-                // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count);
-                // transform->rect.x = 0 + (x_size * grid->x_count);
-                transform->rect.x = 0 + (x_size * x_count);
-            } break;
+        if (transform) {
+            switch (grid->align_x) {
+                case ALIGN_KEEP_SIZE: {
+                    // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count);
+                    // transform->rect.x = 0 + (x_size * grid->x_count);
+                    transform->rect.x = 0 + (x_size * x_count);
+                } break;
 
-            case ALIGN_PADDING_ALL: {
-                // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
-                // transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
-                transform->rect.x = 0 + (x_size * x_count) + (x_padding * (x_count + 1));
-            } break;
+                case ALIGN_PADDING_ALL: {
+                    // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
+                    // transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
+                    transform->rect.x = 0 + (x_size * x_count) + (x_padding * (x_count + 1));
+                } break;
 
-            case ALIGN_PADDING_BETWEEN: {
-                // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count) + (x_padding * grid->x_count);
-                // transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * grid->x_count);
-                transform->rect.x = 0 + (x_size * x_count) + (x_padding * x_count);
-            } break;
+                case ALIGN_PADDING_BETWEEN: {
+                    // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count) + (x_padding * grid->x_count);
+                    // transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * grid->x_count);
+                    transform->rect.x = 0 + (x_size * x_count) + (x_padding * x_count);
+                } break;
 
-            default: break;
-        }
+                default: break;
+            }
 
-        switch (grid->align_y) {
-            case ALIGN_KEEP_SIZE: {
-                // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count);
-                // transform->rect.y = 0 + (y_size * grid->y_count);
-                transform->rect.y = 0 + (y_size * y_count);
-            } break;
+            switch (grid->align_y) {
+                case ALIGN_KEEP_SIZE: {
+                    // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count);
+                    // transform->rect.y = 0 + (y_size * grid->y_count);
+                    transform->rect.y = 0 + (y_size * y_count);
+                } break;
 
-            case ALIGN_PADDING_ALL: {
-                // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
-                // transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
-                transform->rect.y = 0 + (y_size * y_count) + (y_padding * (y_count + 1));
-            } break;
+                case ALIGN_PADDING_ALL: {
+                    // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
+                    // transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
+                    transform->rect.y = 0 + (y_size * y_count) + (y_padding * (y_count + 1));
+                } break;
 
-            case ALIGN_PADDING_BETWEEN: {
-                // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count) + (y_padding * grid->y_count);
-                // transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * grid->y_count);
-                transform->rect.y = 0 + (y_size * y_count) + (y_padding * y_count);
-            } break;
+                case ALIGN_PADDING_BETWEEN: {
+                    // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count) + (y_padding * grid->y_count);
+                    // transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * grid->y_count);
+                    transform->rect.y = 0 + (y_size * y_count) + (y_padding * y_count);
+                } break;
 
-            default: break;
+                default: break;
+            }
         }
     }
 
@@ -392,11 +418,11 @@ static void ui_layout_grid_update_image_size (GridLayout *grid, GridElement *ele
         u32 max_width = grid->cell_width - x_inner_padding;      // Max width for the image
         u32 max_height = grid->cell_height - y_inner_padding;    // Max height for the image
         float ratio = 0;                            // Used for aspect ratio
-        u32 width = element->original_width;        // Current image width
-        u32 height = element->original_height;      // Current image height
+        u32 width = element->ui_element_original_width;        // Current image width
+        u32 height = element->ui_element_original_height;      // Current image height
 
-        u32 new_width = element->original_width;
-        u32 new_height = element->original_height;
+        u32 new_width = element->ui_element_original_width;
+        u32 new_height = element->ui_element_original_height;
 
         // Check if the current width is larger than the max
         if (width > max_width) {
@@ -427,7 +453,9 @@ static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *g
 
     if (grid && grid_element) {
         switch (grid_element->ui_element->type) {
-            case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
+            case UI_IMAGE: 
+                ui_layout_grid_update_image_size (grid, grid_element); 
+                break;
 
             default: break;
         }
@@ -505,8 +533,10 @@ u8 ui_layout_grid_add_element_at_pos (GridLayout *grid, UIElement *ui_element, u
     u8 retval = 1;
 
     if (grid && ui_element) {
-        GridElement *grid_element = grid_element_new (ui_element, 
-            ui_element->transform->rect.w, ui_element->transform->rect.h);
+        // GridElement *grid_element = grid_element_new (ui_element, 
+        //     ui_element->transform->rect.w, ui_element->transform->rect.h);
+        GridElement *grid_element = grid_element_create (grid,
+            ui_element, ui_element->transform->rect.w, ui_element->transform->rect.h);
 
         if (grid_element) {
             grid_element->x = grid->x_count;
@@ -544,8 +574,10 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
 
     if (grid && ui_element) {
         // add element in next available idx -> at the end for now
-        GridElement *grid_element = grid_element_new (ui_element, 
-            ui_element->transform->rect.w, ui_element->transform->rect.h);
+        // GridElement *grid_element = grid_element_new (ui_element, 
+        //     ui_element->transform->rect.w, ui_element->transform->rect.h);
+        GridElement *grid_element = grid_element_create (grid,
+            ui_element, ui_element->transform->rect.w, ui_element->transform->rect.h);
 
         if (grid_element) {
             grid_element->x = grid->x_count;
@@ -576,7 +608,7 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                     grid->x_count, grid->y_count,
                     x_padding, y_padding);
 
-                // printf ("x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+                printf ("grid element: x %d - y %d\n", grid_element->transform->rect.x, grid_element->transform->rect.y);
 
                 if (grid->x_count < (grid->cols - 1)) grid->x_count += 1;
                 else {
@@ -584,8 +616,27 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                     grid->y_count += 1;
                 }
 
+                // printf ("BEFORE: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+
                 // update element size if necesary
                 ui_layout_grid_update_element_size (grid, grid_element);
+
+                // UITransform *trans = ui_transform_component_create (0, 0, ui_element->transform->rect.w, ui_element->transform->rect.h);
+
+                // ui_transform_component_set_pos (
+                //     // ((Image *) grid_element->ui_element)->ui_element->transform, 
+                //     trans,
+                //     NULL, 
+                //     &grid_element->transform->rect, 
+                //     UI_POS_MIDDLE_CENTER, 
+                //     false);
+
+                // ui_transform_component_delete (trans);
+
+                // ui_element->transform->rect.x = trans->rect.x;
+                // ui_element->transform->rect.y = trans->rect.y;
+
+                // printf ("AFTER: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
 
                 retval = 0;
             }
@@ -714,7 +765,7 @@ static void ui_layout_grid_scroll_down_actual (GridLayout *grid, int amount) {
 
     if (grid) {
         // printf ("down!\n");
-        // printf ("+%d\n", *amount);
+        // printf ("+%d\n", amount);
 
         if (dlist_size (grid->elements) > 0) {
             // check the pos of the last element
