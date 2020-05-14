@@ -15,6 +15,8 @@
 #include "cengine/ui/textbox.h"
 #include "cengine/ui/panel.h"
 
+static void ui_layout_grid_update_all_elements_pos (GridLayout *grid);
+
 static void ui_layout_grid_scroll_up_event (void *event_data);
 static void ui_layout_grid_scroll_down_event (void *event_data);
 
@@ -239,59 +241,26 @@ static void ui_layout_grid_update_image_size (GridLayout *grid, GridElement *ele
 
 }
 
-// FIXME: 06/02/2020 -- do we still need this?
-// FIXME: we need to update the panel size
-// updates the grid with a new size
-// returns 0 on success update, 1 on failure
-int ui_layout_grid_update_dimensions (GridLayout *grid, u32 cols, u32 rows) {
+static void ui_layout_grid_update_element_size (GridLayout *grid, GridElement *grid_element) {
 
-    int retval = 1;
+    if (grid && grid_element) {
+        switch (grid_element->ui_element->type) {
+            case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
 
-    // if (grid) {
-    //     if (grid->elements) {
-    //         if (cols > 0 && rows > 0) {
-    //             grid->cols = cols;
-    //             grid->rows = rows;
-    //             // grid->curr_n_ui_elements = 0;
-    //             grid->next_x = 0;
-    //             grid->next_y = 0;
-    //             // grid->max_n_ui_elements = grid->cols * grid->rows;
+            default: break;
+        }
+    }
 
-    //             // grid->cell_width = (cols * grid->cell_width) / grid->cols;
-    //             // grid->cell_height = (cols * grid->cell_height) / grid->rows;
+}
 
-    //             grid->cell_width = grid->transform->rect.w / cols;
-    //             grid->cell_height = grid->transform->rect.h / rows;
-    //             // printf ("cell height: %d / %d\n", grid->transform->rect.h, rows);
-    //             // printf ("cell size: %d x %d\n", grid->cell_width, grid->cell_height);
-    //             grid->cell_padding_x = grid->cell_width * 0.1;
-    //             grid->cell_padding_y = grid->cell_height * 0.1;
+static void ui_layout_grid_update_all_elements_size (GridLayout *grid) {
 
-    //             GridElement *grid_element = NULL;
-    //             for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
-    //                 grid_element = (GridElement *) le->data;
-
-    //                 grid_element->x = grid->next_x;
-    //                 grid_element->y = grid->next_y;
-
-    //                 ui_layout_grid_update_element_size (grid, grid_element);
-    //                 ui_layout_grid_update_element_pos (grid, grid_element->ui_element->transform);
-
-    //                 // grid->curr_n_ui_elements += 1;
-
-    //                 if (grid->next_x < (grid->cols - 1)) grid->next_x += 1;
-    //                 else {
-    //                     grid->next_x = 0;
-    //                     grid->next_y += 1;
-    //                 } 
-    //             }
-
-    //             retval = 0;
-    //         }
-    //     }
-    // }
-
-    return retval;
+    if (grid) {
+        GridElement *grid_element = NULL;
+        for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
+            ui_layout_grid_update_element_size (grid, (GridElement *) le->data);
+        }
+    }
 
 }
 
@@ -419,17 +388,20 @@ static void ui_layout_grid_set_element_pos (GridLayout *grid,
         switch (grid->align_x) {
             case ALIGN_KEEP_SIZE: {
                 // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count);
-                transform->rect.x = 0 + (x_size * grid->x_count);
+                // transform->rect.x = 0 + (x_size * grid->x_count);
+                transform->rect.x = 0 + (x_size * x_count);
             } break;
 
             case ALIGN_PADDING_ALL: {
                 // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
-                transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
+                // transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * (grid->x_count + 1));
+                transform->rect.x = 0 + (x_size * x_count) + (x_padding * (x_count + 1));
             } break;
 
             case ALIGN_PADDING_BETWEEN: {
                 // transform->rect.x = grid->transform->rect.x + (x_size * grid->x_count) + (x_padding * grid->x_count);
-                transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * grid->x_count);
+                // transform->rect.x = 0 + (x_size * grid->x_count) + (x_padding * grid->x_count);
+                transform->rect.x = 0 + (x_size * x_count) + (x_padding * x_count);
             } break;
 
             default: break;
@@ -438,17 +410,20 @@ static void ui_layout_grid_set_element_pos (GridLayout *grid,
         switch (grid->align_y) {
             case ALIGN_KEEP_SIZE: {
                 // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count);
-                transform->rect.y = 0 + (y_size * grid->y_count);
+                // transform->rect.y = 0 + (y_size * grid->y_count);
+                transform->rect.y = 0 + (y_size * y_count);
             } break;
 
             case ALIGN_PADDING_ALL: {
                 // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
-                transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
+                // transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * (grid->y_count + 1));
+                transform->rect.y = 0 + (y_size * y_count) + (y_padding * (y_count + 1));
             } break;
 
             case ALIGN_PADDING_BETWEEN: {
                 // transform->rect.y = grid->transform->rect.y + (y_size * grid->y_count) + (y_padding * grid->y_count);
-                transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * grid->y_count);
+                // transform->rect.y = 0 + (y_size * grid->y_count) + (y_padding * grid->y_count);
+                transform->rect.y = 0 + (y_size * y_count) + (y_padding * y_count);
             } break;
 
             default: break;
@@ -461,9 +436,6 @@ static void ui_layout_grid_set_element_pos (GridLayout *grid,
 static void ui_layout_grid_update_all_elements_pos (GridLayout *grid) {
 
     if (grid) {
-        u32 n_elements_x_row = grid->n_elements_x_row;
-        u32 n_elements_x_col = grid->n_elements_x_col;
-        
         // cell size
         u32 x_size = 0;
         u32 y_size = 0;
@@ -478,27 +450,28 @@ static void ui_layout_grid_update_all_elements_pos (GridLayout *grid) {
         u32 x_count = 0;
         u32 y_count = 0;
 
-        // u32 x_offset = 0;
-        // u32 y_offset = 0;
-
         GridElement *grid_element = NULL;
-        UITransform *transform = NULL;
         for (ListElement *le = dlist_start (grid->elements); le; le = le->next) {
             grid_element = (GridElement *) le->data;
-            transform = grid_element->ui_element->transform;
 
-            if (x_count >= n_elements_x_row) {
-                x_count = 0;
-                y_count += 1;
-            }
+            // printf ("x_count: %d, y_count: %d\n", x_count, y_count);
+            // printf ("x_size: %d, y_size: %d\n", x_size, y_size);
+            // printf ("x_padding: %d, y_padding: %d\n", x_padding, y_padding);
             
-            ui_layout_grid_set_element_pos (grid,
+            ui_layout_grid_set_element_pos (grid, 
                 grid_element,
                 x_size, y_size,
                 x_count, y_count,
                 x_padding, y_padding);
 
-            x_count += 1;
+            // printf ("x %d - y %d\n", grid_element->ui_element->transform->rect.x, grid_element->ui_element->transform->rect.y);
+            // printf ("x_count %d < %d\n", x_count, grid->cols -1);
+
+            if (x_count < (grid->cols - 1)) x_count += 1;
+            else {
+                x_count = 0;
+                y_count += 1;
+            }
         }
     }
 
@@ -529,11 +502,7 @@ u8 ui_layout_grid_add_element_at_pos (GridLayout *grid, UIElement *ui_element, u
                 }
 
                 // update element size if necesary
-                switch (grid_element->ui_element->type) {
-                    case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
-
-                    default: break;
-                }
+                ui_layout_grid_update_element_size (grid, grid_element);
 
                 retval = 0;
             }
@@ -589,10 +558,6 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
 
                 // printf ("x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
 
-                // ui_layout_grid_update_all_elements_pos (grid);
-
-                // grid->x_count += 1;
-
                 if (grid->x_count < (grid->cols - 1)) grid->x_count += 1;
                 else {
                     grid->x_count = 0;
@@ -600,11 +565,7 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                 }
 
                 // update element size if necesary
-                switch (grid_element->ui_element->type) {
-                    case UI_IMAGE: ui_layout_grid_update_image_size (grid, grid_element); break;
-
-                    default: break;
-                }
+                ui_layout_grid_update_element_size (grid, grid_element);
 
                 retval = 0;
             }
