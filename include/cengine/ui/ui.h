@@ -47,6 +47,9 @@ struct _UIElement {
     void *element;
     struct _UITransform *transform;
 
+    // 14/05/2020 - fixes mouse check pos when the element is a panel's child
+    int abs_offset_x, abs_offset_y;
+
     struct _UIElement *parent;
 
 };

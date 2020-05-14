@@ -45,6 +45,8 @@ static UIElement *ui_element_new (void) {
         ui_element->type = UI_NONE;
         ui_element->element = NULL;
         ui_element->transform = NULL;
+        ui_element->abs_offset_x = 0;
+        ui_element->abs_offset_y = 0;
 
         ui_element->parent = NULL;
     }

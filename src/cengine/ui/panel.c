@@ -437,6 +437,9 @@ void ui_panel_child_add (Panel *panel, UIElement *ui_element) {
 
         ui_panel_child_update_pos (panel, ui_element);
 
+        ui_element->abs_offset_x = panel->ui_element->transform->rect.x;
+        ui_element->abs_offset_y = panel->ui_element->transform->rect.y;
+
         ui_element->parent = panel->ui_element;
     }
 
