@@ -418,6 +418,7 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 	ui_layout_grid_set_elements_x_row (grid, n_cols);
 	ui_layout_grid_set_elements_x_col (grid, n_actual_rows);
     ui_layout_grid_set_cell_size (grid, cell_width, cell_height);
+    ui_layout_grid_set_cell_inner_padding (grid, 0.05, 0.05);
 	ui_layout_grid_toggle_scrolling (grid, true);
 	ui_layout_grid_set_scroll_sensitivity (grid, 20);
 

@@ -20,6 +20,8 @@ static void ui_layout_grid_update_all_elements_pos (GridLayout *grid);
 static void ui_layout_grid_scroll_up_event (void *event_data);
 static void ui_layout_grid_scroll_down_event (void *event_data);
 
+#pragma region grid element
+
 static GridElement *grid_element_new (UIElement *ui_element, u32 width, u32 height) {
 
     GridElement *element = (GridElement *) malloc (sizeof (GridElement));
@@ -64,6 +66,10 @@ static int grid_element_comparator_by_ui_element (const void *a, const void *b) 
     return 0;
 
 }
+
+#pragma endregion
+
+#pragma region grid
 
 static GridLayout *ui_layout_grid_new (void) {
 
@@ -165,6 +171,17 @@ void ui_layout_grid_set_cell_padding (GridLayout *grid, u32 cell_padding_x, u32 
     if (grid) {
         grid->cell_padding_x = cell_padding_x;
         grid->cell_padding_y = cell_padding_y;
+    }
+
+}
+
+// sets the cell's inner padding percentage
+void ui_layout_grid_set_cell_inner_padding (GridLayout *grid, 
+    float cell_x_inner_padding_percentage, float cell_y_inner_padding_percentage) {
+
+    if (grid) {
+        grid->cell_x_inner_padding_percentage = cell_x_inner_padding_percentage;
+        grid->cell_y_inner_padding_percentage = cell_y_inner_padding_percentage;
     }
 
 }
@@ -369,8 +386,11 @@ static void ui_layout_grid_update_all_elements_pos (GridLayout *grid) {
 static void ui_layout_grid_update_image_size (GridLayout *grid, GridElement *element) {
 
     if (grid && element) {
-        u32 max_width = grid->cell_width - grid->cell_padding_x;      // Max width for the image
-        u32 max_height = grid->cell_height - grid->cell_padding_y;    // Max height for the image
+        float x_inner_padding = grid->cell_width * grid->cell_x_inner_padding_percentage;
+        float y_inner_padding = grid->cell_height * grid->cell_y_inner_padding_percentage;
+
+        u32 max_width = grid->cell_width - x_inner_padding;      // Max width for the image
+        u32 max_height = grid->cell_height - y_inner_padding;    // Max height for the image
         float ratio = 0;                            // Used for aspect ratio
         u32 width = element->original_width;        // Current image width
         u32 height = element->original_height;      // Current image height
@@ -642,6 +662,8 @@ void ui_layout_grid_destroy_ui_elements (GridLayout *grid) {
     }
 
 }
+
+#pragma endregion
 
 #pragma region scrolling
 
