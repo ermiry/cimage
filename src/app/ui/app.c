@@ -185,7 +185,7 @@ int app_ui_statusbar_total_set (u32 total) {
     if (statusbar_total) {
         char *status = c_string_create ("Total: %d", total);
         if (status) {
-            printf ("%s\n", status);
+            // printf ("%s\n", status);
             ui_textbox_update_text (statusbar_total, renderer_get_by_name ("main"), status);
             // ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
 
