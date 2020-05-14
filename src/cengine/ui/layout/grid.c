@@ -7,6 +7,7 @@
 #include "cengine/renderer.h"
 #include "cengine/events.h"
 
+#include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
 #include "cengine/ui/layout/grid.h"
 #include "cengine/ui/layout/align.h"
@@ -87,6 +88,41 @@ static GridElement *grid_element_create (GridLayout *grid,
     }
 
     return grid_element;
+
+}
+
+// updates the grid element's ui element's position
+static void grid_element_update_ui_elements_pos (GridElement *grid_element) {
+
+    if (grid_element) {
+        UIElement *ui_element = grid_element->ui_element;
+
+        if (ui_element) {
+            // printf ("BEFORE: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+
+            UITransform *trans = ui_transform_component_create (
+                0, 0, 
+                ui_element->transform->rect.w, ui_element->transform->rect.h
+            );
+
+            if (trans) {
+                 ui_transform_component_set_pos (
+                    // ((Image *) grid_element->ui_element)->ui_element->transform, 
+                    trans,
+                    NULL, 
+                    &grid_element->transform->rect, 
+                    UI_POS_MIDDLE_CENTER, 
+                    false);
+
+                ui_element->transform->rect.x = trans->rect.x;
+                ui_element->transform->rect.y = trans->rect.y;
+
+                ui_transform_component_delete (trans);
+            }
+
+            // printf ("AFTER: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+        }
+    }
 
 }
 
@@ -396,6 +432,9 @@ static void ui_layout_grid_update_all_elements_pos (GridLayout *grid) {
                 x_count, y_count,
                 x_padding, y_padding);
 
+            // updates the grid element's ui element's position
+            grid_element_update_ui_elements_pos (grid_element);
+
             // printf ("x %d - y %d\n", grid_element->ui_element->transform->rect.x, grid_element->ui_element->transform->rect.y);
             // printf ("x_count %d < %d\n", x_count, grid->cols -1);
 
@@ -554,6 +593,10 @@ u8 ui_layout_grid_add_element_at_pos (GridLayout *grid, UIElement *ui_element, u
                 // update element size if necesary
                 ui_layout_grid_update_element_size (grid, grid_element);
 
+                // updated in ui_layout_grid_update_all_elements_pos () called before this
+                // updates the grid element's ui element's position
+                // grid_element_update_ui_elements_pos (grid_element);
+
                 retval = 0;
             }
 
@@ -608,7 +651,7 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                     grid->x_count, grid->y_count,
                     x_padding, y_padding);
 
-                printf ("grid element: x %d - y %d\n", grid_element->transform->rect.x, grid_element->transform->rect.y);
+                // printf ("grid element: x %d - y %d\n", grid_element->transform->rect.x, grid_element->transform->rect.y);
 
                 if (grid->x_count < (grid->cols - 1)) grid->x_count += 1;
                 else {
@@ -616,27 +659,11 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                     grid->y_count += 1;
                 }
 
-                // printf ("BEFORE: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
-
                 // update element size if necesary
                 ui_layout_grid_update_element_size (grid, grid_element);
 
-                // UITransform *trans = ui_transform_component_create (0, 0, ui_element->transform->rect.w, ui_element->transform->rect.h);
-
-                // ui_transform_component_set_pos (
-                //     // ((Image *) grid_element->ui_element)->ui_element->transform, 
-                //     trans,
-                //     NULL, 
-                //     &grid_element->transform->rect, 
-                //     UI_POS_MIDDLE_CENTER, 
-                //     false);
-
-                // ui_transform_component_delete (trans);
-
-                // ui_element->transform->rect.x = trans->rect.x;
-                // ui_element->transform->rect.y = trans->rect.y;
-
-                // printf ("AFTER: ui element: x %d - y %d\n", ui_element->transform->rect.x, ui_element->transform->rect.y);
+                // updates the grid element's ui element's position
+                grid_element_update_ui_elements_pos (grid_element);
 
                 retval = 0;
             }

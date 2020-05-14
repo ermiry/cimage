@@ -152,7 +152,8 @@ void zoom_more (void *args) {
                 u32 cell_height = (window_height / rows);
 
                 ui_layout_grid_update_size (grid, cols, cell_width, cell_height);
-                printf ("+\n");
+
+                // printf ("+\n");
             }
         }
     }
@@ -190,7 +191,7 @@ void zoom_less (void *args) {
 
                 ui_layout_grid_update_size (grid, cols, cell_width, cell_height);
 
-                printf ("-\n");
+                // printf ("-\n");
             }
         }
     }
