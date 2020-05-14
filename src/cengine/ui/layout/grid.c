@@ -92,7 +92,7 @@ static GridElement *grid_element_create (GridLayout *grid,
 }
 
 // updates the grid element's ui element's position
-static void grid_element_update_ui_elements_pos (GridElement *grid_element) {
+static void grid_element_update_ui_elements_pos (GridLayout *grid, GridElement *grid_element) {
 
     if (grid_element) {
         UIElement *ui_element = grid_element->ui_element;
@@ -114,7 +114,7 @@ static void grid_element_update_ui_elements_pos (GridElement *grid_element) {
                     trans,
                     NULL, 
                     &grid_element->transform->rect, 
-                    UI_POS_MIDDLE_CENTER, 
+                    grid->cell_pos, 
                     false
                 );
 
@@ -246,6 +246,13 @@ void ui_layout_grid_set_cell_inner_padding (GridLayout *grid,
         grid->cell_x_inner_padding_percentage = cell_x_inner_padding_percentage;
         grid->cell_y_inner_padding_percentage = cell_y_inner_padding_percentage;
     }
+
+}
+
+// sets the ui position to be used for grid element's, by the default it is UI_POS_MIDDLE_CENTER
+void ui_layout_grid_set_cell_position (GridLayout *grid, UIPosition pos) {
+
+    if (grid) grid->cell_pos = pos;
 
 }
 
@@ -437,7 +444,7 @@ static void ui_layout_grid_update_all_elements_pos (GridLayout *grid) {
                 x_padding, y_padding);
 
             // updates the grid element's ui element's position
-            grid_element_update_ui_elements_pos (grid_element);
+            grid_element_update_ui_elements_pos (grid, grid_element);
 
             // printf ("x %d - y %d\n", grid_element->ui_element->transform->rect.x, grid_element->ui_element->transform->rect.y);
             // printf ("x_count %d < %d\n", x_count, grid->cols -1);
@@ -529,6 +536,8 @@ GridLayout *ui_layout_grid_create (i32 x, i32 y, u32 w, u32 h, Renderer *rendere
         grid->transform = ui_transform_component_create (x, y, w, h);
 
         grid->elements = dlist_init (grid_element_delete, grid_element_comparator_by_ui_element);
+
+        grid->cell_pos = UI_POS_MIDDLE_CENTER;
     }
 
     return grid;
@@ -675,7 +684,7 @@ u8 ui_layout_grid_add_element_at_end (GridLayout *grid, UIElement *ui_element) {
                 ui_layout_grid_update_element_size (grid, grid_element);
 
                 // updates the grid element's ui element's position
-                grid_element_update_ui_elements_pos (grid_element);
+                grid_element_update_ui_elements_pos (grid, grid_element);
 
                 retval = 0;
             }

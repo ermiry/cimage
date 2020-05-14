@@ -57,6 +57,7 @@ typedef struct GridLayout {
     // 14/05/2020
     float cell_x_inner_padding_percentage;
     float cell_y_inner_padding_percentage;
+    UIPosition cell_pos;
 
     AxisAlignment align_x;
     AxisAlignment align_y;
@@ -92,6 +93,9 @@ extern void ui_layout_grid_set_cell_padding (GridLayout *grid, u32 cell_padding_
 // sets the cell's inner padding percentage
 extern void ui_layout_grid_set_cell_inner_padding (GridLayout *grid, 
     float cell_x_inner_padding_percentage, float cell_y_inner_padding_percentage);
+
+// sets the ui position to be used for grid element's, by the default it is UI_POS_MIDDLE_CENTER
+extern void ui_layout_grid_set_cell_position (GridLayout *grid, UIPosition pos);
 
 // sets the alignment to use in the x axis
 extern void ui_layout_grid_set_x_axis_alignment (GridLayout *grid, AxisAlignment align);
