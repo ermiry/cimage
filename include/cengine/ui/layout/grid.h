@@ -5,6 +5,7 @@
 #include "cengine/collections/dlist.h"
 
 #include "cengine/renderer.h"
+#include "cengine/events.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
@@ -64,6 +65,9 @@ typedef struct GridLayout {
 
     bool scrolling;             // enable / disable scrolling
     u32 scroll_sensitivity;     // how fast the elements move
+    EventAction *event_scroll_up;
+    EventAction *event_scroll_down;
+
 
 } GridLayout;
 

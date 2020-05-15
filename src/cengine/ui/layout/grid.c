@@ -151,8 +151,12 @@ static GridLayout *ui_layout_grid_new (void) {
     if (grid) {
         memset (grid, 0, sizeof (GridLayout));
 
+        grid->renderer = NULL;
         grid->transform = NULL;
         grid->elements = NULL;
+
+        grid->event_scroll_up = NULL;
+        grid->event_scroll_down = NULL;
     }
 
     return grid;
@@ -179,6 +183,14 @@ void ui_layout_grid_delete (void *grid_ptr) {
         ui_transform_component_delete (grid->transform);
 
         dlist_delete (grid->elements);
+
+        if (grid->event_scroll_up) {
+            cengine_event_unregister (grid->event_scroll_up);
+        }
+
+        if (grid->event_scroll_down) {
+            cengine_event_unregister (grid->event_scroll_down);
+        }
 
         free (grid);
     }
@@ -286,8 +298,8 @@ void ui_layout_grid_toggle_scrolling (GridLayout *grid, bool enable) {
 
     if (grid) {
         // register this grid layout to listen for the scroll event
-        cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_grid_scroll_up_event, grid);
-        cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_grid_scroll_down_event, grid);
+        grid->event_scroll_up = cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_grid_scroll_up_event, grid);
+        grid->event_scroll_down = cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_grid_scroll_down_event, grid);
 
         grid->scroll_sensitivity = GRID_LAYOUT_DEFAULT_SCROLL;
         grid->scrolling = enable;
