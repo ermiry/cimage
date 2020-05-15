@@ -74,11 +74,11 @@ static void sidebar_init (u32 screen_height) {
 
 static void sidebar_end (void) {
 
-    if (sidebar) ui_element_destroy (sidebar->ui_element);
+    // if (sidebar) ui_element_destroy (sidebar->ui_element);
 
-    if (photos_button) ui_element_destroy (photos_button->ui_element);
-    if (presentation_button) ui_element_destroy (presentation_button->ui_element);
-    if (settings_button) ui_element_destroy (settings_button->ui_element);
+    // if (photos_button) ui_element_destroy (photos_button->ui_element);
+    // if (presentation_button) ui_element_destroy (presentation_button->ui_element);
+    // if (settings_button) ui_element_destroy (settings_button->ui_element);
 
 }
 
@@ -161,9 +161,9 @@ void app_ui_actionsbar_hide (void) {
 
 static void actionsbar_end (void) {
 
-    if (actionsbar_panel) ui_element_destroy (actionsbar_panel->ui_element);   
-    if (actionsbar_search_input) ui_element_destroy (actionsbar_search_input->ui_element);
-    if (actionsbar_close_button)  ui_element_destroy (actionsbar_close_button->ui_element);
+    // if (actionsbar_panel) ui_element_destroy (actionsbar_panel->ui_element);   
+    // if (actionsbar_search_input) ui_element_destroy (actionsbar_search_input->ui_element);
+    // if (actionsbar_close_button)  ui_element_destroy (actionsbar_close_button->ui_element);
 
 }
 
@@ -308,6 +308,7 @@ void app_ui_statusbar_hide (void) {
 
     ui_element_toggle_active (statusbar_foldername->ui_element);
     ui_element_toggle_active (statusbar_total->ui_element);
+    ui_element_toggle_active (statusbar_zoom->ui_element);
     ui_element_toggle_active (statusbar->ui_element);
 
 }
@@ -330,11 +331,11 @@ void app_ui_statusbar_set_selected_text (const char *text) {
 
 static void statusbar_end (void) {
 
-    if (statusbar) ui_element_destroy (statusbar->ui_element);
+    // if (statusbar) ui_element_destroy (statusbar->ui_element);
 
-    if (statusbar_foldername) ui_element_destroy (statusbar_foldername->ui_element);
-    if (statusbar_selected) ui_element_destroy (statusbar_selected->ui_element);
-    if (statusbar_total) ui_element_destroy (statusbar_total->ui_element);
+    // if (statusbar_foldername) ui_element_destroy (statusbar_foldername->ui_element);
+    // if (statusbar_selected) ui_element_destroy (statusbar_selected->ui_element);
+    // if (statusbar_total) ui_element_destroy (statusbar_total->ui_element);
 
 }
 
@@ -464,10 +465,6 @@ void app_ui_images_set_ui_elements (u32 n_images, u32 n_cols, u32 n_rows) {
 
 // we have closed the images folde,r so hide images ui items
 void app_ui_images_remove_ui_elements (void) {
-
-    // remove the panel and the layout
-    GridLayout *grid = (GridLayout *) images_panel->layout;
-    ui_layout_grid_destroy_ui_elements (grid);
 
     if (images_panel) {
         ui_element_destroy (images_panel->ui_element);
