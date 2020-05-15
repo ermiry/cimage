@@ -28,6 +28,4 @@ extern void cimage_delete (void *cimage_ptr);
 
 extern Cimage *cimage_create (void);
 
-extern void main_screen_input (void *win_ptr);
-
 #endif

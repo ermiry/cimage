@@ -114,56 +114,6 @@ static void main_renderer_update (void *args) {
 
 }
 
-#pragma region main screen
-
-#include "cengine/timer.h"
-
-static bool once = false;
-
-static Timer *alt_key_timer = NULL;
-static u32 alt_key_cooldown = 500;
-
-void main_screen_input (void *win_ptr) {
-
-    if (win_ptr) {
-        Window *win = (Window *) win_ptr;
-
-        if (win->keyboard) {
-            if (input_is_key_down (SDL_SCANCODE_F11)) {
-                // make window fullscreen
-                if (!once) {
-                window_toggle_fullscreen_soft (win);
-                once = true;
-                }
-            }
-
-            else if (input_is_key_down (SDL_SCANCODE_LALT) || input_is_key_down (SDL_SCANCODE_RALT)) {
-                if (timer_get_ticks (alt_key_timer) > alt_key_cooldown) {
-                    // toggle display actions menu
-                    if (images_panel) app_ui_actionsbar_toggle ();
-
-                    timer_start (alt_key_timer);
-                }
-            }
-
-            else if (input_is_key_down (SDL_SCANCODE_UP)) {
-                // move images up
-                // app_ui_images_move_down (10);
-                ui_layout_grid_scroll_up ((GridLayout *) images_panel->layout, 1);
-            }
-
-            else if (input_is_key_down (SDL_SCANCODE_DOWN)) {
-                // move images down
-                // app_ui_images_move_up (10);
-                ui_layout_grid_scroll_down ((GridLayout *) images_panel->layout, -1);
-            }
-        }
-    }
-
-}
-
-#pragma endregion
-
 State *app_state = NULL;
 
 static void app_update (void) {
@@ -184,14 +134,13 @@ static void app_on_enter (void) {
     Renderer *main_renderer = renderer_get_by_name ("main");
     renderer_set_update (main_renderer, main_renderer_update, main_renderer);
 
-    alt_key_timer = timer_new ();
-    timer_start (alt_key_timer);
+    cimage_input_init ();
 
 }
 
 static void app_on_exit (void) { 
 
-    timer_destroy (alt_key_timer);
+    cimage_input_end ();
 
     app_ui_end ();
 

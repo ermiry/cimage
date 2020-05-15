@@ -517,7 +517,6 @@ void app_ui_image_select (void *media_item_ptr) {
 
 }
 
-// FIXME: we need to make this work with videos!!!
 void app_ui_image_display_in_window (void *item_ptr) {
 
     if (item_ptr) {

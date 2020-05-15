@@ -22,6 +22,7 @@
 
 #include "cimage.h"
 #include "app/settings.h"
+#include "app/input.h"
 #include "app/states/app.h"
 
 void cimage_quit (void) { running = false; }
