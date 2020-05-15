@@ -2,13 +2,23 @@
 
 #include "cengine/manager/manager.h"
 
+#include "cengine/timer.h"
+
+#include "app/states/app.h"
 #include "app/ui/splash.h"
 
 State *splash_state = NULL;
 
+static Timer *timer = NULL;
+static u32 time = 2000;
+
 static void splash_update (void) {
 
-	// game_object_update_all ();
+	if (timer_get_ticks (timer) > time) {
+		// go to main screen
+		app_state = app_state_new ();
+    	manager_state_change_state (app_state);
+	}
 
 }
 
@@ -18,11 +28,16 @@ static void splash_on_enter (void) {
 
 	splash_ui_init ();
 
+	timer = timer_new ();
+    timer_start (timer);
+
 }
 
 static void splash_on_exit (void) { 
 
 	splash_ui_end ();
+
+	timer_destroy (timer);
 
 }
 
