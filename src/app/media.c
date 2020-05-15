@@ -16,6 +16,7 @@
 #include "cimage.h"
 #include "app/states/app.h"
 #include "app/media.h"
+#include "app/input.h"          // for zoom level
 
 #include "app/ui/app.h"
 
@@ -148,7 +149,10 @@ static void *media_load (void *folder_name_ptr) {
                 // prepare ui for images
                 app_ui_images_set_ui_elements (dlist_size (cimage->images), DEFAULT_GRID_N_COLS, DEFAULT_GRID_N_ROWS);
                 app_ui_actionsbar_show ();
-                app_ui_statusbar_show (folder_name->str, cimage->images->size);
+
+                app_ui_statusbar_total_set (cimage->images->size);
+                app_ui_statusbar_zoom_set (zoom_level);
+                app_ui_statusbar_show (folder_name->str);
 
                 for (ListElement *le = dlist_start (cimage->images); le; le = le->next) {
                     // printf ("%s\n", ((String *) le->data)->str);

@@ -31,7 +31,7 @@ extern int app_ui_statusbar_total_set (u32 total);
 // displays the current zoom level in the status bar
 extern int app_ui_statusbar_zoom_set (int zoom);
 
-extern void app_ui_statusbar_show (const char *foldername, u32 total);
+extern void app_ui_statusbar_show (const char *foldername);
 
 extern void app_ui_statusbar_hide (void);
 

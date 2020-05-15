@@ -5,7 +5,6 @@
 
 int zoom_level = 0;
 
-// TODO: display zoom level in status bar
 void zoom_more (void *args) {
 
     // get window with keyboard focus
@@ -37,6 +36,8 @@ void zoom_more (void *args) {
 
                 ui_layout_grid_update_size (grid, cols, cell_width, cell_height);
 
+                app_ui_statusbar_zoom_set (zoom_level);
+
                 // printf ("+\n");
             }
         }
@@ -44,7 +45,6 @@ void zoom_more (void *args) {
 
 }
 
-// TODO: display zoom level in status bar
 void zoom_less (void *args) {
 
     // get window with keyboard focus
@@ -74,6 +74,8 @@ void zoom_less (void *args) {
                 u32 cell_height = (window_height / rows);
 
                 ui_layout_grid_update_size (grid, cols, cell_width, cell_height);
+
+                app_ui_statusbar_zoom_set (zoom_level);
 
                 // printf ("-\n");
             }
