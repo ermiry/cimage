@@ -42,14 +42,25 @@ static GridElement *grid_element_new (void) {
 
 static void grid_element_delete (void *grid_element_ptr) {
 
-    if (grid_element_ptr) free (grid_element_ptr);
+    if (grid_element_ptr) {
+        GridElement *grid_element = (GridElement *) grid_element_ptr;
+
+        ui_transform_component_delete (grid_element->transform);
+
+        free (grid_element_ptr);
+    } 
 
 }
 
 static void grid_element_delete_full (void *grid_element_ptr) {
 
     if (grid_element_ptr) {
-        ui_element_destroy (((GridElement *) grid_element_ptr)->ui_element);
+        GridElement *grid_element = (GridElement *) grid_element_ptr;
+
+        ui_element_destroy (grid_element->ui_element);
+
+        ui_transform_component_delete (grid_element->transform);
+
         free (grid_element_ptr);
     } 
 
