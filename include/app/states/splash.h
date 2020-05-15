@@ -1,5 +1,5 @@
-#ifndef _CIMAGE_STATE_APP_H_
-#define _CIMAGE_STATE_APP_H_
+#ifndef _CIMAGE_STATE_SPLASH_H_
+#define _CIMAGE_STATE_SPLASH_H_
 
 #include "cengine/manager/state.h"
 

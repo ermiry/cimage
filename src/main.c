@@ -4,6 +4,7 @@
 
 #include "cimage.h"
 #include "version.h"
+#include "app/states/splash.h"
 #include "app/states/app.h"
 
 int main (void) {
@@ -14,8 +15,11 @@ int main (void) {
 
     running = !cimage_init () ? true : false;
 
-    app_state = app_state_new ();
-    manager = manager_new (app_state);
+    splash_state = splash_state_new ();
+    manager = manager_new (splash_state);
+
+    // app_state = app_state_new ();
+    // manager = manager_new (app_state);
 
     cengine_start (FPS_LIMIT);
 

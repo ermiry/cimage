@@ -2,6 +2,8 @@
 
 #include "cengine/manager/manager.h"
 
+#include "app/ui/splash.h"
+
 State *splash_state = NULL;
 
 static void splash_update (void) {
@@ -14,13 +16,13 @@ static void splash_on_enter (void) {
 
 	splash_state->update = splash_update;
 
-	// app_ui_init ();
+	splash_ui_init ();
 
 }
 
 static void splash_on_exit (void) { 
 
-	// splash_ui_end ();
+	splash_ui_end ();
 
 }
 
