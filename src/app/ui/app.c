@@ -173,6 +173,7 @@ static void actionsbar_end (void) {
 static Panel *statusbar = NULL;
 static TextBox *statusbar_foldername = NULL;
 static TextBox *statusbar_selected = NULL;
+static TextBox *statusbar_zoom = NULL;
 static TextBox *statusbar_total = NULL;
 
 #define STATUS_BAR_HEIGHT           50
@@ -199,6 +200,28 @@ int app_ui_statusbar_total_set (u32 total) {
 
 }
 
+// displays the current zoom level in the status bar
+int app_ui_statusbar_zoom_set (int zoom) {
+
+    int retval = 1;
+
+    if (statusbar_zoom) {
+        char *status = c_string_create ("Zoom: %d", zoom);
+        if (status) {
+            // printf ("%s\n", status);
+            ui_textbox_update_text (statusbar_zoom, renderer_get_by_name ("main"), status);
+            // ui_textbox_set_text_pos (statusbar_zoom, UI_POS_RIGHT_CENTER);
+
+            free (status);
+
+            retval = 0 ;
+        }
+    }
+
+    return retval;
+
+}
+
 static void statusbar_init (void) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -208,6 +231,7 @@ static void statusbar_init (void) {
     u32 screen_width = main_renderer->window->window_size.width;
     u32 screen_height = main_renderer->window->window_size.height;
 
+    // background
     RGBA_Color statusbar_color = { .r = 37, .g = 44, .b = 54, .a = 245 };
     statusbar = ui_panel_create (sidebar->ui_element->transform->rect.w, 0, 
         screen_width - sidebar->ui_element->transform->rect.w, STATUS_BAR_HEIGHT,
@@ -216,6 +240,7 @@ static void statusbar_init (void) {
     ui_element_set_layer (main_renderer->ui, statusbar->ui_element, "top");
     ui_element_toggle_active (statusbar->ui_element);
 
+    // path
     statusbar_foldername = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_foldername, &statusbar->ui_element->transform->rect, UI_POS_LEFT_CENTER, NULL);
     statusbar_foldername->ui_element->transform->rect.x += 20;
@@ -225,6 +250,7 @@ static void statusbar_init (void) {
     // ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
     ui_element_toggle_active (statusbar_foldername->ui_element);
 
+    // selected
     statusbar_selected = ui_textbox_create (0, 0, 600, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_selected, &statusbar->ui_element->transform->rect, UI_POS_MIDDLE_CENTER, NULL);
     statusbar_selected->ui_element->transform->rect.x -= sidebar->ui_element->transform->rect.w / 2;
@@ -234,17 +260,31 @@ static void statusbar_init (void) {
     ui_element_set_layer (main_renderer->ui, statusbar_selected->ui_element, "top");
     ui_element_toggle_active (statusbar_selected->ui_element);
 
-    statusbar_total = ui_textbox_create (0, 0, 200, 50, UI_POS_FREE, main_renderer);
+    // total
+    statusbar_total = ui_textbox_create (0, 0, 160, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_total, &statusbar->ui_element->transform->rect, UI_POS_RIGHT_CENTER, NULL);
     statusbar_total->ui_element->transform->rect.x -= 20;
     // ui_textbox_set_text (statusbar_total, main_renderer, "", font, 24, RGBA_WHITE, false);
     // ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
-    // ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
+    ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
     // ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
     ui_element_toggle_active (statusbar_total->ui_element);
 
+    // zoom
+    statusbar_zoom = ui_textbox_create (0, 0, 120, 50, UI_POS_FREE, main_renderer);
+    ui_textbox_set_pos (statusbar_zoom, &statusbar->ui_element->transform->rect, UI_POS_RIGHT_CENTER, NULL);
+    statusbar_zoom->ui_element->transform->rect.x -= (20 + statusbar_total->ui_element->transform->rect.w);
+    ui_textbox_set_text (statusbar_zoom, main_renderer, 
+        "Zoom: 0", 
+        font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_zoom, UI_POS_RIGHT_CENTER);
+    ui_textbox_set_ouline_colour (statusbar_zoom, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, statusbar_zoom->ui_element, "top");
+    ui_element_toggle_active (statusbar_zoom->ui_element);
+
 }
 
+// FIXME: move total from here
 void app_ui_statusbar_show (const char *foldername, u32 total) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
@@ -261,6 +301,8 @@ void app_ui_statusbar_show (const char *foldername, u32 total) {
     ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
     ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
     ui_element_toggle_active (statusbar_total->ui_element);
+
+    ui_element_toggle_active (statusbar_zoom->ui_element);
 
     ui_element_toggle_active (statusbar->ui_element);
 
