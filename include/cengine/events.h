@@ -25,6 +25,9 @@ typedef struct _EventActionData EventActionData;
 
 struct _EventAction {
 
+	CengineEventType type;
+	int id;
+
 	Action action;
     void *args;
 
@@ -42,8 +45,11 @@ struct _Event {
 typedef struct _Event Event;
 
 // register a new action to be triggered when an event takes place
+extern EventAction *cengine_event_register (CengineEventType type, Action action, void *args);
+
+// unregister from an event
 // returns 0 on succes, 1 on error
-extern u8 cengine_event_register (CengineEventType type, Action action, void *args);
+extern u8 cengine_event_unregister (EventAction *event_action);
 
 // called by internal cengine methods to trigger all the actions
 // that have been registered to an event
