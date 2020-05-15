@@ -6,6 +6,7 @@
 #include "cengine/collections/dlist.h"
 
 #include "cengine/renderer.h"
+#include "cengine/events.h"
 
 #include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"

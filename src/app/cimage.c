@@ -114,10 +114,11 @@ int cimage_init (void) {
 
     // register to some signals
     signal (SIGINT, cimage_quit_signal);
-    signal (SIGSEGV, cimage_quit_signal);
+    // signal (SIGSEGV, cimage_quit_signal);
 
     cengine_set_quit (cimage_quit);
     cengine_assets_set_path ("./assets");
+    cengine_default_assets_set_path ("./assets/default/");
 
     retval = cengine_init ();
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cengine!");
@@ -135,6 +136,9 @@ int cimage_init (void) {
     icon_surface = surface_load_image ("./assets/cimage-128.png");
     if (icon_surface) window_set_icon (main_renderer->window, icon_surface);
     else cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to load icon!");
+
+    renderer_set_background_texture_loading_factor (main_renderer, 10);
+    renderer_set_background_texture_destroying_factor (main_renderer, 5);
 
     retval = cimage_init_ui (main_renderer);
     if (retval) cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to init cimage's ui!");

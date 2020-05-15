@@ -58,8 +58,10 @@ void ui_image_delete (void *image_ptr) {
 
         image->ui_element = NULL;
 
-        if (image->texture && ! image->texture_reference) 
+        if (image->texture && !image->texture_reference) {
             SDL_DestroyTexture (image->texture);
+            // texture_destroy (renderer_get_by_name ("main"), image->texture);
+        }
 
         if (image->texture_src_rect) free (image->texture_src_rect);
 
