@@ -4,7 +4,7 @@ SDL2 	:= `sdl2-config --cflags --libs` -l SDL2_image -l SDL2_ttf
 MATH 	:= -lm 
 PTHREAD := -l pthread
 
-FFMPEG	:= -l avutil -l avformat -l avcodec -l avutil -l swresample
+# FFMPEG	:= -l avutil -l avformat -l avcodec -l avutil -l swresample
 
 # development
 DEVELOPMENT = -D CENGINE_DEBUG
@@ -25,7 +25,8 @@ DEPEXT      := d
 OBJEXT      := o
 
 CFLAGS      := -g $(DEFINES)
-LIB         := $(MATH) $(PTHREAD) $(SDL2) $(FFMPEG)
+# LIB         := $(MATH) $(PTHREAD) $(SDL2) $(FFMPEG)
+LIB         := $(MATH) $(PTHREAD) $(SDL2)
 INC         := -I $(INCDIR) -I /usr/local/include
 INCDEP      := -I $(INCDIR)
 
