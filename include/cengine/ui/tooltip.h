@@ -35,4 +35,12 @@ typedef struct Tooltip {
 
 extern void ui_tooltip_delete (void *tooltip_ptr);
 
+// sets the background colour of the tooltip
+extern void ui_tooltip_set_bg_colour (Tooltip *tooltip, Renderer *renderer, RGBA_Color colour);
+
+// removes the background from the tooltip
+extern void ui_tooltip_remove_background (Tooltip *tooltip);
+
+extern Tooltip *ui_tooltip_create (Renderer *renderer);
+
 #endif
