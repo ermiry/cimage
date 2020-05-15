@@ -12,6 +12,7 @@
 static Panel *background_panel = NULL;
 static Image *logo = NULL;
 static TextBox *version_text = NULL;
+static TextBox *created_text = NULL;
 
 void splash_ui_init (void) {
 
@@ -39,13 +40,23 @@ void splash_ui_init (void) {
     version_text = ui_textbox_create (0, 0, 500, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (version_text, NULL, UI_POS_MIDDLE_CENTER, main_renderer);
     version_text->ui_element->transform->rect.y += 256;
-    ui_textbox_set_text (version_text, main_renderer, CIMAGE_VERSION_NAME, font, 32, electromagnetic, false);
+    ui_textbox_set_text (version_text, main_renderer, CIMAGE_VERSION_NAME, font, 48, electromagnetic, false);
     ui_textbox_set_text_pos (version_text, UI_POS_MIDDLE_CENTER);
     // ui_textbox_set_ouline_colour (version_text, electromagnetic);
+
+    /*** created ***/
+    created_text = ui_textbox_create (0, 0, 500, 50, UI_POS_FREE, main_renderer);
+    ui_textbox_set_pos (created_text, NULL, UI_POS_BOTTOM_CENTER, main_renderer);
+    created_text->ui_element->transform->rect.y -= 32;
+    ui_textbox_set_text (created_text, main_renderer, "Created by Ermiry", font, 32, electromagnetic, false);
+    ui_textbox_set_text_pos (created_text, UI_POS_MIDDLE_CENTER);
+    // ui_textbox_set_ouline_colour (created_text, electromagnetic);
 
 }
 
 void splash_ui_end (void) {
+
+    if (created_text) ui_element_destroy (created_text->ui_element);
 
     if (version_text) ui_element_destroy (version_text->ui_element);
 

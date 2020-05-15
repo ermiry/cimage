@@ -89,7 +89,7 @@ static int cimage_init_ui (Renderer *renderer) {
         ui_default_assets_load ();
         Font *main_font = ui_font_create ("roboto", "./assets/fonts/Roboto-Regular.ttf");
         if (main_font) {
-            ui_font_set_sizes (main_font, 6, 16, 20, 24, 32, 64, 200);
+            ui_font_set_sizes (main_font, 6, 16, 20, 24, 32, 48, 64);
             ui_font_load (main_font, renderer, TTF_STYLE_NORMAL);
 
             main_noti_center = ui_noti_center_create (renderer->ui, 3, UI_POS_RIGHT_BOTTOM_CORNER, renderer);
