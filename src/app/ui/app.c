@@ -264,10 +264,10 @@ static void statusbar_init (void) {
     statusbar_total = ui_textbox_create (0, 0, 160, 50, UI_POS_FREE, main_renderer);
     ui_textbox_set_pos (statusbar_total, &statusbar->ui_element->transform->rect, UI_POS_RIGHT_CENTER, NULL);
     statusbar_total->ui_element->transform->rect.x -= 20;
-    // ui_textbox_set_text (statusbar_total, main_renderer, "", font, 24, RGBA_WHITE, false);
-    // ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
-    ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
-    // ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
+    ui_textbox_set_text (statusbar_total, main_renderer, "Total: 0", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
+    // ui_textbox_set_ouline_colour (statusbar_total, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
     ui_element_toggle_active (statusbar_total->ui_element);
 
     // zoom
@@ -278,14 +278,13 @@ static void statusbar_init (void) {
         "Zoom: 0", 
         font, 24, RGBA_WHITE, false);
     ui_textbox_set_text_pos (statusbar_zoom, UI_POS_RIGHT_CENTER);
-    ui_textbox_set_ouline_colour (statusbar_zoom, RGBA_WHITE);
+    // ui_textbox_set_ouline_colour (statusbar_zoom, RGBA_WHITE);
     ui_element_set_layer (main_renderer->ui, statusbar_zoom->ui_element, "top");
     ui_element_toggle_active (statusbar_zoom->ui_element);
 
 }
 
-// FIXME: move total from here
-void app_ui_statusbar_show (const char *foldername, u32 total) {
+void app_ui_statusbar_show (const char *foldername) {
 
     Renderer *main_renderer = renderer_get_by_name ("main");
     Font *font = ui_font_get_default ();
@@ -295,11 +294,7 @@ void app_ui_statusbar_show (const char *foldername, u32 total) {
     ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
     ui_element_toggle_active (statusbar_foldername->ui_element);
 
-    ui_textbox_set_text (statusbar_total, main_renderer, 
-        c_string_create ("Total: %d", total), 
-        font, 24, RGBA_WHITE, false);
-    ui_textbox_set_text_pos (statusbar_total, UI_POS_RIGHT_CENTER);
-    ui_element_set_layer (main_renderer->ui, statusbar_total->ui_element, "top");
+    
     ui_element_toggle_active (statusbar_total->ui_element);
 
     ui_element_toggle_active (statusbar_zoom->ui_element);
