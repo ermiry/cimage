@@ -12,7 +12,6 @@
 #include "cengine/ui/components/transform.h"
 #include "cengine/ui/layout/vertical.h"
 
-// FIXME:!!!
 #include "cengine/ui/textbox.h"
 #include "cengine/ui/panel.h"
 
@@ -29,6 +28,9 @@ static VerticalLayout *ui_layout_vertical_new (void) {
 
         vertical->transform = NULL;
         vertical->ui_elements = NULL;
+
+        vertical->event_scroll_up = NULL;
+        vertical->event_scroll_down = NULL;
     }
 
     return vertical;
@@ -42,6 +44,14 @@ void ui_layout_vertical_delete (void *vertical_ptr) {
 
         ui_transform_component_delete (vertical->transform);
         dlist_delete (vertical->ui_elements);
+
+        if (vertical->event_scroll_up) {
+            cengine_event_unregister (vertical->event_scroll_up);
+        }
+
+        if (vertical->event_scroll_down) {
+            cengine_event_unregister (vertical->event_scroll_down);
+        }
 
         free (vertical);
     }
@@ -82,8 +92,8 @@ void ui_layout_vertical_toggle_scrolling (VerticalLayout *vertical, bool enable)
 
     if (vertical) {
         // register this vertical layout to listen for the scroll event
-        cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_vertical_scroll_up, vertical);
-        cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_vertical_scroll_down, vertical);
+        vertical->event_scroll_up = cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_vertical_scroll_up, vertical);
+        vertical->event_scroll_down = cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_vertical_scroll_down, vertical);
 
         vertical->scroll_sensitivity = VERTICAL_LAYOUT_DEFAULT_SCROLL;
         vertical->scrolling = enable;

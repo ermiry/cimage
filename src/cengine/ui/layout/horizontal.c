@@ -25,6 +25,9 @@ static HorizontalLayout *ui_layout_horizontal_new (void) {
 
         horizontal->transform = NULL;
         horizontal->ui_elements = NULL;
+
+        horizontal->event_scroll_up = NULL;
+        horizontal->event_scroll_down = NULL;
     }
 
     return horizontal;
@@ -38,6 +41,14 @@ void ui_layout_horizontal_delete (void *horizontal_ptr) {
 
         ui_transform_component_delete (horizontal->transform);
         dlist_delete (horizontal->ui_elements);
+
+        if (horizontal->event_scroll_up) {
+            cengine_event_unregister (horizontal->event_scroll_up);
+        }
+
+        if (horizontal->event_scroll_down) {
+            cengine_event_unregister (horizontal->event_scroll_down);
+        }
 
         free (horizontal);
     }
@@ -78,8 +89,8 @@ void ui_layout_horizontal_toggle_scrolling (HorizontalLayout *horizontal, bool e
 
     if (horizontal) {
         // register this horizontal layout to listen for the scroll event
-        cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_horizontal_scroll_up, horizontal);
-        cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_horizontal_scroll_down, horizontal);
+        horizontal->event_scroll_up = cengine_event_register (CENGINE_EVENT_SCROLL_UP, ui_layout_horizontal_scroll_up, horizontal);
+        horizontal->event_scroll_down = cengine_event_register (CENGINE_EVENT_SCROLL_DOWN, ui_layout_horizontal_scroll_down, horizontal);
 
         horizontal->scroll_sensitivity = HORIZONTAL_LAYOUT_DEFAULT_SCROLL;
         horizontal->scrolling = enable;

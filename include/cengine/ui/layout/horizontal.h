@@ -35,6 +35,8 @@ typedef struct HorizontalLayout {
 
     bool scrolling;             // enable / disable scrolling
     u32 scroll_sensitivity;     // how fast the elements move
+    EventAction *event_scroll_up;
+    EventAction *event_scroll_down;
 
 } HorizontalLayout;
 
