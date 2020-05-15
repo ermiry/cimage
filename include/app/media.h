@@ -1,6 +1,8 @@
 #ifndef _CIMAGE_MEDIA_H_
 #define _CIMAGE_MEDIA_H_
 
+#include "cengine/ui/image.h"
+
 struct _MediaItem {
 
     Image *image;

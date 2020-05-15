@@ -17,6 +17,7 @@
 
 #include "cengine/utils/utils.h"
 
+#include "cimage.h"
 #include "app/states/app.h"
 #include "app/media.h"
 

@@ -12,6 +12,23 @@
 
 typedef unsigned char uchar;
 
+// general information of the things we are working on
+struct _Cimage {
+
+    String *opened_folder_name;
+    DoubleList *images;
+    DoubleList *selected_images;
+
+};
+
+typedef struct _Cimage Cimage;
+
+extern Cimage *cimage;
+
+extern void cimage_delete (void *cimage_ptr);
+
+extern Cimage *cimage_create (void);
+
 extern NotiCenter *main_noti_center;
 
 extern void cimage_quit (void);

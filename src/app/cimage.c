@@ -23,7 +23,46 @@
 #include "cimage.h"
 #include "app/settings.h"
 #include "app/input.h"
+#include "app/media.h"
 #include "app/states/app.h"
+
+Cimage *cimage = NULL;
+
+static Cimage *cimage_new (void) {
+
+    Cimage *cimage = (Cimage *) malloc (sizeof (Cimage));
+    if (cimage) {
+        cimage->opened_folder_name = NULL;
+        cimage->images = NULL;
+        cimage->selected_images = NULL;
+    }
+
+    return cimage;
+
+}
+
+void cimage_delete (void *cimage_ptr) {
+
+    if (cimage_ptr) {
+        Cimage *cimage = (Cimage *) cimage_ptr;
+
+        str_delete (cimage->opened_folder_name);
+        dlist_delete (cimage->images);
+        // FIXME: segfault if list is empty
+        // dlist_delete (cimage->selected_images);
+
+        free (cimage_ptr);
+    }
+
+}
+
+Cimage *cimage_create (void) {
+
+    Cimage *cimage = cimage_new ();
+    if (cimage) cimage->selected_images = dlist_init (media_item_delete_dummy, NULL);
+    return cimage;
+
+}
 
 void cimage_quit (void) { running = false; }
 
