@@ -3,11 +3,14 @@
 #include "cengine/manager/manager.h"
 
 #include "cimage.h"
+#include "version.h"
 #include "app/states/app.h"
 
 int main (void) {
 
     cengine_version_print_full ();
+
+    cimage_version_print_full ();
 
     running = !cimage_init () ? true : false;
 
