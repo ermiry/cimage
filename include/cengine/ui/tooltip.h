@@ -55,4 +55,7 @@ extern u8 ui_tooltip_remove_element (Tooltip *tooltip, UIElement *ui_element);
 
 extern Tooltip *ui_tooltip_create (Renderer *renderer);
 
+// draws the tooltip to the screen
+extern void ui_tooltip_draw (Tooltip *tooltip, Renderer *renderer);
+
 #endif

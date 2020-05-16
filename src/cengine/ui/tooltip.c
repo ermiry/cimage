@@ -259,3 +259,42 @@ Tooltip *ui_tooltip_create (Renderer *renderer) {
 	return tooltip;
 
 }
+
+// draws the tooltip to the screen
+void ui_tooltip_draw (Tooltip *tooltip, Renderer *renderer) {
+
+	if (tooltip && renderer) {
+		if (SDL_HasIntersection (&tooltip->ui_element->transform->rect, &renderer->window->screen_rect)) {
+            // render the background
+            if (tooltip->colour) {
+                if (tooltip->bg_texture) {
+                    SDL_RenderCopyEx (renderer->renderer, tooltip->bg_texture, 
+                        &tooltip->bg_texture_rect, &tooltip->ui_element->transform->rect, 
+                        0, 0, SDL_FLIP_NONE);
+                }
+
+                else {
+                    render_basic_filled_rect (renderer, &tooltip->ui_element->transform->rect, tooltip->bg_colour);
+                }
+            }
+
+            // render the tooltip's children
+            if (tooltip->children) {
+                if (tooltip->vertical) SDL_RenderSetViewport (renderer->renderer, &tooltip->ui_element->transform->rect);
+                for (ListElement *le = dlist_start (tooltip->children); le; le = le->next)
+                    ui_render_element (renderer, (UIElement *) le->data);
+                
+                if (tooltip->vertical) renderer_set_viewport_to_window_size (renderer);
+            }
+
+            // render the outline
+            // if (tooltip->outline) {
+            //     render_basic_outline_rect (renderer, &tooltip->ui_element->transform->rect, tooltip->outline_colour,
+            //         tooltip->outline_scale_x, tooltip->outline_scale_y);
+            // }
+
+            renderer->render_count += 1;
+        }
+	}
+
+}
