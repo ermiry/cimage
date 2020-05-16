@@ -27,7 +27,8 @@ typedef enum UIElementType {
     UI_INPUT            = 5,
     UI_CHECK            = 6,
     UI_NOTI_CENTER      = 7,
-    UI_DROPDOWN         = 8
+    UI_DROPDOWN         = 8,
+    UI_TOOLTIP          = 9,
 
 } UIElementType;
 
