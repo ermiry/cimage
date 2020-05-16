@@ -14,6 +14,7 @@
 #include "cengine/window.h"
 
 #include "cengine/ui/inputfield.h"
+#include "cengine/ui/tooltip.h"
 #include "cengine/ui/components/text.h"
 
 Input *input_new (void) {
@@ -24,13 +25,28 @@ Input *input_new (void) {
         input->active_text = NULL;
 
         input->user_input = NULL;
+
+        input->right_click_menu = NULL;
+        input->right_click_event = NULL;
     }
 
     return input;
 
 }
 
-void input_delete (void *input_ptr) { if (input_ptr) free (input_ptr); }
+void input_delete (void *input_ptr) { 
+    
+    if (input_ptr) {
+        Input *input = (Input *) input_ptr;
+
+        if (input->right_click_event) {
+            cengine_event_unregister (input->right_click_event);
+        }
+
+        free (input_ptr);
+    }
+    
+}
 
 void input_set_active_text (Input *input, InputField *text) {
 
@@ -41,7 +57,42 @@ void input_set_active_text (Input *input, InputField *text) {
 
 }
 
+// FIXME: we need a way to dismiss the menu
+static void input_right_click_menu_event (void *event_data) {
+
+    if (event_data) {
+        EventActionData *event_action_data = (EventActionData *) event_data;
+
+        Tooltip *menu = (Tooltip *) event_action_data->action_args;
+
+        if (menu) {
+            if (!menu->ui_element->active) {
+                // FIXME: display the menu at mouse position
+            }
+        }
+    }
+
+}
+
+// sets the menu (tooltip) to be displayed in the current window
+void input_set_right_click_menu (Input *input, Tooltip *right_click_menu) {
+
+    if (input && right_click_menu) {
+        input->right_click_menu = right_click_menu;
+
+        // register to the mouse event
+        input->right_click_event = cengine_event_register (
+            CENGINE_EVENT_MOUSE_RIGHT_UP,
+            input_right_click_menu_event,
+            input->right_click_menu
+        );
+    }
+
+}
+
 /*** Mouse ***/
+
+#pragma region mouse
 
 Vector2D mousePos = { 0, 0 };
 
@@ -64,9 +115,18 @@ static void input_on_mouse_button_down (SDL_Event event) {
 static void input_on_mouse_button_up (SDL_Event event) {
 
     switch (event.button.button) {
-        case SDL_BUTTON_LEFT: mouse_button_states[MOUSE_LEFT] = false; break;
-        case SDL_BUTTON_MIDDLE: mouse_button_states[MOUSE_MIDDLE] = false; break;
-        case SDL_BUTTON_RIGHT: mouse_button_states[MOUSE_RIGHT] = false; break;
+        case SDL_BUTTON_LEFT:
+            mouse_button_states[MOUSE_LEFT] = false;
+            cengine_event_trigger (CENGINE_EVENT_MOUSE_LEFT_UP, NULL);
+            break;
+        case SDL_BUTTON_MIDDLE: 
+            mouse_button_states[MOUSE_MIDDLE] = false; 
+            cengine_event_trigger (CENGINE_EVENT_MOUSE_MIDDLE_UP, NULL);
+            break;
+        case SDL_BUTTON_RIGHT: 
+            mouse_button_states[MOUSE_RIGHT] = false; 
+            cengine_event_trigger (CENGINE_EVENT_MOUSE_RIGHT_UP, NULL);
+            break;
 
         default: break;
     }
@@ -136,7 +196,11 @@ static void input_on_mouse_scroll (SDL_Event event) {
 
 }
 
+#pragma endregion
+
 /*** Keyboard ***/
+
+#pragma region keyboard
 
 // a custom action performed with a combination of ctl + key
 typedef struct Command {
@@ -347,7 +411,11 @@ bool input_is_key_down (const SDL_Scancode key) {
     
 }
 
+#pragma endregion
+
 /*** Input ***/
+
+#pragma region main
 
 void input_init (void) {
 
@@ -432,3 +500,5 @@ void input_handle (SDL_Event event) {
     }
 
 }
+
+#pragma endregion

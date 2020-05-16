@@ -8,13 +8,22 @@
 #include "cengine/types/types.h"
 #include "cengine/types/vector2d.h"
 
+#include "cengine/events.h"
+
 #include "cengine/ui/inputfield.h"
+#include "cengine/ui/tooltip.h"
+
+struct _EventActionData;
 
 struct _Input {
 
     // current active input field
     bool typing;
     InputField *active_text;
+
+    // 15/05/2020
+    Tooltip *right_click_menu;
+    EventAction *right_click_event;
 
     // custom user input method
     void (*user_input)(void *);
