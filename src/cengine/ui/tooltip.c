@@ -13,6 +13,12 @@
 #include "cengine/ui/components/transform.h"
 #include "cengine/ui/tooltip.h"
 
+// used for children
+// #include "cengine/ui/inputfield.h"
+#include "cengine/ui/button.h"
+// #include "cengine/ui/image.h"
+#include "cengine/ui/textbox.h"
+
 #include "cengine/ui/layout/layout.h"
 #include "cengine/ui/layout/vertical.h"
 
@@ -86,6 +92,34 @@ void ui_tooltip_remove_background (Tooltip *tooltip) {
 
 }
 
+// 15/05/2020 -- we want only buttons and textboxs in the tooltip
+// updates one tooltip's child position
+static void ui_tooltip_child_update_pos (Tooltip *tooltip, UIElement *child) {
+
+    if (tooltip && child) {
+         // update the element's transform values
+        switch (child->type) {
+            case UI_BUTTON: {
+                ui_button_set_pos ((Button *) child->element,
+                    &tooltip->ui_element->transform->rect,
+                    child->transform->pos,
+                    NULL);
+            } break;
+
+            case UI_TEXTBOX: {
+                TextBox *textbox = (TextBox *) child->element;
+                ui_textbox_set_pos (textbox,
+                    &tooltip->ui_element->transform->rect, 
+                    child->transform->pos, 
+                    NULL);
+            } break;
+
+            default: break;
+        }
+    }
+
+}
+
 // adds a new child to the tooltip
 // the element's position will be managed by the tooltip
 // when the tooltip gets destroyed, all of its children get destroyed as well 
@@ -102,7 +136,6 @@ static void ui_tooltip_child_add (Tooltip *tooltip, UIElement *ui_element) {
 
         dlist_insert_after (tooltip->children, dlist_end (tooltip->children), ui_element);
 
-		// FIXME:
         ui_tooltip_child_update_pos (tooltip, ui_element);
 
         ui_element->abs_offset_x = tooltip->ui_element->transform->rect.x;
