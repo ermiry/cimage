@@ -143,7 +143,7 @@ void ui_panel_child_update_pos (Panel *panel, UIElement *child) {
                 //     textbox->ui_element->transform, false);
                 // ui_textbox_update_text_pos (textbox);
                 // printf ("%d - %d\n", textbox->ui_element->transform->rect.x, textbox->ui_element->transform->rect.y);
-            }
+            } break;
 
             default: break;
         }
@@ -307,6 +307,9 @@ void ui_panel_layout_add_element_at_pos (Panel *panel, UIElement *ui_element, u3
 
     if (panel && ui_element) {
         if (panel->layout) {
+            // add the element to the panel's children
+            ui_panel_child_add (panel, ui_element);
+
             switch (panel->layout_type) {
                 case LAYOUT_TYPE_HORIZONTAL: 
                     ui_layout_horizontal_add_at_pos ((HorizontalLayout *) panel->layout, ui_element, pos);
@@ -362,7 +365,8 @@ void ui_panel_layout_add_element_at_end (Panel *panel, UIElement *ui_element) {
     }
 
 }
- // returns the ui element that is at the required position in the panel's layout
+
+// returns the ui element that is at the required position in the panel's layout
 UIElement *ui_panel_layout_get_element_at (Panel *panel, unsigned int pos) {
 
     UIElement *retval = NULL;
@@ -420,8 +424,8 @@ u8 ui_panel_layout_remove_element (Panel *panel, UIElement *ui_element) {
 }
 
 // adds a new child to the panel
-// the element's position will be manage by the panel
-// when the panel gets destroyed, all of their children get destroyed as well 
+// the element's position will be managed by the panel
+// when the panel gets destroyed, all of its children get destroyed as well 
 void ui_panel_child_add (Panel *panel, UIElement *ui_element) {
 
     if (panel && ui_element) {
