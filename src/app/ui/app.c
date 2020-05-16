@@ -295,7 +295,6 @@ void app_ui_statusbar_show (const char *foldername) {
     ui_textbox_set_text_pos (statusbar_foldername, UI_POS_LEFT_CENTER);
     ui_element_set_layer (main_renderer->ui, statusbar_foldername->ui_element, "top");
     ui_element_toggle_active (statusbar_foldername->ui_element);
-
     
     ui_element_toggle_active (statusbar_total->ui_element);
 
@@ -382,9 +381,28 @@ void app_ui_init (void) {
     actionsbar_init ();
     statusbar_init ();
 
-    Tooltip *right_click_menu = ui_tooltip_create (200, 200, main_renderer);
-    ui_tooltip_set_bg_colour (right_click_menu, main_renderer, RGBA_RED);
+    Tooltip *right_click_menu = ui_tooltip_create (200, 100, main_renderer);
+    ui_element_set_layer (main_renderer->ui, right_click_menu->ui_element, "top");
+    ui_tooltip_set_bg_colour (right_click_menu, main_renderer, RGBA_BLACK);
     input_set_right_click_menu (main_renderer->window->input, right_click_menu);
+
+    TextBox *test_text = ui_textbox_create (0, 0, 200, 50, UI_POS_UPPER_CENTER, main_renderer);
+    ui_textbox_set_text (test_text, main_renderer, "Test!", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (test_text, UI_POS_MIDDLE_CENTER);
+    ui_textbox_set_ouline_colour (test_text, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, test_text->ui_element, "top");
+    // ui_element_toggle_active (test_text->ui_element);
+
+    ui_tooltip_add_element_at_end (right_click_menu, test_text->ui_element);
+
+    TextBox *hola_text = ui_textbox_create (0, 0, 500, 50, UI_POS_UPPER_CENTER, main_renderer);
+    ui_textbox_set_pos_offset (hola_text, 0, 50);
+    ui_textbox_set_text (hola_text, main_renderer, "Hola!", font, 24, RGBA_WHITE, false);
+    ui_textbox_set_text_pos (hola_text, UI_POS_MIDDLE_CENTER);
+    ui_textbox_set_ouline_colour (hola_text, RGBA_WHITE);
+    ui_element_set_layer (main_renderer->ui, hola_text->ui_element, "top");
+
+    ui_tooltip_add_element_at_end (right_click_menu, hola_text->ui_element);
 
     // FIXME: 21/12/2019 -- dropdwon is still broken!!!
     // Dropdown *projects_update_type_dropdown = ui_dropdown_create (0, 225, 200, 50, UI_POS_MIDDLE_CENTER, main_renderer);

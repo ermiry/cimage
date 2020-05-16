@@ -97,24 +97,35 @@ void ui_tooltip_remove_background (Tooltip *tooltip) {
 static void ui_tooltip_child_update_pos (Tooltip *tooltip, UIElement *child) {
 
     if (tooltip && child) {
-         // update the element's transform values
-        switch (child->type) {
-            case UI_BUTTON: {
-                ui_button_set_pos ((Button *) child->element,
-                    &tooltip->ui_element->transform->rect,
-                    child->transform->pos,
-                    NULL);
-            } break;
+        UITransform *trans = ui_transform_component_create (
+            0, 0, 
+            tooltip->ui_element->transform->rect.w, tooltip->ui_element->transform->rect.h
+        );
 
-            case UI_TEXTBOX: {
-                TextBox *textbox = (TextBox *) child->element;
-                ui_textbox_set_pos (textbox,
-                    &tooltip->ui_element->transform->rect, 
-                    child->transform->pos, 
-                    NULL);
-            } break;
+        if (trans) {
+            // update the element's transform values
+            switch (child->type) {
+                case UI_BUTTON: {
+                    ui_button_set_pos ((Button *) child->element,
+                        // &tooltip->ui_element->transform->rect,
+                        &trans->rect,
+                        child->transform->pos,
+                        NULL);
+                } break;
 
-            default: break;
+                case UI_TEXTBOX: {
+                    TextBox *textbox = (TextBox *) child->element;
+                    ui_textbox_set_pos (textbox,
+                        // &tooltip->ui_element->transform->rect, 
+                        &trans->rect,
+                        child->transform->pos, 
+                        NULL);
+                } break;
+
+                default: break;
+            }
+
+            ui_transform_component_delete (trans);
         }
     }
 
@@ -251,7 +262,7 @@ Tooltip *ui_tooltip_create (u32 w, u32 h, Renderer *renderer) {
 	if (ui_element) {
 		tooltip = ui_tooltip_new ();
 		if (tooltip) {
-			tooltip->renderer = NULL;
+			tooltip->renderer = renderer;
 
 			tooltip->ui_element	= ui_element;
 			ui_transform_component_set_values (
