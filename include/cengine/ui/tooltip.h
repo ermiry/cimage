@@ -15,11 +15,14 @@
 #include "cengine/ui/layout/layout.h"
 #include "cengine/ui/layout/vertical.h"
 
+struct _Renderer;
+struct _UIElement;
+
 typedef struct Tooltip {
 
     struct _Renderer *renderer;
 
-    UIElement *ui_element;
+    struct _UIElement *ui_element;
 
     // background
 	bool colour;
@@ -36,26 +39,26 @@ typedef struct Tooltip {
 extern void ui_tooltip_delete (void *tooltip_ptr);
 
 // sets the background colour of the tooltip
-extern void ui_tooltip_set_bg_colour (Tooltip *tooltip, Renderer *renderer, RGBA_Color colour);
+extern void ui_tooltip_set_bg_colour (Tooltip *tooltip, struct _Renderer *renderer, RGBA_Color colour);
 
 // removes the background from the tooltip
 extern void ui_tooltip_remove_background (Tooltip *tooltip);
 
 // adds a new ui element to the tooltip's layout's in the specified position (0 indexed)
-extern void ui_tooltip_add_element_at_pos (Tooltip *tooltip, UIElement *ui_element, u32 pos);
+extern void ui_tooltip_add_element_at_pos (Tooltip *tooltip, struct _UIElement *ui_element, u32 pos);
 
 // adds a new ui element to the tooltip's layout's END
-extern void ui_tooltip_add_element_at_end (Tooltip *tooltip, UIElement *ui_element);
+extern void ui_tooltip_add_element_at_end (Tooltip *tooltip, struct _UIElement *ui_element);
 
 // returns the ui element that is at the required position in the tooltip's layout
-extern UIElement *ui_tooltip_get_element_at (Tooltip *tooltip, unsigned int pos);
+extern struct _UIElement *ui_tooltip_get_element_at (Tooltip *tooltip, unsigned int pos);
 
 // removes a ui element form the tooltip's layout
-extern u8 ui_tooltip_remove_element (Tooltip *tooltip, UIElement *ui_element);
+extern u8 ui_tooltip_remove_element (Tooltip *tooltip, struct _UIElement *ui_element);
 
-extern Tooltip *ui_tooltip_create (Renderer *renderer);
+extern Tooltip *ui_tooltip_create (struct _Renderer *renderer);
 
 // draws the tooltip to the screen
-extern void ui_tooltip_draw (Tooltip *tooltip, Renderer *renderer);
+extern void ui_tooltip_draw (Tooltip *tooltip, struct _Renderer *renderer);
 
 #endif

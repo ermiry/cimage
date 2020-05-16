@@ -14,13 +14,15 @@
 #define VERTICAL_LAYOUT_DEFAULT_SCROLL          5
 
 struct _Renderer;
+struct _UIElement;
+struct _UITransform;
 
 typedef struct VerticalLayout {
 
     // usefull reference to the window's renderer
     struct _Renderer *renderer;
 
-    UITransform *transform;
+    struct _UITransform *transform;
 
     DoubleList *ui_elements;
     u32 curr_element_height;
@@ -68,17 +70,17 @@ extern void ui_layout_vertical_update (VerticalLayout *vertical);
 
 // adds a new elemenet in the specified pos of the vertical layout group
 // returns 0 on success, 1 on error
-extern u8 ui_layout_vertical_add_at_pos (VerticalLayout *vertical, UIElement *ui_element, u32 pos);
+extern u8 ui_layout_vertical_add_at_pos (VerticalLayout *vertical, struct _UIElement *ui_element, u32 pos);
 
 // adds a new element to the end of the vertical layout group
 // this method avoids updating all the other elements positions as well
 // returns 0 on success, 1 on error
-extern u8 ui_layout_vertical_add_at_end (VerticalLayout *vertical, UIElement *ui_element);
+extern u8 ui_layout_vertical_add_at_end (VerticalLayout *vertical, struct _UIElement *ui_element);
 
 // returns the ui element that is at the required position in the layout
-extern UIElement *ui_layout_vertical_get_element_at (VerticalLayout *vertical, unsigned int pos);
+extern struct _UIElement *ui_layout_vertical_get_element_at (VerticalLayout *vertical, unsigned int pos);
 
 // removes an element from the vertical layout group
-extern u8 ui_layout_vertical_remove (VerticalLayout *vertical, UIElement *ui_element);
+extern u8 ui_layout_vertical_remove (VerticalLayout *vertical, struct _UIElement *ui_element);
 
 #endif
