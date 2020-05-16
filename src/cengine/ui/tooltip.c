@@ -86,6 +86,56 @@ void ui_tooltip_remove_background (Tooltip *tooltip) {
 
 }
 
+// adds a new child to the tooltip
+// the element's position will be managed by the tooltip
+// when the tooltip gets destroyed, all of its children get destroyed as well 
+static void ui_tooltip_child_add (Tooltip *tooltip, UIElement *ui_element) {
+
+    if (tooltip && ui_element) {
+        // remove the element from the ui elements
+        ui_remove_element (tooltip->renderer->ui, ui_element);
+
+        // remove element from its layers to let the tooltip manage how the element gets renderer
+        Layer *layer = layer_get_by_pos (tooltip->renderer->ui->ui_elements_layers, 
+            ui_element->layer_id);
+        layer_remove_element (layer, ui_element);
+
+        dlist_insert_after (tooltip->children, dlist_end (tooltip->children), ui_element);
+
+		// FIXME:
+        ui_tooltip_child_update_pos (tooltip, ui_element);
+
+        ui_element->abs_offset_x = tooltip->ui_element->transform->rect.x;
+        ui_element->abs_offset_y = tooltip->ui_element->transform->rect.y;
+
+        ui_element->parent = tooltip->ui_element;
+    }
+
+}
+
+// removes a child from the tooltip (the dlist uses a ui element ids comparator)
+// returns the ui element that was removed
+static UIElement *ui_tooltip_child_remove (Tooltip *tooltip, UIElement *ui_element) {
+
+    UIElement *retval = NULL;
+
+    if (tooltip && ui_element) {
+        retval = (UIElement *) dlist_remove (tooltip->children, ui_element, NULL);
+
+        // add the element back to its original layer
+        layer_add_element (layer_get_by_pos (tooltip->renderer->ui->ui_elements_layers,
+            ui_element->layer_id), ui_element);
+
+        // add the element back to the UI
+        ui_add_element (tooltip->renderer->ui, ui_element);
+
+        ui_element->parent = NULL;
+    }
+
+    return retval;
+
+}
+
 Tooltip *ui_tooltip_create (Renderer *renderer) {
 
 	Tooltip *tooltip = NULL;
