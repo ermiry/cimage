@@ -41,6 +41,18 @@ extern void ui_tooltip_set_bg_colour (Tooltip *tooltip, Renderer *renderer, RGBA
 // removes the background from the tooltip
 extern void ui_tooltip_remove_background (Tooltip *tooltip);
 
+// adds a new ui element to the tooltip's layout's in the specified position (0 indexed)
+extern void ui_tooltip_add_element_at_pos (Tooltip *tooltip, UIElement *ui_element, u32 pos);
+
+// adds a new ui element to the tooltip's layout's END
+extern void ui_tooltip_add_element_at_end (Tooltip *tooltip, UIElement *ui_element);
+
+// returns the ui element that is at the required position in the tooltip's layout
+extern UIElement *ui_tooltip_get_element_at (Tooltip *tooltip, unsigned int pos);
+
+// removes a ui element form the tooltip's layout
+extern u8 ui_tooltip_remove_element (Tooltip *tooltip, UIElement *ui_element);
+
 extern Tooltip *ui_tooltip_create (Renderer *renderer);
 
 #endif

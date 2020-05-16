@@ -136,6 +136,67 @@ static UIElement *ui_tooltip_child_remove (Tooltip *tooltip, UIElement *ui_eleme
 
 }
 
+// adds a new ui element to the tooltip's layout's in the specified position (0 indexed)
+void ui_tooltip_add_element_at_pos (Tooltip *tooltip, UIElement *ui_element, u32 pos) {
+
+	if (tooltip && ui_element) {
+		if (tooltip->vertical) {
+			// add the element to the tooltip's children
+            ui_tooltip_child_add (tooltip, ui_element);
+
+			ui_layout_vertical_add_at_pos (tooltip->vertical, ui_element, pos);
+		}
+	}
+
+}
+
+// adds a new ui element to the tooltip's layout's END
+void ui_tooltip_add_element_at_end (Tooltip *tooltip, UIElement *ui_element) {
+
+	if (tooltip && ui_element) {
+		if (tooltip->vertical) {
+			// add the element to the tooltip's children
+            ui_tooltip_child_add (tooltip, ui_element);
+
+			ui_layout_vertical_add_at_end (tooltip->vertical, ui_element);
+		}
+	}
+
+}
+
+// returns the ui element that is at the required position in the tooltip's layout
+UIElement *ui_tooltip_get_element_at (Tooltip *tooltip, unsigned int pos) {
+
+	UIElement *retval = NULL;
+
+	if (tooltip) {
+		if (tooltip->vertical) {
+			retval = ui_layout_vertical_get_element_at (tooltip->vertical, pos);
+		}
+	}
+
+	return retval;
+
+}
+
+// removes a ui element form the tooltip's layout
+u8 ui_tooltip_remove_element (Tooltip *tooltip, UIElement *ui_element) {
+
+	u8 retval = 1;
+
+	if (tooltip && ui_element) {
+		if (tooltip->vertical) {
+			retval = ui_layout_vertical_remove (tooltip->vertical, ui_element);
+
+			// remove the element from the tooltip's children
+            ui_tooltip_child_remove (tooltip, ui_element);
+		}
+	}
+
+	return retval;
+
+}
+
 Tooltip *ui_tooltip_create (Renderer *renderer) {
 
 	Tooltip *tooltip = NULL;
