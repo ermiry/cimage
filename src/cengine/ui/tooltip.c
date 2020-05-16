@@ -120,6 +120,19 @@ static void ui_tooltip_child_update_pos (Tooltip *tooltip, UIElement *child) {
 
 }
 
+// updates the tooltip's children positions
+void ui_tooltip_children_update_pos (Tooltip *tooltip) {
+
+    if (tooltip) {
+        for (ListElement *le = dlist_start (tooltip->children); le; le = le->next) {
+            UIElement *child = (UIElement *) le->data;
+
+            ui_tooltip_child_update_pos (tooltip, child);
+        }
+    }
+
+}
+
 // adds a new child to the tooltip
 // the element's position will be managed by the tooltip
 // when the tooltip gets destroyed, all of its children get destroyed as well 
@@ -230,7 +243,7 @@ u8 ui_tooltip_remove_element (Tooltip *tooltip, UIElement *ui_element) {
 
 }
 
-Tooltip *ui_tooltip_create (Renderer *renderer) {
+Tooltip *ui_tooltip_create (u32 w, u32 h, Renderer *renderer) {
 
 	Tooltip *tooltip = NULL;
 
@@ -241,6 +254,11 @@ Tooltip *ui_tooltip_create (Renderer *renderer) {
 			tooltip->renderer = NULL;
 
 			tooltip->ui_element	= ui_element;
+			ui_transform_component_set_values (
+				tooltip->ui_element->transform, 
+				0, 0,
+				w, h
+			);
 
 			ui_element->element = tooltip;
 
@@ -248,7 +266,7 @@ Tooltip *ui_tooltip_create (Renderer *renderer) {
 				// tooltip->ui_element->transform->rect.x, tooltip->ui_element->transform->rect.y, 
 				// tooltip->ui_element->transform->rect.w, tooltip->ui_element->transform->rect.h,
 				0, 0,
-				0, 0,
+				w, h,
 				renderer
 			);
 

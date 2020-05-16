@@ -13,6 +13,7 @@
 #include "cengine/ui/image.h"
 #include "cengine/ui/panel.h"
 #include "cengine/ui/inputfield.h"
+#include "cengine/ui/tooltip.h"
 #include "cengine/ui/layout/grid.h"
 
 #include "cengine/utils/utils.h"
@@ -380,6 +381,10 @@ void app_ui_init (void) {
 
     actionsbar_init ();
     statusbar_init ();
+
+    Tooltip *right_click_menu = ui_tooltip_create (200, 200, main_renderer);
+    ui_tooltip_set_bg_colour (right_click_menu, main_renderer, RGBA_RED);
+    input_set_right_click_menu (main_renderer->window->input, right_click_menu);
 
     // FIXME: 21/12/2019 -- dropdwon is still broken!!!
     // Dropdown *projects_update_type_dropdown = ui_dropdown_create (0, 225, 200, 50, UI_POS_MIDDLE_CENTER, main_renderer);

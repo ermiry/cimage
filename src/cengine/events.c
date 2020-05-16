@@ -213,6 +213,10 @@ u8 cengine_events_init (void) {
 	errors |= dlist_insert_after (cengine_events, dlist_end (cengine_events), event_create (CENGINE_EVENT_SCROLL_UP));
 	errors |= dlist_insert_after (cengine_events, dlist_end (cengine_events), event_create (CENGINE_EVENT_SCROLL_DOWN));
 
+	errors |= dlist_insert_after (cengine_events, dlist_end (cengine_events), event_create (CENGINE_EVENT_MOUSE_LEFT_UP));
+	errors |= dlist_insert_after (cengine_events, dlist_end (cengine_events), event_create (CENGINE_EVENT_MOUSE_MIDDLE_UP));
+	errors |= dlist_insert_after (cengine_events, dlist_end (cengine_events), event_create (CENGINE_EVENT_MOUSE_RIGHT_UP));
+
 	return errors;
 
 }

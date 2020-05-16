@@ -17,6 +17,8 @@
 #include "cengine/ui/tooltip.h"
 #include "cengine/ui/components/text.h"
 
+void mouse_pos_get (int *x, int *y);
+
 Input *input_new (void) {
 
     Input *input = (Input *) malloc (sizeof (Input));
@@ -57,7 +59,6 @@ void input_set_active_text (Input *input, InputField *text) {
 
 }
 
-// FIXME: we need a way to dismiss the menu
 static void input_right_click_menu_event (void *event_data) {
 
     if (event_data) {
@@ -67,7 +68,21 @@ static void input_right_click_menu_event (void *event_data) {
 
         if (menu) {
             if (!menu->ui_element->active) {
-                // FIXME: display the menu at mouse position
+                // move the tooltip to the mouse position
+                mouse_pos_get (
+                    &menu->ui_element->transform->rect.x,
+                    &menu->ui_element->transform->rect.y
+                );
+
+                // update the tooltip's children positions
+                ui_tooltip_children_update_pos (menu);
+
+                menu->ui_element->active = true;
+            }
+
+            // just dismiss
+            else {
+                menu->ui_element->active = false;
             }
         }
     }
@@ -86,6 +101,8 @@ void input_set_right_click_menu (Input *input, Tooltip *right_click_menu) {
             input_right_click_menu_event,
             input->right_click_menu
         );
+
+        right_click_menu->ui_element->active = false;
     }
 
 }
@@ -95,6 +112,15 @@ void input_set_right_click_menu (Input *input, Tooltip *right_click_menu) {
 #pragma region mouse
 
 Vector2D mousePos = { 0, 0 };
+
+void mouse_pos_get (int *x, int *y) {
+
+    if (x && y) {
+        *x = (int) mousePos.x;
+        *y = (int) mousePos.y;
+    }
+
+}
 
 static bool mouse_button_states[N_MOUSE_BUTTONS];
 
